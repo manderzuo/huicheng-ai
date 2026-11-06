@@ -1,0 +1,95 @@
+{
+  "key": "systemui_shade",
+  "name": "状态栏 + 通知栏 + 快捷设置 + 电源菜单",
+  "package": "com.android.systemui",
+  "entry": "从屏幕顶端下拉（540,15 → 540,1315）；再下拉一次全展开",
+  "captured_at": "2026-11-01T16:55+08:00",
+  "evidence_level": "navigation-verified",
+  "status_bar": {
+    "container": "com.android.systemui:id/status_bar",
+    "clock": {"id": "com.android.systemui:id/clock", "xy": [136, 78]},
+    "notification_icons": {"id": "com.android.systemui:id/notificationIcons", "xy": [415, 78]},
+    "wifi": {"id": "com.android.systemui:id/wifi_combo", "label": "Wi-Fi 訊號強度滿格。", "xy": [668, 91]},
+    "mobile_signal": {"id": "com.android.systemui:id/mobile_signal", "label": "電話訊號強度一格。"},
+    "battery": {"id": "com.android.systemui:id/battery", "text_id": "com.android.systemui:id/battery_percentage_view", "xy": [778, 78]}
+  },
+  "nav_bar": {
+    "back": {"id": "com.android.systemui:id/back", "xy": [842, 1857]},
+    "home": {"id": "com.android.systemui:id/home", "xy": [539, 1857]},
+    "recents": {"id": "com.android.systemui:id/recent_apps", "xy": [237, 1857]},
+    "note": "三键导航（不是手势导航），y 全程 1794..1920"
+  },
+  "shade_collapsed": {
+    "header_clock": {"id": "com.android.systemui:id/header_clock", "xy": [115, 180]},
+    "header_date": {"id": "com.android.systemui:id/header_date", "text": "11月1日 週日"},
+    "settings_button": {"id": "com.android.systemui:id/settings_button", "label": "開啟設定。", "xy": [973, 263], "note": "点击直达系统设置"},
+    "notification_stack": {"id": "com.android.systemui:id/notification_stack_scroller"},
+    "notification_row": {"id": "com.android.systemui:id/expandableNotificationRow", "note": "每条通知一个 row；子元素 android:id/title / android:id/text / android:id/time"},
+    "expand_button": {"id": "android:id/expand_button", "label": "展開", "xy": [1003, 682]},
+    "shelf_actions": {"note": "底部通知工具条：通知設定(noti_setting) / 清除(clear_all)"},
+    "clear_all": {"id": "com.android.systemui:id/clear_all", "text": "清除", "xy": [968, 1618]},
+    "noti_setting": {"id": "com.android.systemui:id/noti_setting", "text": "通知設定", "xy": [830, 1618]},
+    "carrier_label": {"id": "com.android.systemui:id/panel_carrier_label_container", "text": "無 SIM 卡 | 僅限緊急電話", "xy": [540, 1743]}
+  },
+  "shade_expanded": {
+    "panel_clock": {"id": "com.android.systemui:id/panel_clock", "xy": [539, 536]},
+    "panel_date": {"id": "com.android.systemui:id/panel_date", "xy": [539, 650]},
+    "pager": {"id": "com.android.systemui:id/qs_pager", "note": "3 页，横滑切换"},
+    "tile_page": {"id": "com.android.systemui:id/tile_page"},
+    "tile": {"container": "ViewGroup(label=「<名称>,<状态>。,按鍵」)", "icon_id": "android:id/icon", "label_id": "com.android.systemui:id/tile_label", "note": "★ tile 的 container 无 id，靠 label 文本识别；状态在 label 里"},
+    "footer_buttons": {
+      "mum": {"id": "com.android.systemui:id/mum_button_container", "xy": [550, 263]},
+      "search": {"id": "com.android.systemui:id/search_button", "label": "搜尋", "xy": [656, 263]},
+      "power": {"id": "com.android.systemui:id/power_button", "label": "關閉", "xy": [762, 263], "note": "打开电源菜单"},
+      "settings": {"id": "com.android.systemui:id/settings_button", "label": "開啟設定。", "xy": [868, 263]},
+      "more": {"id": "com.android.systemui:id/more_button", "label": "更多選項, 有新內容可用", "xy": [974, 263]}
+    },
+    "brightness": {"slider_id": "com.android.systemui:id/slider", "bar_id": "com.android.systemui:id/brightness_slider", "value": "105 → 归一化 0..10000", "detail_button": {"id": "com.android.systemui:id/brightness_detail", "label": "亮度設定面板", "xy": [998, 1718]}},
+    "page_indicator": "第 1/2/3 頁，共 3 頁"
+  },
+  "qs_tiles": {
+    "page1": [
+      {"label": "WiFi,開啟。,Starlink", "name": "Wi-Fi", "state": "开", "xy": [168, 1072]},
+      {"label": "音效 開啟。,按鍵", "name": "音效", "state": "开", "xy": [416, 1072]},
+      {"label": "藍牙,關閉。,按鍵", "name": "蓝牙", "state": "关", "xy": [660, 1072]},
+      {"label": "自動旋轉,設為直向,關閉。,按鍵", "name": "自动旋转", "state": "关(直向)", "xy": [906, 1072]},
+      {"label": "飛航模式,關閉。,按鍵", "name": "飞行模式", "state": "关", "xy": [168, 1378]},
+      {"label": "手電筒,關閉。,按鍵", "name": "手电筒", "state": "关", "xy": [416, 1378]},
+      {"label": "行動數據,關閉。,按鍵", "name": "移动数据", "state": "关", "xy": [660, 1378]},
+      {"label": "行動,無線基地台,關閉。,按鍵", "name": "移动热点", "state": "关", "xy": [906, 1378]}
+    ],
+    "page2": [
+      {"label": "省電模式,關閉。,按鍵", "name": "省电模式", "xy": [168, 1072]},
+      {"label": "位置,開啟。,按鍵", "name": "位置", "xy": [416, 1072]},
+      {"label": "連結至,Windows,關閉。,按鍵", "name": "连接至 Windows", "xy": [660, 1072]},
+      {"label": "螢幕錄影,關閉。,按鍵", "name": "屏幕录制", "xy": [906, 1072]},
+      {"label": "快速分享,關閉。,按鍵", "name": "快速分享", "xy": [168, 1378], "sub": "只限本人"},
+      {"label": "DeX,關閉。,按鍵", "name": "DeX", "xy": [416, 1378]},
+      {"label": "Smart View,關閉。,按鍵", "name": "Smart View", "xy": [660, 1378]},
+      {"label": "鄰近分享,關閉。,按鍵", "name": "邻近分享", "xy": [906, 1378]}
+    ],
+    "page3": [
+      {"label": "護眼模式,關閉。,按鍵", "name": "护眼模式", "xy": [168, 1072]},
+      {"label": "深色模式,關閉。,按鍵", "name": "深色模式", "xy": [416, 1072]},
+      {"label": "請勿打擾,關閉。,按鍵", "name": "勿扰模式", "xy": [660, 1072]},
+      {"label": "掃描 QR 碼,關閉。,按鍵", "name": "扫描二维码", "xy": [906, 1072]},
+      {"label": "編輯按鈕,按鍵", "name": "编辑面板", "xy": [168, 1378], "id": "com.android.systemui:id/edit_button"}
+    ]
+  },
+  "power_menu": {
+    "key": "power_menu",
+    "entry": "快捷面板右上「關閉」按钮（电源键图标）762,263",
+    "container": "com.android.systemui:id/sec_global_actions_item_list",
+    "items": [
+      {"name": "電源關閉", "label": "電源關閉,", "xy": [540, 496], "risk": "danger", "note": "★ 会关机，勿自动点"},
+      {"name": "重新啟動", "label": "重新啟動,", "xy": [540, 856], "risk": "danger", "note": "★ 会重启，adb 断开 30-60s"},
+      {"name": "緊急模式", "label": "緊急模式,關", "xy": [540, 1215], "state": "關", "risk": "high"}
+    ]
+  },
+  "uncovered": [
+    "通知栏«长按»某条通知的设置入口（App 通知类别页）未展开",
+    "亮度详情面板（brightness_detail）未成功进入 —— 第一次点被 BACK 抢了焦点",
+    "单个 QS tile 长按后的「相关快速设置」子页未采集",
+    "锁屏界面未采集（采集时设备已解锁；无 SIM 卡）"
+  ]
+}

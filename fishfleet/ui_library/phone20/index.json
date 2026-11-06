@@ -1,0 +1,83 @@
+{
+  "library": "phone20",
+  "device": "SERIAL0001",
+  "device_alias": "手机20",
+  "model": "Galaxy S10 (SM-G973U1) / Android 12 / 1080x1920 / zh-TW",
+  "captured_at": "2026-11-01T16:52+08:00 ~ 2026-11-01T17:04+08:00",
+  "scope": "系统级 UI：桌面、应用抽屉、状态栏、通知栏、快捷设置、电源菜单、最近任务、侧屏幕面板、系统设置（一级 + 7 个关键子页）。不含第三方 App 内部页面。",
+  "method": "mobile-mcp（accessibility 元素树）+ adb uiautomator/dumpsys（视图树，uiautomator 被系统 KILL）、adb screencap（截图）",
+  "evidence_levels": {
+    "collected": "看到界面并记录了控件，但未做导航验证",
+    "navigation-verified": "实际进入并抓取了该层界面",
+    "partial": "只抓到首屏，列表/后续分页未展开"
+  },
+  "pages": [
+    {"key": "launcher_home", "name": "桌面（主螢幕）", "package": "com.sec.android.app.launcher", "activity": "com.sec.android.app.launcher.activities.LauncherActivity", "file": "system/launcher_home.json", "evidence_level": "collected", "screenshot": "screenshots/01_launcher_home.png"},
+    {"key": "app_drawer", "name": "应用抽屉（全部 43 个入口）", "package": "com.sec.android.app.launcher", "file": "system/app_drawer.json", "evidence_level": "navigation-verified", "screenshot": "screenshots/02_appdrawer_p2.png + 03_appdrawer_p1.png"},
+    {"key": "systemui_shade", "name": "状态栏 + 通知栏 + 快捷设置(3页/21开关) + 电源菜单", "package": "com.android.systemui", "file": "system/systemui_shade.json", "evidence_level": "navigation-verified", "screenshot": "screenshots/04~07"},
+    {"key": "recents", "name": "最近任务（Overview）", "package": "com.sec.android.app.launcher", "file": "system/systemui_recents_edge.json#recents", "evidence_level": "navigation-verified"},
+    {"key": "edge_panel", "name": "侧屏幕面板（Apps edge）", "package": "com.samsung.android.app.cocktailbarservice", "file": "system/systemui_recents_edge.json#edge_panel", "evidence_level": "navigation-verified", "screenshot": "screenshots/08_edge_panel.png"},
+    {"key": "settings_home", "name": "系统设置一级页（22 项）", "activity": "com.android.settings/.Settings", "file": "system/settings.json#settings_home", "evidence_level": "navigation-verified", "screenshot": "screenshots/09_settings_home_top.png"},
+    {"key": "settings_wifi", "name": "Wi-Fi 设置", "activity": "com.android.settings/.Settings$WifiSettingsActivity", "file": "system/settings.json#settings_wifi", "evidence_level": "navigation-verified"},
+    {"key": "settings_bluetooth", "name": "蓝牙设置", "activity": "com.android.settings/.Settings$BluetoothSettingsActivity", "file": "system/settings.json#settings_bluetooth", "evidence_level": "navigation-verified"},
+    {"key": "settings_display", "name": "顯示螢幕（亮度/深色/护眼）", "activity": "com.android.settings/.Settings$DisplaySettingsActivity", "file": "system/settings.json#settings_display", "evidence_level": "navigation-verified"},
+    {"key": "settings_date_time", "name": "日期與時間（自动时间/自动时区/24小时制）", "activity": "com.android.settings/.Settings$DateTimeSettingsActivity", "file": "system/settings.json#settings_date_time", "evidence_level": "navigation-verified"},
+    {"key": "settings_apps", "name": "應用程式（默认应用/应用列表/排序）", "activity": "com.android.settings/.Settings$ManageApplicationsActivity", "file": "system/settings.json#settings_apps", "evidence_level": "navigation-verified"},
+    {"key": "settings_developer", "name": "開發人員選項", "activity": "com.android.settings/.Settings$DevelopmentSettingsDashboardActivity", "file": "system/settings.json#settings_developer", "evidence_level": "navigation-verified"}
+  ],
+  "assets": {
+    "controls_quicklook": "system/pages_controls.json（22 个设置子页的控件表：类名/资源 id/绝对坐标/是否可点击）",
+    "raw_hierarchy": "raw/*.hier.txt（22 页 dumpsys 视图树原文，约 7.8 MB，作为原始证据）",
+    "collector": "collect_system.ps1（批量补采子页视图树+截图）",
+    "extractor": "extract_controls.ps1（把视图树转成绝对坐标控件表）",
+    "device_profile": "device.json",
+    "one_click_actions": "actions.json",
+    "one_click_runner": "p20.ps1",
+    "screenshots": "screenshots/*.png（9 张）"
+  },
+  "coverage": {
+    "done": [
+      "桌面 1 页 + 4 个 hotseat 图标 + 2 个文件夹（10 个应用）",
+      "应用抽屉 2 页共 33 个图标（全量）",
+      "状态栏全部图标位置与 id",
+      "通知栏（含通知 row 结构、清除/通知设置按钮）",
+      "快捷设置 3 页共 21 个 tile 的 label/状态/坐标",
+      "电源菜单 3 项（含风险标注）",
+      "最近任务（含关闭全部、建议应用栏）",
+      "侧屏幕面板（最近 3 + 固定 4）",
+      "系统设置一级 22 项",
+      "Wi-Fi / 蓝牙 / 显示 / 日期时间 / 应用 / 开发者选项 6 个子页",
+      "一键开关命令：Wi-Fi、蓝牙、飞行模式、自动旋转、自动时区、自动时间、亮度、自动亮度、深色、护眼、定位、音量、勿扰、保持唤醒、息屏超时、通知栏展开/收起、键事件、截图、应用管理"
+    ],
+    "not_done": [
+      "锁屏界面（采集时已解锁）",
+      "通知栏单条通知长按 → App 通知类别页",
+      "快捷 tile 长按 → 相关设置子页",
+      "亮度详情面板（点了一次被 BACK 抢焦点）",
+      "设置二级页：連接、鎖定螢幕、生物辨識與安全性、隱私設定、位置、安全與緊急狀況、帳號與備份、Google、進階功能、數位健康、電池與裝置維護、一般管理、協助工具、軟體更新、關於手機",
+      "应用详情页（单应用卸载/清数据/权限）",
+      "开发者选项第二屏（动画缩放/USB 调试/后台进程限制）",
+      "多任务/分屏拖拽手势"
+    ]
+  },
+  "quick_start": {
+    "status": "powershell -File .\\p20.ps1 status",
+    "wifi_on": "powershell -File .\\p20.ps1 wifi on",
+    "bt_off": "powershell -File .\\p20.ps1 bt off",
+    "rotate_lock_portrait": "powershell -File .\\p20.ps1 rotate portrait",
+    "auto_timezone_on": "powershell -File .\\p20.ps1 tz on",
+    "screenshot": "powershell -File .\\p20.ps1 shot D:\\shots\\a.png",
+    "note": "脚本默认 Serial=SERIAL0001；换机加 -Serial <序列号>。脚本必须保存为 UTF-8 with BOM，否则中文注释在 PowerShell 5.1 下会乱码报错。"
+  },
+  "known_pitfalls": [
+    "uiautomator dump 在本机被系统 KILL，不能用来抓元素；只能用 mobile-mcp(accessibility) 或 dumpsys activity top 视图树。",
+    "设置子页里多个 Switch 共用 android:id/switch_widget，同页必须靠坐标/行文本区分，不能只靠 id。",
+    "快捷设置 tile 的容器没有 id，只能靠 label 文本（形如「WiFi,開啟。,Starlink,按鍵」）识别，label 里带状态。",
+    "右侧 1069..1080 是三星侧屏触控条，x>1060 的点击/滑动会误触侧屏。",
+    "设置一级页坐标随滚动变化，写死坐标会点错；优先用 am start 直达子页。",
+    "关闭 Wi-Fi 会断掉 192.168.31.93 的 WiFi adb，但 USB adb（本机走 USB）不受影响。",
+    "系统语言是繁体中文，任何文案匹配都要用「連接/顯示螢幕/設定」等台版写法。",
+    "pages_controls.json 的坐标只对「抓取那一刻屏幕上可见」的控件可靠；RecyclerView 滚动外的 item 会被复用到相同坐标（如日期页 3 个开关都报 904,426）。滚动外的控件要滚到位后重采，或用 mobile-mcp 实测坐标。",
+    "settings_wallpaper 与 settings_reset 两个 intent 被系统改写落到了别的页（SET_WALLPAPER 落到顯示螢幕、BACKUP_AND_RESET 落到開發人員選項），这两页的真实界面尚未采到。"
+  ]
+}

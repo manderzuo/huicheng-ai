@@ -1,0 +1,45 @@
+{
+  "key": "launcher_home",
+  "name": "桌面（主螢幕）",
+  "package": "com.sec.android.app.launcher",
+  "activity": "com.sec.android.app.launcher.activities.LauncherActivity",
+  "entry": "按 HOME / 启动器默认页",
+  "captured_at": "2026-11-01T16:52+08:00",
+  "evidence_level": "collected",
+  "screen": "1080x1920",
+  "layout": {
+    "status_bar": "y=0..124",
+    "workspace": "y=121..1544（1 页，共 1 页）",
+    "page_indicator": "y=1536..1586（Samsung Free / 第1页）",
+    "hotseat": "y=1588..1920",
+    "nav_bar": "y=1794..1920"
+  },
+  "targets": [
+    {"name": "工作区容器", "id": "com.sec.android.app.launcher:id/workspace", "role": "容器", "xy": [540, 800], "note": "上滑进入应用抽屉；长按空白进入桌面编辑"},
+    {"name": "手势容器", "id": "com.sec.android.app.launcher:id/drag_layer", "role": "容器"},
+    {"name": "天气小组件", "id": "com.sec.android.daemonapp:id/widget_empty_layout", "role": "小组件", "xy": [540, 832], "note": "空态，文案「輕觸以取得天氣資訊」"},
+    {"name": "Google 搜索小组件", "id": "com.google.android.googlequicksearchbox:id/googleapp_search_plate", "role": "小组件", "xy": [540, 1112]},
+    {"name": "搜索框（小组件内）", "id": "com.google.android.googlequicksearchbox:id/googleapp_search_edit_frame", "xy": [471, 1112], "role": "输入"},
+    {"name": "语音搜索", "id": "com.google.android.googlequicksearchbox:id/googleapp_search_widget_voice_btn", "label": "語音搜尋", "xy": [830, 1112]},
+    {"name": "相机搜索 Lens", "id": "com.google.android.googlequicksearchbox:id/googleapp_search_widget_lens_btn", "label": "相機搜尋", "xy": [956, 1112]},
+    {"name": "应用商店图标", "id": "com.sec.android.app.launcher:id/home_icon", "text": "應用商店", "xy": [162, 1394]},
+    {"name": "媒體瀏覽器图标", "id": "com.sec.android.app.launcher:id/home_icon", "text": "媒體瀏覽器", "xy": [414, 1394]},
+    {"name": "Play 商店图标", "id": "com.sec.android.app.launcher:id/home_icon", "text": "Play 商店", "xy": [666, 1394]},
+    {"name": "Google 文件夹", "id": "com.sec.android.app.launcher:id/home_icon", "text": "Google", "label": "Google, 資料夾", "xy": [918, 1394], "note": "内含 Google/Gmail/地圖/YouTube"},
+    {"name": "Samsung Free", "label": "Samsung Free", "xy": [513, 1561], "role": "导航", "note": "桌面最左侧负一屏"},
+    {"name": "页面指示器", "id": "com.sec.android.app.launcher:id/page_indicator", "xy": [567, 1561], "label": "第 1 頁，共 1 頁, 預設頁面"},
+    {"name": "底部-電話", "id": "com.sec.android.app.launcher:id/hotseat_icon", "text": "電話", "xy": [161, 1691]},
+    {"name": "底部-訊息", "id": "com.sec.android.app.launcher:id/hotseat_icon", "text": "訊息", "xy": [413, 1691]},
+    {"name": "底部-網際網路", "id": "com.sec.android.app.launcher:id/hotseat_icon", "text": "網際網路", "xy": [665, 1691]},
+    {"name": "底部-相機", "id": "com.sec.android.app.launcher:id/hotseat_icon", "text": "相機", "xy": [917, 1691]}
+  ],
+  "navigation": [
+    {"action": "从 workspace 上滑（540,1400 → 540,500）", "to": "app_drawer", "verified": true},
+    {"action": "点击 Google 文件夹", "to": "folder_google", "verified": true},
+    {"action": "点击 hotseat 图标", "to": "对应应用", "verified": false}
+  ],
+  "uncovered": [
+    "桌面只有 1 页，无左右滑动空间",
+    "长按空白触发的桌面编辑菜单未成功弹出（长按 900ms 无效，可能需要更长或桌面无空白区）"
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "library": "phone20",
+  "target_device_alias": "手机20",
+  "serial": "SERIAL0001",
+  "connection": "usb",
+  "lan_ip": "192.168.31.93",
+  "manufacturer_model": "SM-G973U1",
+  "product_name": "Galaxy S10",
+  "device_codename": "beyond1qlteue",
+  "android_version": "12",
+  "sdk": 31,
+  "security_patch": "2023-03-01",
+  "build_fingerprint": "samsung/beyond1qlteue/beyond1q:12/SP1A.210812.016/G973U1UEU9IWH2:user/release-keys",
+  "build_date": "Thu Aug  3 03:51:14 KST 2023",
+  "cpu_abi": "arm64-v8a",
+  "ro_secure": 1,
+  "ro_debuggable": 0,
+  "screen": {
+    "physical": "1080x1920",
+    "density": 420,
+    "orientation": "portrait",
+    "note": "导航栏 y=1794..1920（返回键 723,1794；主页键 420,1794；最近任务 118,1794）"
+  },
+  "locale": "zh-TW（繁体中文，台湾）",
+  "input_methods": [
+    "com.samsung.android.honeyboard/.service.HoneyBoardService (三星键盘，默认)",
+    "com.samsung.android.svoiceime/.SamsungVoiceReco",
+    "com.android.xwkeyboard/.XwIME (疑似讯飞)",
+    "com.aztp.board/.AztpIME",
+    "com.google.android.tts/...VoiceInputMethodService",
+    "com.google.android.googlequicksearchbox/...VoiceInputMethodService"
+  ],
+  "adb_path": "C:\\Program Files (x86)\\huicheng_android\\tools\\adb.exe",
+  "baseline_state_at_capture": {
+    "wifi_on": 1,
+    "wifi_ssid": "Starlink",
+    "bluetooth_on": 0,
+    "airplane_mode_on": 0,
+    "accelerometer_rotation": 0,
+    "auto_time": 1,
+    "auto_time_zone": 1,
+    "screen_brightness": 105,
+    "screen_brightness_mode": 1,
+    "screen_off_timeout": 2147483647,
+    "stay_on_while_plugged_in": 7,
+    "media_volume_music": "4/15",
+    "battery": "64%（充电中）",
+    "sim": "无 SIM 卡"
+  },
+  "notes": [
+    "已 Root 关闭（ro.secure=1 / ro.debuggable=0），只能走 adb shell 权限，非 root 命令。",
+    "uiautomator dump 在本机被系统 KILL，不可用；元素采集走 mobile-mcp（accessibility）或 dumpsys activity top 视图树。",
+    "系统语言为繁体中文，Settings 文案为「連接/顯示螢幕/一般管理」等台版用词，做文案匹配时勿用简体。",
+    "screen_off_timeout 已被设为 2147483647（永不熄屏）+ stay_on_while_plugged_in=7，是群控优化痕迹。"
+  ]
+}

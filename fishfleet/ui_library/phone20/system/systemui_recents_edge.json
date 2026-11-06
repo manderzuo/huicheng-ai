@@ -1,0 +1,48 @@
+{
+  "key": "systemui_recents_edge",
+  "name": "最近任务（Overview）+ 侧屏幕面板（Apps edge）",
+  "captured_at": "2026-11-01T16:56+08:00",
+  "evidence_level": "navigation-verified",
+  "recents": {
+    "key": "recents",
+    "package": "com.sec.android.app.launcher",
+    "entry": "点导航栏最近任务键 237,1857 / input keyevent 187",
+    "container": "com.sec.android.app.launcher:id/overview_panel",
+    "targets": [
+      {"name": "任务卡片（通用）", "label": "「<应用名> <页面标题>」", "id": "com.sec.android.app.launcher:id/snapshot", "note": "卡片容器 FrameLayout，label 带 App 名 + 当前页标题"},
+      {"name": "卡片图标", "id": "com.sec.android.app.launcher:id/icon", "label": "「<应用名> <页面标题> 進階選項」"},
+      {"name": "顶部操作胶囊", "id": "com.sec.android.app.launcher:id/overview_actions_view", "note": "分屏/弹出视图等按钮，内部 action_buttons 未展开到单键"},
+      {"name": "搜索栏", "id": "com.sec.android.app.launcher:id/search_port", "text": "搜尋", "xy": [540, 222], "note": "在最近任务里搜应用"},
+      {"name": "更多选项", "id": "com.sec.android.app.launcher:id/more_port", "label": "更多選項", "xy": [996, 222]},
+      {"name": "关闭全部", "id": "com.sec.android.app.launcher:id/clear_all_button", "text": "關閉全部", "xy": [540, 1455], "risk": "medium", "note": "清空所有后台，正在跑的任务会掉"},
+      {"name": "建议应用栏", "id": "com.sec.android.app.launcher:id/suggested_apps", "xy": [540, 1754], "note": "底部 4 个常用应用（本次：Kitsunebi / Play 商店 / Chrome / Facebook）"}
+    ],
+    "uncovered": ["任务卡片左右滑动删除、长按卡片菜单、分屏拖拽未验证"]
+  },
+  "edge_panel": {
+    "key": "edge_panel",
+    "package": "com.samsung.android.app.cocktailbarservice",
+    "entry": "从右边缘轻触发条向左拖：起点 1070,600 → 左滑 500",
+    "trigger": {"id": "com.samsung.android.app.cocktailbarservice:id/default_trigger", "bounds": "1069,429 11x340", "note": "侧屏触控条，在屏幕右侧中部"},
+    "container": "com.samsung.android.app.cocktailbarservice:id/panel_container",
+    "apps_panel": "com.samsung.android.app.appsedge:id/applist_container",
+    "items": {
+      "recent": [
+        {"text": "設定", "xy": [921, 304]},
+        {"text": "抖音", "xy": [921, 490], "badge": "1"},
+        {"text": "小紅書", "xy": [921, 676], "badge": "3"}
+      ],
+      "pinned": [
+        {"text": "訊息", "xy": [921, 902]},
+        {"text": "YouTube + 網際網路（文件夹）", "xy": [921, 1088]},
+        {"text": "YouTube", "xy": [921, 1274]},
+        {"text": "Chrome", "xy": [921, 1460]}
+      ]
+    },
+    "bottom_buttons": [
+      {"name": "选项", "id": "com.samsung.android.app.appsedge:id/menu", "label": "選項 按鈕", "xy": [921, 1652]},
+      {"name": "边缘面板设置", "id": "com.samsung.android.app.cocktailbarservice:id/global_edge_setting_layout", "label": "設定 按鍵", "xy": [734, 1636]}
+    ],
+    "note": "侧屏是三星独有；批量操作时容易误触（右边缘 11px 宽的触控条），自动化脚本要避开 x>1060。"
+  }
+}

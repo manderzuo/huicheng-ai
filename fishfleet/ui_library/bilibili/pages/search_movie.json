@@ -1,0 +1,40 @@
+{
+  "key": "search_movie",
+  "name": "搜索结果 · 影视 tab",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.search2.main.BiliMainSearchActivity",
+  "entry": "搜索结果页 → 点「影视」tab",
+  "captured_at": "2026-10-31T20:59:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "影视 tab 选中", "id": "tab_title", "text": "影视", "note": "selected"},
+    {"name": "ogv 结果容器", "id": "ogv_container"}
+  ],
+  "targets": [
+    {"name": "分类 tab", "id": "tab_title", "text_re": "^(综合|番剧|直播|用户|影视|图文)$", "role": "导航", "risk": "none", "state_hint": "selected"},
+    {"name": "空态文案", "id": "text", "text_re": "暂无搜索结果", "role": "空态", "risk": "none", "note": "同样会用推荐内容兜底"},
+    {"name": "影视项容器", "id": "ogv_container", "role": "列表项", "risk": "none"},
+    {"name": "封面", "id": "cover", "role": "可点击", "risk": "none"},
+    {"name": "封面角标", "id": "cover_badge", "role": "状态", "risk": "none", "note": "内容不可读（View）"},
+    {"name": "影视名", "id": "title", "role": "文本", "risk": "none"},
+    {"name": "立即观看", "id": "play_button", "text": "立即观看", "role": "导航", "risk": "none"},
+    {"name": "风格容器", "id": "styles_container", "role": "容器", "risk": "none"},
+    {"name": "地区标签", "id": "style_label", "role": "展示", "risk": "none", "note": "View，内容不可读"},
+    {"name": "年份与地区", "id": "styles", "role": "文本", "risk": "none", "note": "形如「2026 | 美国」「2026 | 中国大陆」「2025 | 中国大陆」"},
+    {"name": "演员/类型", "id": "tag", "role": "文本", "risk": "none", "note": "电影/剧集是「演员：A、B、C…」，纪录片是「美食/人文」这种类型标签"},
+    {"name": "追剧按钮容器", "id": "follow_button_layout", "role": "状态变更", "risk": "send", "note": "含 iv_follow + follow_button（文案「追剧」）"},
+    {"name": "评分", "id": "score", "role": "文本", "risk": "none"},
+    {"name": "评分单位", "id": "score_text", "text": "分", "role": "文本", "risk": "none"},
+    {"name": "评分人数", "id": "count", "role": "文本", "risk": "none"}
+  ],
+  "navigation": [
+    {"action": "点击项/立即观看", "to": "movie_detail", "verified": false},
+    {"action": "点击 追剧", "to": "对外追剧", "verified": false, "risk": "send"}
+  ],
+  "uncovered": [
+    "图文 tab",
+    "有真实结果时的差异（本次同样是推荐兜底）"
+  ],
+  "notes": "影视 tab 与番剧 tab 同样是纵向大卡，但影视 tab 多了三样：cover_badge（角标）、styles（年份|地区）、follow_button（追剧按钮，send 风险）。★注意番剧 tab 没有追剧按钮，影视 tab 有——两者不能混用同一套定位逻辑。"
+}

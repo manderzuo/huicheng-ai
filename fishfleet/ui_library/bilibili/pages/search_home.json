@@ -1,0 +1,41 @@
+{
+  "key": "search_home",
+  "name": "搜索 · 首页（热搜/历史/发现）",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.search2.main.BiliMainSearchActivity",
+  "entry": "首页顶部搜索栏 expand_search",
+  "captured_at": "2026-10-31T19:55:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "搜索输入框", "id": "search_src_text", "note": "EditText，label=搜索查询，自动 focus 并弹键盘"},
+    {"name": "返回箭头", "id": "iv_back_arrow", "label_re": "返回"}
+  ],
+  "targets": [
+    {"name": "返回", "id": "iv_back_arrow", "label_re": "返回", "role": "导航", "risk": "none"},
+    {"name": "搜索输入框", "id": "search_src_text", "label_re": "搜索查询", "role": "输入", "risk": "none"},
+    {"name": "搜索按钮", "id": "action_search", "text": "搜索", "role": "提交", "risk": "none", "note": "空输入时点击无效/仅提示"},
+    {"name": "热搜标题", "id": "title", "text": "bilibili热搜", "role": "文本", "risk": "none"},
+    {"name": "热搜条目", "id": "rank_title", "role": "可点击", "risk": "none", "note": "点击直接以该词搜索并进入结果页；部分条目右侧有 rank_icon（新/热标记）"},
+    {"name": "完整榜单入口", "id": "entrance", "text": "完整榜单", "role": "导航", "risk": "none"},
+    {"name": "搜索历史标题", "id": "title", "text": "搜索历史", "role": "文本", "risk": "none"},
+    {"name": "清空搜索历史", "id": "delete_all", "label_re": "清空搜索历史", "role": "操作", "risk": "none", "note": "本地状态变更，无需确认，但会丢失历史"},
+    {"name": "历史词条", "id": "tag_name", "role": "可点击", "risk": "none", "note": "点击即搜索"},
+    {"name": "搜索发现标题", "id": "title", "text": "搜索发现", "role": "文本", "risk": "none"},
+    {"name": "刷新搜索发现", "id": "guess_refresh", "label_re": "刷新", "role": "操作", "risk": "none"},
+    {"name": "隐藏搜索发现", "id": "guess_icon", "label_re": "隐藏搜索发现", "role": "操作", "risk": "none"},
+    {"name": "发现词条", "id": "title", "role": "可点击", "risk": "none", "note": "同层还有 reason 显示「·8小时前更新」等"},
+    {"name": "反馈", "id": "button_text", "text": "反馈", "role": "导航", "risk": "none"}
+  ],
+  "navigation": [
+    {"action": "点击热搜 rank_title", "to": "search_result", "verified": true},
+    {"action": "输入关键词后点搜索", "to": "search_result", "verified": false},
+    {"action": "点击发现词条", "to": "search_result", "verified": false}
+  ],
+  "uncovered": [
+    "真实键盘输入 + 搜索提交路径（本次走的是热搜点击）",
+    "完整榜单页",
+    "搜索发现刷新/隐藏后的布局"
+  ],
+  "notes": "热搜与发现词由服务端下发，全是内容不是控件；控件 id 稳定。"
+}

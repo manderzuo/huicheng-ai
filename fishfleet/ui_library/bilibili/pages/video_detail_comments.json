@@ -1,0 +1,42 @@
+{
+  "key": "video_detail_comments",
+  "name": "视频详情页（竖屏态 · 评论 tab）",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.ship.theseus.detail.UnitedBizDetailsActivity",
+  "entry": "视频详情页（竖屏）→ 点击「评论」tab",
+  "captured_at": "2026-10-31T20:11:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "评论容器", "id": "comment_container"},
+    {"name": "评论 tab 选中", "id": "tab_title", "text": "评论", "note": "selected，右侧 tab_sub_title 是评论数"}
+  ],
+  "targets": [
+    {"name": "热门评论标题", "text": "热门评论", "role": "文本", "risk": "none"},
+    {"name": "排序切换", "label_re": "按热度", "role": "排序", "risk": "none", "note": "无 id，View + TextView 两层都带 label"},
+    {"name": "评论项容器", "role": "列表项", "risk": "none", "note": "整条是无 id 的 View 组合，靠 label 逐段读"},
+    {"name": "评论者头像", "label_re": "（用户名）", "role": "导航", "risk": "none", "note": "View，label=用户名"},
+    {"name": "评论者用户名按钮", "role": "导航", "risk": "none", "note": "Button，text/label 都是用户名"},
+    {"name": "UP 主身份标", "label_re": "^UP$", "role": "展示", "risk": "none"},
+    {"name": "评论正文", "role": "文本", "risk": "none", "note": "View 的 label 是完整正文（含 [表情名] 占位）"},
+    {"name": "置顶标记", "text": "置顶", "role": "状态", "risk": "none"},
+    {"name": "评论图片", "role": "展示", "risk": "none"},
+    {"name": "评论时间/IP", "label_re": "\\d+:\\d+\\s+\\S+", "role": "文本", "risk": "none", "note": "形如「昨天 11:41 广东」"},
+    {"name": "回复", "label_re": "^回复$", "role": "互动", "risk": "send"},
+    {"name": "点赞", "label_re": "点赞，\\d+", "role": "互动", "risk": "send", "note": "label 自带赞数"},
+    {"name": "点踩", "label_re": "^点踩$", "role": "互动", "risk": "send"},
+    {"name": "更多", "label_re": "^更多$", "role": "菜单", "risk": "none"},
+    {"name": "评论输入入口", "role": "输入", "risk": "send", "note": "底部条，占位文案是动态的（本次「你渴望拥有力量吗？评论让力量更强大」），不能当锚点"}
+  ],
+  "navigation": [
+    {"action": "点击 排序", "to": "按时间排序", "verified": false},
+    {"action": "点击 回复", "to": "回复输入态", "verified": false, "risk": "send"}
+  ],
+  "uncovered": [
+    "排序切换后的差异",
+    "楼中楼二级回复",
+    "评论输入态与发送",
+    "评论「更多」菜单项"
+  ],
+  "notes": "【重要】长视频详情页的评论区和竖屏 Story 的评论区是两套不同实现：这里几乎全无 id（靠 View + label），Story 那边有 cmt3_* 完整 id 体系。写定位逻辑时必须区分这两种页面，不能混用。"
+}

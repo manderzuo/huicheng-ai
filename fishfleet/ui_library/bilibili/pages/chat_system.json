@@ -1,0 +1,35 @@
+{
+  "key": "chat_system",
+  "name": "系统会话页（创作助手）",
+  "package": "tv.danmaku.bili",
+  "activity": "kntr.common.compose.launcher.VertexActivity",
+  "entry": "消息中心 → 会话条目（以「创作助手」为例）",
+  "captured_at": "2026-10-31T20:04:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "render_tech": "Jetpack Compose",
+  "identity": [
+    {"name": "标题（会话名）", "note": "如「创作助手」，无 id"},
+    {"name": "消息气泡", "note": "时间戳 TextView + 卡片"}
+  ],
+  "targets": [
+    {"name": "返回", "role": "导航", "risk": "none", "note": "左上角 View，无 id 无 label"},
+    {"name": "会话名标题", "role": "文本", "risk": "none"},
+    {"name": "右上菜单", "role": "菜单", "risk": "none", "note": "无 label（普通 View）"},
+    {"name": "时间戳", "role": "文本", "risk": "none", "note": "形如「2026年10月29日 13:23」，居中显示"},
+    {"name": "系统通知标题", "role": "文本", "risk": "none", "note": "如「您的稿件已通过审核」「里程碑达成通知」"},
+    {"name": "系统通知正文", "role": "文本", "risk": "none"},
+    {"name": "卡片按钮", "role": "可点击", "risk": "send", "note": "如「查看详情」「快分享给好友吧」；分享属对外动作"},
+    {"name": "满意度评价", "role": "展示", "risk": "none"},
+    {"name": "评分星星", "label_re": "评分星星 \\d", "role": "输入", "risk": "send", "note": "1~5 星，点击即提交评价，属对外反馈"}
+  ],
+  "navigation": [
+    {"action": "点击 卡片按钮", "to": "对应业务页", "verified": false}
+  ],
+  "uncovered": [
+    "真人私信会话布局（本账号无真人私信）",
+    "输入框与发送按钮（系统会话不允许回复，未出现输入框）",
+    "菜单项"
+  ],
+  "notes": "系统会话没有输入框，只有卡片式通知；真人私信布局需另采。本页同时暴露了账号投稿状态（有已过审稿件），属账号信息，不在资料库记录具体稿件内容。"
+}

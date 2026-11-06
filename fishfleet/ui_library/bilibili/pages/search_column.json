@@ -1,0 +1,49 @@
+{
+  "key": "search_column",
+  "name": "搜索结果 · 图文 tab（专栏 / 动态）",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.search2.main.BiliMainSearchActivity",
+  "entry": "搜索结果页 → 点「图文」tab",
+  "captured_at": "2026-10-31T20:59:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "图文 tab 选中", "id": "tab_title", "text": "图文", "note": "selected"},
+    {"name": "图文列表容器", "id": "column_nested_container"}
+  ],
+  "targets": [
+    {"name": "分类 tab", "id": "tab_title", "text_re": "^(综合|番剧|直播|用户|影视|图文)$", "role": "导航", "risk": "none", "state_hint": "selected"},
+    {"name": "排序下拉", "id": "menu", "text": "默认排序", "role": "排序", "risk": "none", "note": "带 arrow 箭头"},
+    {"name": "分类下拉", "id": "menu", "text": "全部分类", "role": "筛选", "risk": "none", "note": "带 arrow 箭头"},
+    {"name": "下拉菜单容器", "id": "drop_down_menu_head", "role": "容器", "risk": "none"},
+    {"name": "结果列表", "id": "recycler_view", "role": "列表", "risk": "none"},
+    {"name": "条目容器", "id": "parent_layout", "role": "列表项", "risk": "none"},
+    {"name": "封面", "id": "cover", "role": "可点击", "risk": "none"},
+    {"name": "封面角标", "id": "cover_badge", "role": "状态", "risk": "none", "note": "动态类条目显示「动态」"},
+    {"name": "条目标题", "id": "title", "role": "文本", "risk": "none"},
+    {"name": "正文摘要", "id": "article", "role": "文本", "risk": "none", "note": "结尾带「…全文」；纯图片/话题动态可能没有正文"},
+    {"name": "信息行容器", "id": "more_info_layout", "role": "容器", "risk": "none"},
+    {"name": "作者名（专栏）", "id": "up_name", "role": "文本", "risk": "none", "note": "专栏/文章类用 up_name"},
+    {"name": "点赞数", "id": "like", "role": "文本", "risk": "none"},
+    {"name": "发布时间（专栏）", "id": "publish_time", "role": "文本", "risk": "none", "note": "带前导「 · 」，如「 · 8月24日」"},
+    {"name": "动态类型-头部", "id": "upper_layout", "role": "容器", "risk": "none", "note": "只有动态类条目才有"},
+    {"name": "动态类型-头像", "id": "avatar", "role": "导航", "risk": "none"},
+    {"name": "动态类型-用户名", "id": "user_name", "role": "文本", "risk": "none"},
+    {"name": "动态类型-发布时间", "id": "pub_time", "role": "文本", "risk": "none", "note": "★注意是 pub_time，不是 publish_time，少个 lish"},
+    {"name": "动态类型-更多", "id": "iv_more", "role": "菜单", "risk": "none"}
+  ],
+  "card_variants": {
+    "专栏/文章": ["cover", "title", "article", "up_name", "like", "publish_time"],
+    "动态": ["cover", "cover_badge=动态", "upper_layout(avatar+user_name)", "title", "like", "pub_time", "iv_more"]
+  },
+  "navigation": [
+    {"action": "点击条目", "to": "专栏详情 / 动态详情", "verified": false},
+    {"action": "点击 排序/分类下拉", "to": "下拉菜单", "verified": false}
+  ],
+  "uncovered": [
+    "专栏详情页",
+    "动态详情页",
+    "排序/分类下拉的具体选项"
+  ],
+  "notes": "图文 tab 是本轮唯一**有真实搜索结果**的分类（没有走推荐兜底）。两种卡片混排：专栏用 up_name+publish_time，动态用 user_name+pub_time，字段名差几个字母，写解析时容易抓错——这是本页最大的坑。"
+}

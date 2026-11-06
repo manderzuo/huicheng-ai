@@ -1,0 +1,44 @@
+{
+  "key": "bangumi_home",
+  "name": "番剧分区（ogv 首页）",
+  "package": "tv.danmaku.bili",
+  "activity": "kntr.common.compose.launcher.VertexActivity",
+  "entry": "首页 → 分区 → 番剧（或底栏分区图标进入后选番剧）",
+  "captured_at": "2026-10-31T20:12:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "render_tech": "Jetpack Compose（ogv 模块）",
+  "identity": [
+    {"name": "顶部 ogv tab", "text_re": "^(国创|番剧|漫剧|UP动画|少儿)$", "note": "番剧 selected 时为本页"},
+    {"name": "返回", "label_re": "back", "note": "少见地给了 label"}
+  ],
+  "targets": [
+    {"name": "返回", "label_re": "back", "role": "导航", "risk": "none"},
+    {"name": "ogv 分类 tab", "text_re": "^(国创|番剧|漫剧|UP动画|少儿)$", "role": "导航", "risk": "none", "state_hint": "选中项字号更大/加粗，节点上不一定有 selected"},
+    {"name": "热门榜", "text": "热门榜", "role": "导航", "risk": "none"},
+    {"name": "找番看", "text": "找番看", "role": "导航", "risk": "none"},
+    {"name": "继续观看", "text": "继续观看", "role": "导航", "risk": "none"},
+    {"name": "本周推荐", "text": "本周推荐", "role": "导航", "risk": "none"},
+    {"name": "动画种草", "text": "动画种草", "role": "导航", "risk": "none"},
+    {"name": "正在热播", "text": "正在热播", "role": "分组", "risk": "none"},
+    {"name": "时间表", "text": "时间表", "role": "导航", "risk": "none", "note": "番剧放送时间表"},
+    {"name": "番剧封面", "label_re": "ogvImage", "role": "可点击", "risk": "none"},
+    {"name": "番剧角标", "label_re": "ogvBadge", "role": "状态", "risk": "none", "note": "如「独家」「会员」「新」等，内容不可读"},
+    {"name": "追番数", "text_re": "追番$", "role": "文本", "risk": "none", "note": "形如「84.2万追番」「563.5万系列追番」"},
+    {"name": "番剧标题", "role": "文本", "risk": "none"},
+    {"name": "更新状态", "text_re": "^(全\\d+话|更新至第\\d+话)$", "role": "文本", "risk": "none"}
+  ],
+  "navigation": [
+    {"action": "点击 ogv 分类 tab", "to": "国创/漫剧/UP动画/少儿", "verified": false},
+    {"action": "点击番剧卡", "to": "bangumi_detail", "verified": false},
+    {"action": "点击 时间表", "to": "bangumi_timetable", "verified": false},
+    {"action": "点击 热门榜", "to": "bangumi_ranking", "verified": false}
+  ],
+  "uncovered": [
+    "番剧详情页（剧集列表/追番/评分）",
+    "国创/漫剧/UP动画/少儿 各 tab",
+    "时间表、热门榜、找番看",
+    "特别企划区"
+  ],
+  "notes": "ogv 模块整体是 Compose，除 back 外没有资源 id；番剧卡是 3 列网格，封面节点 label 恒为 ogvImage，角标恒为 ogvBadge，内容不可读——封面信息只能靠同级的追番数/标题/更新状态文本。"
+}

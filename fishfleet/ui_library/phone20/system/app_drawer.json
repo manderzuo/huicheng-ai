@@ -1,0 +1,72 @@
+{
+  "key": "app_drawer",
+  "name": "应用抽屉（全部应用）",
+  "package": "com.sec.android.app.launcher",
+  "entry": "桌面 workspace 上滑（540,1400 → 540,500）",
+  "captured_at": "2026-11-01T16:53+08:00",
+  "evidence_level": "navigation-verified",
+  "total_pages": 2,
+  "layout": {
+    "search_bar": "y=0..296（搜索框 y=165..280）",
+    "grid": "4 列 × 5 行，单元 246x272，起始 (39,331)",
+    "page_indicator": "y=1729..1779",
+    "note": "无底部导航栏，抽屉占满全屏；当前页 1/2"
+  },
+  "containers": [
+    {"name": "抽屉容器", "id": "com.sec.android.app.launcher:id/apptray_view"},
+    {"name": "应用分页", "id": "com.sec.android.app.launcher:id/apps_content"},
+    {"name": "搜索框", "id": "com.sec.android.app.launcher:id/app_search_edit_text", "text": "搜尋", "xy": [505, 222]},
+    {"name": "更多选项", "id": "com.sec.android.app.launcher:id/more_icon_imageview", "label": "更多選項", "xy": [996, 222]},
+    {"name": "图标（通用）", "id": "com.sec.android.app.launcher:id/apps_icon", "note": "所有应用图标共用此 id，定位需靠 text 或坐标"},
+    {"name": "文件夹图标（通用）", "id": "com.sec.android.app.launcher:id/home_icon", "note": "文件夹也是 home_icon，含 label 带「資料夾」"},
+    {"name": "分页指示器", "id": "com.sec.android.app.launcher:id/apps_page_indicator"}
+  ],
+  "page1": {
+    "label": "第 1 頁，共 2 頁",
+    "items": [
+      {"text": "Google", "type": "folder", "xy": [162, 467], "contains": ["Google", "Gmail", "地圖", "YouTube"]},
+      {"text": "Samsung", "type": "folder", "xy": [414, 467], "contains": ["AR 區域", "網際網路", "我的檔案", "Galaxy Wearable", "Samsung Health", "SmartThings"]},
+      {"text": "日曆", "xy": [666, 467], "package": "com.samsung.android.calendar"},
+      {"text": "相機", "xy": [918, 467], "package": "com.sec.android.app.camera"},
+      {"text": "Chrome", "xy": [162, 744], "package": "com.android.chrome"},
+      {"text": "時鐘", "xy": [414, 744], "package": "com.sec.android.app.clockpackage"},
+      {"text": "聯絡人", "xy": [666, 744], "package": "com.samsung.android.app.contacts"},
+      {"text": "電子郵件", "xy": [918, 744], "package": "com.samsung.android.email.provider"},
+      {"text": "Facebook", "xy": [162, 1021], "package": "com.facebook.katana"},
+      {"text": "應用商店", "xy": [414, 1021], "package": "com.sec.android.app.samsungapps"},
+      {"text": "媒體瀏覽器", "xy": [666, 1021], "package": "com.sec.android.gallery3d"},
+      {"text": "遊戲中心", "xy": [918, 1021], "package": "com.samsung.android.game.gamehome"},
+      {"text": "訊息", "xy": [162, 1298], "package": "com.samsung.android.messaging"},
+      {"text": "電話", "xy": [414, 1298], "package": "com.samsung.android.dialer"},
+      {"text": "Play 商店", "xy": [666, 1298], "package": "com.android.vending"},
+      {"text": "設定", "xy": [918, 1298], "package": "com.android.settings"},
+      {"text": "提示", "xy": [162, 1575], "package": "com.samsung.android.app.tips"},
+      {"text": "語音信箱", "xy": [414, 1575], "package": "com.samsung.vvm.se"},
+      {"text": "Kitsunebi", "xy": [666, 1575], "package": "fun.kitsunebi.kitsunebi4android"}
+    ]
+  },
+  "page2": {
+    "label": "第 2 頁，共 2 頁（最后一页）",
+    "items": [
+      {"text": "Meet", "xy": [162, 467], "package": "com.google.android.apps.tachyon"},
+      {"text": "雲端硬碟", "xy": [414, 467], "package": "com.google.android.apps.docs"},
+      {"text": "Google TV", "xy": [666, 467], "package": "com.google.android.videos"},
+      {"text": "計算機", "xy": [918, 467], "package": "com.sec.android.app.popupcalculator"},
+      {"text": "相簿", "xy": [162, 744], "package": "com.google.android.apps.photos"},
+      {"text": "Samsung Notes", "xy": [414, 744], "package": "com.samsung.android.app.notes"},
+      {"text": "Smart Switch", "xy": [666, 744], "package": "com.sec.android.easyMover"},
+      {"text": "Samsung Wallet", "xy": [918, 744], "package": "com.samsung.android.spay"},
+      {"text": "Spotify", "xy": [162, 1021], "package": "com.spotify.music"},
+      {"text": "Samsung Global Goals", "xy": [414, 1021], "package": "com.samsung.sree"},
+      {"text": "TikTok", "xy": [666, 1021], "package": "com.ss.android.ugc.trill"},
+      {"text": "小紅書", "xy": [918, 1021], "package": "com.xingin.xhs", "badge": "3 則通知"},
+      {"text": "黑神话上号器", "xy": [162, 1298], "package": "com.tencent.mobileqq", "note": "包名是 QQ，实为套壳上号器"},
+      {"text": "抖音", "xy": [414, 1298], "package": "com.ss.android.ugc.aweme", "badge": "1 個通知"}
+    ]
+  },
+  "swipe": {"next_page": "从右向左滑（900,1150 左滑 700）", "prev_page": "从左向右滑（300,900 右滑 800）"},
+  "notes": [
+    "抽屉里共 33 个图标（19 + 14），加两个文件夹里 10 个 = 43 个入口；pm 列表 42 个包（相簿/媒體瀏覽器同为 gallery3d 两个入口）。",
+    "「手繪動態攝影」不出现在抽屉，但在设置-应用程式列表里能看到（已安装但无启动图标）。"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "key": "video_detail",
+  "name": "视频详情页（横屏全屏 / UnitedBizDetailsActivity）",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.ship.theseus.detail.UnitedBizDetailsActivity",
+  "entry": "热门页横版视频卡片 / 搜索结果视频卡片",
+  "captured_at": "2026-10-31T20:03:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "blocked",
+  "identity": [
+    {"name": "播放器容器", "id": "video_area"},
+    {"name": "页面根", "id": "fl_root_container"}
+  ],
+  "targets": [
+    {"name": "播放器", "id": "video_container", "role": "播放器", "risk": "none"},
+    {"name": "顶部 appbar", "id": "appbar", "role": "容器", "risk": "none"},
+    {"name": "跳过片头提示", "id": "title", "role": "提示", "risk": "none", "note": "「即将跳过片头」+ action「不跳过」"},
+    {"name": "大会员推广浮层", "role": "推广", "risk": "none", "note": "文案「福利降临！/花联通积分…」+「立即兑换」「成为大会员」，会拦截第一次 BACK"}
+  ],
+  "navigation": [],
+  "uncovered": [
+    "竖屏详情态的标题/简介/评论/相关推荐（未能进入）",
+    "横屏控制栏按钮（控制器隐藏，点屏幕也不出）",
+    "画质/倍速/投屏/弹幕设置"
+  ],
+  "limitation": "进入该页后自动横屏全屏播放，且叠加大会员推广浮层。实测：点屏幕唤不出控制器；BACK 第 1 次被浮层吃掉，第 2 次直接退出 Activity。因此竖屏详情（真正的评论区/简介/相关推荐）没有采到。后续可试：先在「设置 → 播放设置」关掉自动全屏，或用 DeepLink（bilibili://video/BV号）直接打开竖屏态。",
+  "status": "该 Activity 的竖屏布局仍是未知项，需要调整播放设置后再采。"
+}

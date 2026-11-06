@@ -1,0 +1,33 @@
+{
+  "key": "playlist_square",
+  "name": "片单广场（影视片单）",
+  "package": "tv.danmaku.bili",
+  "activity": "kntr.common.compose.launcher.VertexActivity",
+  "entry": "首页 → 影视 → 片单",
+  "captured_at": "2026-10-31T20:44:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "render_tech": "Jetpack Compose",
+  "identity": [
+    {"name": "标题", "text": "片单广场"},
+    {"name": "分类 tab", "text_re": "^(推荐|UP推荐|入站必看|获奖高分|黄金厂牌|综艺考古|日剧精选)$"}
+  ],
+  "targets": [
+    {"name": "返回", "label_re": "back", "role": "导航", "risk": "none"},
+    {"name": "标题", "text": "片单广场", "role": "文本", "risk": "none"},
+    {"name": "分类 tab", "text_re": "^(推荐|UP推荐|入站必看|获奖高分|黄金厂牌|综艺考古|日剧精选)$", "role": "导航", "risk": "none", "note": "选中项字号更大；分类由运营配置，可能增减"},
+    {"name": "片单卡", "role": "列表项", "risk": "none", "note": "2 列网格；容器是无 id 的 View，封面也是 View（无 ogvImage 标签）"},
+    {"name": "片单标题", "role": "文本", "risk": "none", "note": "如「人生七年全系列！7岁到70岁的百味人生」"},
+    {"name": "观看进度", "role": "文本", "risk": "none", "note": "形如「看过：0/6部」，是本页特有字段"}
+  ],
+  "navigation": [
+    {"action": "点击片单卡", "to": "片单详情（剧集列表）", "verified": false},
+    {"action": "点击分类 tab", "to": "同页切换", "verified": false}
+  ],
+  "uncovered": [
+    "片单详情页",
+    "各分类下的差异",
+    "「看过」进度的更新逻辑"
+  ],
+  "notes": "片单广场是纯 Compose：除「back」label 和标题外没有任何资源 id，片单卡连 ogvImage 标签都没有（就是纯 View 当封面），只能靠标题文本和「看过：N/M部」的相对位置定位。"
+}

@@ -1,0 +1,49 @@
+{
+  "library": "tiktok",
+  "app": "com.zhiliaoapp.musically",
+  "app_name": "TikTok（国际版）",
+  "app_version": "35.8.1",
+  "device": "SERIAL0001",
+  "device_alias": "手机7",
+  "captured_at": "2026-11-01T20:26+08:00 ~ 2026-11-01T20:37+08:00",
+  "rounds": 1,
+  "evidence_levels": {
+    "collected": "看到了界面并记录了控件，但未做完整流程验证",
+    "navigation-verified": "不仅看到，还实际点击进入了下一页/下一层",
+    "blocked": "能看到界面或入口，但控件层级读不到 / 进不去，只能截图或记录限制"
+  },
+  "evidence_note": "本库全部页面均为 navigation-verified：都是实际点击进入后采集的层级。",
+  "pages": [
+    {"key": "feed", "name": "首页 · 推荐流（For You）", "activity": "SplashActivity(主 TabHost)", "evidence_level": "collected", "note": "竖屏视频页；右侧操作栏点赞/评论/收藏/分享"},
+    {"key": "feed_following", "name": "首页 · 已关注（空态引导）", "activity": "SplashActivity(主 TabHost)", "evidence_level": "navigation-verified", "note": "账号 0 关注 → 热门创作者引导"},
+    {"key": "friends", "name": "好友 · 空态 + 首次说明", "activity": "SplashActivity(主 TabHost)", "evidence_level": "navigation-verified", "note": "含 FB 好友授权弹窗（已拒绝）"},
+    {"key": "inbox", "name": "收件箱（消息中心）", "activity": "SplashActivity(主 TabHost)", "evidence_level": "navigation-verified", "note": "新粉丝/活动 两个系统入口"},
+    {"key": "inbox_fans", "name": "新粉丝", "activity": "SplashActivity 内页", "evidence_level": "navigation-verified", "note": "空态"},
+    {"key": "inbox_activity", "name": "活动（通知）", "activity": "SplashActivity 内页", "evidence_level": "navigation-verified", "note": "空态；含筛选入口"},
+    {"key": "dm_new_chat", "name": "新建聊天（选人）", "activity": "SplashActivity 底部工作表", "evidence_level": "navigation-verified", "note": "搜索好友 → 私信入口"},
+    {"key": "profile_me", "name": "主页（我）", "activity": "SplashActivity(主 TabHost)", "evidence_level": "navigation-verified", "note": "0 关注 0 粉丝 0 作品白号"},
+    {"key": "profile_author", "name": "他人主页", "activity": "SplashActivity 内页", "evidence_level": "navigation-verified", "note": "★含「关注 + 消息」双按钮，截流核心"},
+    {"key": "search", "name": "搜索页", "activity": "SplashActivity 内页", "evidence_level": "navigation-verified", "note": "含搜索历史列表"},
+    {"key": "search_result", "name": "搜索结果（8 个分栏）", "activity": "SplashActivity 内页", "evidence_level": "navigation-verified", "note": "★综合/用户/视频/音乐/直播/图文/地点/话题标签"},
+    {"key": "dm_chat", "name": "私信会话页", "activity": "SplashActivity 内页", "evidence_level": "navigation-verified", "note": "★输入框已测，发送未点"},
+    {"key": "comment_panel", "name": "评论区面板", "activity": "视频页内叠层", "evidence_level": "navigation-verified", "note": "★输入框已测，「发布评论」未点"},
+    {"key": "share_panel", "name": "分享面板", "activity": "视频页内底部工作表", "evidence_level": "navigation-verified", "note": "渠道 + 举报/不感兴趣/推广/合拍"},
+    {"key": "hashtag", "name": "话题标签详情页", "activity": "SplashActivity 内页", "evidence_level": "navigation-verified", "note": "★话题卡 + 竖向视频流 + 加入话题"},
+    {"key": "settings", "name": "设置与隐私（一级）", "activity": "SplashActivity 内页", "evidence_level": "navigation-verified", "note": "5 个分组全部条目已采"}
+  ],
+  "page_count": 16,
+  "risk_levels": {
+    "none": "纯浏览/导航/输入，可直接执行",
+    "send": "会对外发出内容或改变账号对外状态，执行前必须人工确认",
+    "forbidden": "金钱或不可逆，永不自动化"
+  },
+  "key_findings": [
+    "TikTok 控件 id 是混淆短名（i5n / ca8 / d63），同一次 dump 内会重复（d63 同时是点赞和分享），不能当唯一锚点",
+    "稳定定位优先级：label 语义 > 页面锚点组合 > id（同版本内可用，跨版本必变）> 坐标（仅本次会话有效）",
+    "同一页面的不同状态会整体换布局：如评论区未输入/已输入是两套容器，发送按钮只在有输入时出现",
+    "搜索分栏的顺序不固定（同一账号两次搜索顺序不同），必须按 label 文本定位而不是索引",
+    "部分文本是自绘/图片（如「热门创作者」空态卡、红色关注按钮），层级读不到，只能截图",
+    "数字单位混用中文和英文：主页显示「8761.3 万」，搜索结果显示「87.6M」，解析要同时支持"
+  ],
+  "not_implemented": "本库只采集「页面 + 控件 + 跳转关系」，不代表任何完整任务（发布/评论/私信/截流）已实现或验证。组合成任务时仍需逐步实测。"
+}

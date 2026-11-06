@@ -1,0 +1,46 @@
+{
+  "key": "search_result",
+  "name": "搜索结果页（综合）",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.search2.main.BiliMainSearchActivity",
+  "entry": "搜索页点击热搜/历史/发现词，或输入后提交",
+  "captured_at": "2026-10-31T19:55:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "结果 tab 条", "id": "tabs", "note": "综合/番剧/直播/用户/影视/图文，tab_title 选中态"},
+    {"name": "结果列表", "id": "recycler_view", "note": "id 与首页卡片列表同名，必须结合 Activity 或 tabs 判断"}
+  ],
+  "targets": [
+    {"name": "返回", "id": "iv_back_arrow", "label_re": "返回", "role": "导航", "risk": "none"},
+    {"name": "已选搜索词", "id": "search_fake_text", "role": "文本", "risk": "none"},
+    {"name": "清除查询", "id": "search_close_btn", "label_re": "清除查询", "role": "操作", "risk": "none"},
+    {"name": "搜索按钮", "id": "action_search", "text": "搜索", "role": "提交", "risk": "none"},
+    {"name": "结果分类 tab", "id": "tab_title", "text_re": "^(综合|番剧|直播|用户|影视|图文)$", "role": "导航", "risk": "none", "state_hint": "selected"},
+    {"name": "筛选按钮", "id": "filter_icon", "role": "操作", "risk": "none", "note": "打开 search_filter 面板"},
+    {"name": "热搜置顶行", "id": "iv_hot_icon", "role": "展示", "risk": "none", "note": "同层 tv_title + 完整榜单"},
+    {"name": "综合结果列表", "id": "recycler_view", "role": "列表", "risk": "none"},
+    {"name": "直播卡片", "id": "control_container", "role": "列表项", "risk": "none", "note": "封面 + live_inline_bottom（desc_title 直播间名、inline_live_badge「直播中」、desc_subtitle UP名）"},
+    {"name": "直播中角标", "id": "live_badge_title", "text": "直播中", "role": "状态", "risk": "none"},
+    {"name": "用户卡片", "id": "user_info", "role": "列表项", "risk": "none", "note": "avatar_layout + up_title + user_level + show_desc_1（粉丝·视频数）+ follow 关注按钮 + show_desc_2 简介 + more"},
+    {"name": "关注 UP 主按钮", "id": "follow", "label_re": "关注up主", "role": "状态变更", "risk": "send", "state_hint": "已关注时文案可能变为「已关注」"},
+    {"name": "用户卡片更多", "id": "more", "role": "菜单", "risk": "none"},
+    {"name": "视频网格", "id": "video_layout", "role": "列表", "risk": "none", "note": "每项 cover + play_num + title + post_time"},
+    {"name": "视频项-播放量", "id": "play_num", "role": "文本", "risk": "none"},
+    {"name": "视频项-标题", "id": "title", "role": "文本", "risk": "none"},
+    {"name": "视频项-发布时间", "id": "post_time", "role": "文本", "risk": "none"},
+    {"name": "查看全部 UP 视频", "id": "more_video", "text_re": "^查看全部\\d+个视频$", "role": "导航", "risk": "none"}
+  ],
+  "navigation": [
+    {"action": "点击用户卡片 up_title/avatar_layout", "to": "up_profile", "verified": false},
+    {"action": "点击视频项 cover", "to": "video_detail", "verified": false},
+    {"action": "点击 tab_title 切换分类", "to": "search_result（同类目）", "verified": false},
+    {"action": "点击 filter_icon", "to": "search_filter", "verified": true}
+  ],
+  "uncovered": [
+    "番剧/直播/用户/影视/图文 各分类的独立结果布局",
+    "排序/筛选生效后的结果差异",
+    "「查看全部N个视频」页面"
+  ],
+  "notes": "同一 Activity 内 ViewPager 切换，不是新 Activity；判断页面不能只看 Activity，要看 tabs + recycler 结构。"
+}

@@ -1,0 +1,38 @@
+{
+  "key": "inbox",
+  "name": "收件箱（消息中心）",
+  "package": "com.zhiliaoapp.musically",
+  "activity": "com.ss.android.ugc.aweme.splash.SplashActivity（主 TabHost）",
+  "entry": "底部导航「收件箱」",
+  "captured_at": "2026-11-01T20:28:30+08:00",
+  "device": "SERIAL0001",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "底部「收件箱」tab 选中", "id": "i5o", "label_re": "^收件箱$", "state_hint": "selected"},
+    {"name": "标题「收件箱」", "id": "title", "text": "收件箱", "label_re": "收件箱页面"}
+  ],
+  "targets": [
+    {"name": "新建聊天", "id": "cqj", "label_re": "^新建聊天$", "role": "导航", "risk": "none", "note": "左上角 + 号，进入选人/搜索好友面板"},
+    {"name": "标题", "id": "title", "text": "收件箱", "role": "标题", "risk": "none"},
+    {"name": "在线状态开关", "id": "g1w", "label_re": "^在线状态", "role": "设置", "risk": "send", "note": "★当前 label=「在线状态：已开启」。点击可改为关闭在线状态，会改变他人看到的可见性，属账号状态变更"},
+    {"name": "搜索好友", "id": "fsn", "label_re": "^搜索好友$", "role": "导航", "risk": "none"},
+    {"name": "会话列表", "id": "g1u", "role": "列表", "risk": "none"},
+    {"name": "创建 story", "text": "创建", "role": "导航", "risk": "send", "note": "列表首项，发布限时动态，属外发"},
+    {"name": "添加小组件", "text": "+ 小组件", "role": "控件", "risk": "none"},
+    {"name": "新粉丝入口", "id": "ans", "text": "新粉丝", "role": "导航", "risk": "none", "note": "下方副标题 hic=「在此处查看新粉丝」；整行 Button id=lm8"},
+    {"name": "活动入口", "id": "ans", "text": "活动", "role": "导航", "risk": "none", "note": "副标题 hic=「在此处查看通知」；整行 Button id=lm8"},
+    {"name": "右侧箭头/角标容器", "id": "lgj", "role": "展示", "risk": "none"}
+  ],
+  "navigation": [
+    {"action": "点击「新粉丝」", "to": "inbox_fans", "verified": true},
+    {"action": "点击「活动」", "to": "inbox_activity", "verified": true},
+    {"action": "点击「新建聊天」", "to": "dm_new_chat", "verified": true},
+    {"action": "点击某条会话", "to": "dm_chat", "verified": false}
+  ],
+  "uncovered": [
+    "有真实会话时的会话列表结构（本账号无会话）",
+    "会话长按菜单（置顶/删除/免打扰）",
+    "左上角 story 创建流程"
+  ],
+  "notes": "本账号收件箱为空，只有「新粉丝」「活动」两条系统入口。会话三要素（头像/昵称/最后一条消息/时间/未读徽标）在无会话时读不到，需后续用有消息的账号补采。"
+}

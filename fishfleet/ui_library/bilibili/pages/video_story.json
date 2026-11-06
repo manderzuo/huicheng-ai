@@ -1,0 +1,52 @@
+{
+  "key": "video_story",
+  "name": "竖屏视频播放页（Story 沉浸流）",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.video.story.StoryVideoActivity",
+  "entry": "首页竖版视频卡片 / 关注动态视频封面",
+  "captured_at": "2026-10-31T20:01:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "根容器", "id": "story_activity_root"},
+    {"name": "上下滑容器", "id": "story_view_pager", "note": "竖屏上下滑切换下一个视频"}
+  ],
+  "targets": [
+    {"name": "返回", "id": "container_top_back", "label_re": "返回", "role": "导航", "risk": "none"},
+    {"name": "正在看人数", "id": "story_ctrl_online", "role": "文本", "risk": "none", "note": "形如「182人正在看」，动态值"},
+    {"name": "搜索", "id": "container_top_search", "label_re": "搜索", "role": "导航", "risk": "none"},
+    {"name": "更多", "id": "container_top_more", "label_re": "更多", "role": "菜单", "risk": "none"},
+    {"name": "视频容器", "id": "video_view", "role": "播放器", "risk": "none"},
+    {"name": "点赞", "id": "like_layout", "label_re": "点赞", "role": "互动", "risk": "send", "state_hint": "like_text 显示点赞数；已赞时按钮样式变化", "note": "Button 类型"},
+    {"name": "评论入口", "id": "comment_layout", "label_re": "评论", "role": "互动", "risk": "none", "note": "打开评论区面板（只读浏览）"},
+    {"name": "投币", "id": "coin_layout", "label_re": "投币", "role": "互动", "risk": "send", "note": "消耗硬币，需确认"},
+    {"name": "收藏", "id": "favorite_layout", "label_re": "收藏", "role": "互动", "risk": "send", "state_hint": "favorite_progress 存在表示已收藏"},
+    {"name": "分享", "id": "share_layout", "label_re": "分享", "role": "互动", "risk": "send"},
+    {"name": "UP主头像", "id": "avatar_layout", "label_re": "UP主头像", "role": "导航", "risk": "none"},
+    {"name": "UP主名", "id": "name", "role": "文本", "risk": "none"},
+    {"name": "UP主粉丝数", "id": "fans", "role": "文本", "risk": "none", "note": "形如「256粉丝」"},
+    {"name": "关注按钮", "id": "follow", "label_re": "关注", "role": "状态变更", "risk": "send"},
+    {"name": "视频标题+播放量", "id": "title", "role": "文本", "risk": "none", "note": "label 把标题和播放量拼在一起，例如「标题 ‎11.5万播放」"},
+    {"name": "内容标注", "id": "story_ctrl_argue", "role": "状态", "risk": "none", "note": "如「含AI生成内容」"},
+    {"name": "AI 拓展搜索", "id": "story_ctrl_creative", "role": "导航", "risk": "none", "note": "creative_text 形如「搜索·开源盛世」，内容动态"},
+    {"name": "进度条", "id": "story_ctrl_seekbar", "role": "播放控制", "risk": "none", "note": "SeekBar，value=毫秒"},
+    {"name": "热力峰值", "id": "story_ctrl_heat_peak", "role": "展示", "risk": "none"},
+    {"name": "发弹幕", "id": "story_ctrl_danmaku_send", "label_re": "弹幕", "role": "输入", "risk": "send", "note": "输入框，发送弹幕属于对外发布"},
+    {"name": "弹幕开关", "id": "story_ctrl_danmaku_toggle", "label_re": "关闭弹幕", "role": "设置", "risk": "none", "state_hint": "label 在「关闭弹幕 / 开启弹幕」间切换"},
+    {"name": "详情页", "id": "story_ctrl_router", "label_re": "详情页", "role": "导航", "risk": "none", "note": "进入传统横屏视频详情页（评论区/简介/相关推荐）"},
+    {"name": "全屏", "id": "story_ctrl_screen", "label_re": "全屏", "role": "播放控制", "risk": "none"}
+  ],
+  "navigation": [
+    {"action": "点击 详情页", "to": "video_detail", "verified": true},
+    {"action": "点击 评论", "to": "comment_panel", "verified": false},
+    {"action": "上滑", "to": "下一个竖版视频", "verified": false},
+    {"action": "点击 UP主头像", "to": "up_profile", "verified": false}
+  ],
+  "uncovered": [
+    "评论区面板（从本页打开）",
+    "投币面板、分享面板、更多菜单",
+    "全屏/横屏播放态",
+    "视频自动播完后的行为"
+  ],
+  "notes": "这是竖屏 Story 模式，不是传统横屏详情页；两者控件 id 体系完全不同。视频会自动播放，操作要快；autoplay 会消耗流量。"
+}

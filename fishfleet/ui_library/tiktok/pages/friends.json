@@ -1,0 +1,52 @@
+{
+  "key": "friends",
+  "name": "好友（Friends）· 空态 + 首次说明弹窗",
+  "package": "com.zhiliaoapp.musically",
+  "activity": "com.ss.android.ugc.aweme.splash.SplashActivity（主 TabHost）",
+  "entry": "底部导航「好友」",
+  "captured_at": "2026-11-01T20:28:00+08:00",
+  "device": "SERIAL0001",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "底部「好友」tab 选中", "id": "i5m", "label_re": "^好友$", "state_hint": "selected"},
+    {"name": "空态文案「与好友互动，查看对方的作品」", "id": "euq"}
+  ],
+  "targets": [
+    {"name": "底部-好友", "id": "i5m", "label_re": "^好友$", "role": "导航", "risk": "none", "state_hint": "selected"},
+    {"name": "搜索按钮", "id": "gvw", "label_re": "^搜索$", "role": "导航", "risk": "none", "note": "顶部右侧"},
+    {"name": "左上头像/账户按钮", "id": "gr8", "role": "导航", "risk": "none", "note": "内部 nah 头像；用途待验证"},
+    {"name": "空态容器", "id": "eup"},
+    {"name": "空态标题", "id": "euq", "text": "与好友互动，查看对方的作品"},
+    {"name": "与 Facebook 好友互动", "text": "与 Facebook 好友互动", "role": "导航", "risk": "send", "note": "★会触发 Facebook 授权/好友同步，属对外数据共享，需确认"},
+    {"name": "邀请好友", "text": "邀请好友", "role": "导航", "risk": "send", "note": "会拉起分享/邀请，属外发"}
+  ],
+  "intro_sheet": {
+    "name": "好友页首次进入说明（底部工作表）",
+    "container": {"id": "d3e", "label": "底部工作表"},
+    "elements": [
+      {"name": "关闭", "id": "euz", "label_re": "^关闭$", "risk": "none"},
+      {"name": "标题", "id": "ev5", "text": "查看好友的作品"},
+      {"name": "说明1", "id": "ev1", "text": "发布内容来自你回关的粉丝、关注的账号以及其它推荐账号。"},
+      {"name": "说明2", "id": "ev2", "text": "你随时都可以在【将你的账号推荐给其他人】中更改你的账号被推荐其他人的方式。"},
+      {"name": "确定按钮", "id": "ev0", "text": "确定", "risk": "none", "note": "关闭弹窗，不改变任何设置"}
+    ]
+  },
+  "permission_dialog_seen": {
+    "name": "TikTok 请求访问 Facebook 好友列表与电子邮件",
+    "package": "com.zhiliaoapp.musically",
+    "text": "允许 TikTok 访问你的 Facebook 好友列表和电子邮件？ 此授权会用于改善你的使用体验，包括与好友互动以及提供个性化广告。",
+    "buttons": ["好的", "不允许"],
+    "action_taken": "点击「不允许」",
+    "note": "★属授权类操作，未授予。若以后要点「好的」，需主人明确同意"
+  },
+  "navigation": [
+    {"action": "点击「确定」关闭说明", "to": "friends", "verified": true},
+    {"action": "点击右上搜索", "to": "search", "verified": false}
+  ],
+  "uncovered": [
+    "有好友动态时的真实好友流",
+    "「与 Facebook 好友互动」的完整授权流程（刻意未点）",
+    "左上头像按钮的真实用途"
+  ],
+  "notes": "好友流依赖「回关的粉丝 + 关注的账号 + 推荐账号」三类来源，本账号 0 关注 0 粉丝，只能看到空态。"
+}

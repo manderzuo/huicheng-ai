@@ -1,0 +1,15 @@
+{
+  "package": "tv.danmaku.bili",
+  "app_name": "哔哩哔哩",
+  "version_name": "9.16.1",
+  "version_code": 9161100,
+  "min_sdk": 24,
+  "target_sdk": 35,
+  "first_install_time": "2026-10-27 09:14:27",
+  "activity_main": "tv.danmaku.bili.MainActivityV2",
+  "notes": [
+    "手机版（竖屏），非 HD/平板版",
+    "控件 id 绝大多数带 tv.danmaku.bili:id/ 前缀，是稳定定位的首选依据",
+    "BACK 键无法退出某些 WebView 广告页（如 RewardAdActivityWeb），必要时 force-stop"
+  ]
+}

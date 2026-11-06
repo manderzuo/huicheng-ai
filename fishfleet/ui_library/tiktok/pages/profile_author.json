@@ -1,0 +1,54 @@
+{
+  "key": "profile_author",
+  "name": "他人主页（创作者个人主页）",
+  "package": "com.zhiliaoapp.musically",
+  "activity": "com.ss.android.ugc.aweme.splash.SplashActivity 内独立页",
+  "entry": "搜索结果用户列表 / 视频页头像 / 评论区头像 / 通知条目",
+  "captured_at": "2026-11-01T20:31:20+08:00",
+  "device": "SERIAL0001",
+  "evidence_level": "navigation-verified",
+  "sample_subject": "Addison Rae (@addisonre) — 仅作为结构样本，内容随目标变化",
+  "identity": [
+    {"name": "@handle 按钮", "id": "kko", "text_re": "^@"},
+    {"name": "关注/消息 双按钮", "id": "cth", "note": "第一个 cth=关注，第二个 cth=消息"},
+    {"name": "视频/已转发的视频 tab", "id": "nzt", "label_re": "^(视频|已转发的视频)$"}
+  ],
+  "targets": [
+    {"name": "返回", "label_re": "^返回上一屏幕$", "role": "导航", "risk": "none", "note": "无 id，位于 21,140"},
+    {"name": "昵称", "id": "it3", "role": "标题", "risk": "none"},
+    {"name": "右上 主页访问量/分析", "id": "ati", "role": "数据", "risk": "none", "note": "他人主页此处为数据入口，无 label"},
+    {"name": "头像", "id": "am8", "role": "展示", "risk": "none"},
+    {"name": "@handle", "id": "kko", "role": "文本", "risk": "none", "note": "Button，text 形如 @addisonre"},
+    {"name": "认证标记", "note": "昵称后紧跟 ImageView（32x32）+「艺术家」等标签 Button", "role": "展示", "risk": "none"},
+    {"name": "关注数", "id": "kjr", "role": "数据", "risk": "none"},
+    {"name": "粉丝数", "id": "kh4", "role": "数据", "risk": "none"},
+    {"name": "获赞数", "id": "kjr", "role": "数据", "risk": "none", "note": "★与关注数同 id，靠下方 label（关注/粉丝/赞）区分"},
+    {"name": "标签-关注", "id": "kjq", "text": "关注", "role": "文本", "risk": "none"},
+    {"name": "标签-粉丝", "id": "kh5", "text": "粉丝", "role": "文本", "risk": "none"},
+    {"name": "标签-赞", "id": "kjq", "text": "赞", "role": "文本", "risk": "none"},
+    {"name": "关注按钮", "id": "cth", "text": "关注", "role": "关注", "risk": "send", "note": "★ctc/ctj 容器包 cth；点击立即关注，无二次确认"},
+    {"name": "消息按钮", "id": "cth", "text": "消息", "role": "私信", "risk": "none", "note": "★截流核心：点击进入 dm_chat；打开会话本身不发送"},
+    {"name": "更多/分享", "id": "ctd", "role": "菜单", "risk": "none", "note": "右侧 116x116 图标（分享/更多）"},
+    {"name": "简介里的链接", "note": "如 www.addisonrae.com/tour，Button 可点，会跳外部浏览器", "role": "导航", "risk": "none"},
+    {"name": "tab 视频", "label_re": "^视频$", "role": "导航", "risk": "none", "state_hint": "selected"},
+    {"name": "tab 已转发的视频", "label_re": "^已转发的视频$", "role": "导航", "risk": "none"},
+    {"name": "作品网格", "id": "eaf", "role": "列表", "risk": "none", "note": "GridView 三列"},
+    {"name": "作品卡", "id": "ch8", "role": "列表项", "risk": "none"},
+    {"name": "作品封面", "id": "cover", "role": "展示", "risk": "none"},
+    {"name": "作品播放量", "id": "pg2", "role": "文本", "risk": "none", "note": "左下角，如 1235 万"}
+  ],
+  "navigation": [
+    {"action": "点击「消息」", "to": "dm_chat", "verified": true},
+    {"action": "点击作品封面", "to": "video_detail", "verified": false},
+    {"action": "点击关注数/粉丝数", "to": "follower_list", "verified": false},
+    {"action": "点击「更多/分享」", "to": "share_panel", "verified": false},
+    {"action": "BACK", "to": "search_result", "verified": true}
+  ],
+  "uncovered": [
+    "关注/粉丝列表弹层",
+    "「更多」菜单（举报/拉黑/复制链接等）",
+    "已转发视频 tab",
+    "作品长按菜单"
+  ],
+  "notes": "★截流核心页。与自己的主页(profile_me)结构几乎相同，差异在于：他人主页是「关注 + 消息」双按钮，自己主页是「编辑主页 + 分享主页 + 添加好友」。粉丝数单位会出现「8761.3 万」这类中文单位，与搜索结果里的「87.6M」英文单位不一致，解析时要同时支持。"
+}

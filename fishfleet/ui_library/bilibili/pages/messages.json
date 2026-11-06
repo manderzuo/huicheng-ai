@@ -1,0 +1,37 @@
+{
+  "key": "messages",
+  "name": "消息中心",
+  "package": "tv.danmaku.bili",
+  "activity": "kntr.common.compose.launcher.VertexActivity",
+  "entry": "首页右上角「消息」按钮",
+  "captured_at": "2026-10-31T20:04:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "render_tech": "Jetpack Compose",
+  "identity": [
+    {"name": "标题", "text": "消息"},
+    {"name": "一键已读", "label_re": "一键已读"}
+  ],
+  "targets": [
+    {"name": "返回", "role": "导航", "risk": "none", "note": "左上角 View，无 id 无 label"},
+    {"name": "一键已读", "label_re": "一键已读", "role": "操作", "risk": "none", "note": "清空全部未读计数，状态变更"},
+    {"name": "菜单", "label_re": "菜单", "role": "菜单", "risk": "none"},
+    {"name": "消息标题", "text": "消息", "role": "文本", "risk": "none"},
+    {"name": "回复与@", "label_re": "回复与@", "role": "导航", "risk": "none", "note": "View，label 只含名称"},
+    {"name": "收到喜欢", "label_re": "收到喜欢", "role": "导航", "risk": "none", "note": "label 含未读数，如「收到喜欢\\n2条未读消息」"},
+    {"name": "新增粉丝", "label_re": "新增粉丝", "role": "导航", "risk": "none"},
+    {"name": "会话条目", "role": "列表项", "risk": "none", "note": "label 是四行拼接：名称\\n时间\\n未读状态\\n最新消息预览"},
+    {"name": "空态提示", "text_re": "我可是有底线的", "role": "文本", "risk": "none"}
+  ],
+  "navigation": [
+    {"action": "点击 会话条目", "to": "chat_session", "verified": true},
+    {"action": "点击 回复与@", "to": "message_reply", "verified": false},
+    {"action": "点击 收到喜欢", "to": "message_like", "verified": false}
+  ],
+  "uncovered": [
+    "回复与@ / 收到喜欢 / 新增粉丝 的列表页",
+    "菜单项（可能是全部已读/设置）",
+    "私信（本账号无真人私信）"
+  ],
+  "notes": "Compose 页面，会话条目是无 id 的 View，但 label 把「名称/时间/未读/预览」拼在一起，反而便于一次性解析。"
+}

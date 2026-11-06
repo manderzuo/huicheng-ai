@@ -1,0 +1,84 @@
+{
+  "key": "search_result",
+  "name": "搜索结果（综合 / 用户 / 视频 等分栏）",
+  "package": "com.zhiliaoapp.musically",
+  "activity": "com.ss.android.ugc.aweme.splash.SplashActivity 内独立页",
+  "entry": "搜索页输入关键词 → 点「搜索」；或点搜索历史/热搜词",
+  "captured_at": "2026-11-01T20:31:00+08:00",
+  "device": "SERIAL0001",
+  "evidence_level": "navigation-verified",
+  "query_used": "Addison Rae",
+  "identity": [
+    {"name": "搜索框有查询词", "id": "e22", "note": "text/value = 当前查询"},
+    {"name": "结果分栏条", "id": "iyi", "note": "HorizontalScrollView，子项 label = 分栏名"}
+  ],
+  "tabs": [
+    {"name": "综合", "label_re": "^综合$", "state_hint": "默认选中"},
+    {"name": "用户", "label_re": "^用户$"},
+    {"name": "视频", "label_re": "^视频$"},
+    {"name": "音乐", "label_re": "^音乐$"},
+    {"name": "图文", "label_re": "^图文$"},
+    {"name": "直播", "label_re": "^直播$"},
+    {"name": "话题标签", "label_re": "^话题标签$"},
+    {"name": "地点", "label_re": "^地点$", "note": "★默认在屏幕外，需横向滑动"}
+  ],
+  "tab_order_warning": "★实测两次搜索（Addison Rae / travel）分栏顺序不同：第一次为「综合/用户/视频/音乐/图文/直播/话题标签/地点」，第二次为「综合/视频/用户/音乐/直播/图文/地点/话题标签」。分栏由服务端决定，必须按 label 文本定位，禁止用固定索引或坐标。",
+  "tab_item_structure": {
+    "container": "HorizontalScrollView iyi 内的 FrameLayout，label=分栏名",
+    "text": "内部 TextView，text=分栏名，选中态 selected",
+    "note": "屏幕外的分栏宽度可能被裁到 22px 或 18px，需先左滑"
+  },
+  "hashtag_list_schema": {
+    "container": "RecyclerView hip",
+    "item": "ViewGroup（1080x158）",
+    "avatar": "fp7（95x95 圆圈）",
+    "name": "p0j（如 Travel，不带 #）",
+    "count": "pgf（如「95.4M 作品」）",
+    "button": "bis（右侧 158x84，无 label）",
+    "entry": "点整行或 p0j → hashtag 详情页"
+  },
+  "targets": [
+    {"name": "搜索框", "id": "e22", "role": "输入", "risk": "none"},
+    {"name": "清除搜索字段", "id": "b9r", "label_re": "^清除搜索字段$", "role": "控件", "risk": "none"},
+    {"name": "更多选项", "id": "m0t", "label_re": "^更多选项$", "role": "菜单", "risk": "none"},
+    {"name": "分栏容器", "id": "iyi", "role": "导航", "risk": "none", "note": "每项 FrameLayout label=分栏名，内部 TextView 同名；选中态 selected"},
+    {"name": "结果 ViewPager", "id": "qka", "role": "容器", "risk": "none"},
+    {"name": "综合-结果列表", "id": "hip", "role": "列表", "risk": "none", "note": "综合页为 GridView"},
+    {"name": "用户-结果列表", "id": "hip", "role": "列表", "risk": "none", "note": "切到用户 tab 后同 id 变为 RecyclerView 列表"},
+
+    {"name": "用户结果-整行", "note": "Button 无 id（1080x189），整行可点进主页", "role": "列表项", "risk": "none"},
+    {"name": "用户结果-头像", "id": "egd", "role": "展示", "risk": "none", "note": "外层 egd/ek3，内部 gii 头像圆"},
+    {"name": "用户结果-昵称", "id": "psz", "role": "文本", "risk": "none", "note": "形如「Addison Rae · 已验证账号」，认证后缀带 RTL 控制符 ‎⁨ ⁩，匹配时要容忍"},
+    {"name": "用户结果-@handle", "id": "oyj", "role": "文本", "risk": "none", "note": "纯 handle，不带 @"},
+    {"name": "用户结果-粉丝数·视频数", "id": "p3y", "role": "文本", "risk": "none", "note": "形如「87.6M 个粉丝 · 344 个视频」"},
+    {"name": "用户结果-关注按钮", "id": "l7n", "text": "关注", "role": "关注", "risk": "send", "note": "★列表内直接关注，无二次确认"},
+
+    {"name": "综合-视频卡", "id": "q5w", "role": "列表项", "risk": "none", "note": "ViewGroup，三列网格"},
+    {"name": "综合-视频封面", "id": "q5x", "role": "展示", "risk": "none"},
+    {"name": "综合-播放量", "id": "q60", "role": "文本", "risk": "none", "note": "形如 968.4K"},
+    {"name": "综合-角标", "id": "qar", "role": "文本", "risk": "none", "note": "如「点赞较多」"},
+    {"name": "综合-视频封面(长视频)", "id": "cover", "role": "展示", "risk": "none", "note": "下方大卡使用 cover"}
+  ],
+  "user_item_schema": {
+    "container": "Button（无 id，高 189）",
+    "avatar": "egd",
+    "nickname": "psz",
+    "handle": "oyj",
+    "stats": "p3y",
+    "follow_button": "l7n（text=关注）"
+  },
+  "navigation": [
+    {"action": "点用户结果整行", "to": "profile_author", "verified": true},
+    {"action": "点「用户」分栏", "to": "search_result", "verified": true},
+    {"action": "点击视频结果", "to": "video_detail", "verified": false},
+    {"action": "点击话题标签分栏", "to": "hashtag", "verified": false},
+    {"action": "BACK", "to": "search", "verified": true}
+  ],
+  "uncovered": [
+    "★视频 / 音乐 / 图文 / 直播 / 话题标签 / 地点 六个分栏的内容结构（本次只验证了综合与用户）",
+    "空结果态",
+    "下拉加载更多与排序/筛选入口",
+    "「更多选项」菜单"
+  ],
+  "notes": "★截流核心页：搜索 → 用户列表 → 主页 → 私信，是完整可用的获客链路。用户列表项信息完整（昵称/handle/粉丝数/视频数），可直接用于筛选目标。注意昵称里含 RTL 控制符（‎⁨）与间隔点「·」，正则要容错。"
+}

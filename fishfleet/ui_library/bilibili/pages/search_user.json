@@ -1,0 +1,38 @@
+{
+  "key": "search_user",
+  "name": "搜索结果 · 用户 tab",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.search2.main.BiliMainSearchActivity",
+  "entry": "搜索结果页 → 点击「用户」tab",
+  "captured_at": "2026-10-31T20:13:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "用户 tab 选中", "id": "tab_title", "text": "用户", "note": "selected"},
+    {"name": "用户列表容器", "id": "user_nested_container"}
+  ],
+  "targets": [
+    {"name": "用户 tab", "id": "tab_title", "text": "用户", "role": "导航", "risk": "none", "state_hint": "selected"},
+    {"name": "排序下拉", "id": "menu", "text": "默认排序", "role": "排序", "risk": "none", "note": "带 arrow 箭头，点击展开下拉"},
+    {"name": "用户范围下拉", "id": "menu", "text": "全部用户", "role": "筛选", "risk": "none", "note": "可切「全部用户 / 认证用户」等"},
+    {"name": "下拉菜单容器", "id": "drop_down_menu_head", "role": "容器", "risk": "none"},
+    {"name": "用户列表", "id": "recycler_view", "role": "列表", "risk": "none"},
+    {"name": "用户项容器", "role": "列表项", "risk": "none", "note": "无 id 的 ViewGroup"},
+    {"name": "用户头像", "id": "avatar_layout", "role": "导航", "risk": "none"},
+    {"name": "用户昵称", "id": "up_title", "role": "文本", "risk": "none"},
+    {"name": "等级牌", "id": "user_level", "role": "展示", "risk": "none", "note": "图片，内容不可读"},
+    {"name": "粉丝数与投稿数", "id": "first_desc", "role": "文本", "risk": "none", "note": "形如「9.9万粉丝」「45.5万粉丝 · 11个视频」；没有投稿时不带「N个视频」"},
+    {"name": "用户简介", "id": "second_desc", "role": "文本", "risk": "none", "note": "部分用户没有"},
+    {"name": "关注按钮", "id": "follow", "label_re": "关注up主", "role": "状态变更", "risk": "send", "state_hint": "已关注文案可能变「已关注」"}
+  ],
+  "navigation": [
+    {"action": "点击用户头像/昵称", "to": "up_profile", "verified": false},
+    {"action": "点击排序下拉", "to": "下拉菜单", "verified": false}
+  ],
+  "uncovered": [
+    "排序下拉的具体选项",
+    "「全部用户」下拉的其它选项",
+    "用户 tab 的翻页/到底提示"
+  ],
+  "notes": "用户 tab 和综合 tab 的用户卡片是两套布局：综合里用 show_desc_1/show_desc_2，用户 tab 里用 first_desc/second_desc。id 不同，不能混用。"
+}

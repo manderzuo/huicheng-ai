@@ -1,0 +1,38 @@
+{
+  "key": "search",
+  "name": "搜索页（搜索输入）",
+  "package": "com.zhiliaoapp.musically",
+  "activity": "com.ss.android.ugc.aweme.splash.SplashActivity 内独立页",
+  "entry": "首页/好友页 右上角搜索图标；或「已关注」页右上搜索",
+  "captured_at": "2026-11-01T20:30:30+08:00",
+  "device": "SERIAL0001",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "搜索输入框", "id": "e22", "note": "EditText，进入即 focused"},
+    {"name": "搜索按钮", "id": "plh", "text": "搜索"},
+    {"name": "返回", "id": "aol", "label_re": "^返回上一屏幕$"}
+  ],
+  "targets": [
+    {"name": "返回", "id": "aol", "label_re": "^返回上一屏幕$", "role": "导航", "risk": "none"},
+    {"name": "搜索框", "id": "e22", "role": "输入", "risk": "none", "note": "支持直接输入关键词；首次进入会带上次的搜索词（本次为 Addison Rae）"},
+    {"name": "搜索框内放大镜", "id": "gw6", "role": "展示", "risk": "none"},
+    {"name": "清除输入", "id": "b9r", "label_re": "^清除搜索字段$", "role": "控件", "risk": "none", "note": "★仅在有输入时出现"},
+    {"name": "搜索按钮", "id": "plh", "text": "搜索", "role": "提交", "risk": "none", "note": "★有输入时 plh 为「搜索」文本按钮；空输入时位置变为「更多选项」图标"},
+    {"name": "更多选项", "id": "m0t", "label_re": "^更多选项$", "role": "菜单", "risk": "none", "note": "无输入态下的右侧按钮"},
+    {"name": "内容区", "id": "ga1", "role": "容器", "risk": "none", "note": "空输入时承载热搜/历史；刚打开可能为空（加载时序）"},
+    {"name": "搜索历史列表", "id": "fi2", "role": "列表", "risk": "none", "note": "★只有在搜索过一次并返回时出现；每项一个 RecyclerView 行"},
+    {"name": "搜索历史项-文本", "id": "p92", "role": "导航", "risk": "none", "note": "如「Addison Rae」，点击直接用该词搜索"},
+    {"name": "搜索历史项-删除", "id": "d0s", "role": "控件", "risk": "send", "note": "单条删除（内部 glw 图标）"}
+  ],
+  "navigation": [
+    {"action": "输入关键词后点「搜索」", "to": "search_result", "verified": true},
+    {"action": "BACK", "to": "feed", "verified": true}
+  ],
+  "uncovered": [
+    "★空输入态下的热搜榜 / 搜索历史 / 搜索发现（本次层级与截图均为空，可能受网络或账号冷启动影响）",
+    "搜索联想（输入过程中的下拉建议）",
+    "搜索历史清空按钮",
+    "右上「更多选项」菜单内容"
+  ],
+  "notes": "★重要修正：搜索页刚打开时内容区为空（ScrollView 无子节点），但**搜索过一次再返回后，历史列表 fi2 会出现**（实测出现「Addison Rae」一项 + 删除按钮）。所以「空」是加载时序，不是没有历史功能。热搜榜本轮两次都未出现，仍未覆盖。"
+}

@@ -1,0 +1,45 @@
+{
+  "key": "coin_panel",
+  "name": "投币面板（视频详情页）",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.ship.theseus.detail.UnitedBizDetailsActivity",
+  "entry": "视频详情页 → 点「投币」（frame_coin）",
+  "captured_at": "2026-10-31T20:52:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "side_effect_check": "打开面板后硬币余额仍为 3.0，未发生任何投币；「同时点赞内容」勾选也未生效",
+  "identity": [
+    {"name": "面板根", "id": "pay_coins_layout"},
+    {"name": "余额文案", "id": "balance", "text_re": "^硬币余额"},
+    {"name": "提示文案", "id": "prompt", "text": "上划或点击22娘投硬币"}
+  ],
+  "targets": [
+    {"name": "面板根", "id": "pay_coins_layout", "role": "容器", "risk": "none"},
+    {"name": "外部取消区", "id": "cancel_outside", "role": "关闭", "risk": "none", "note": "点面板外关闭"},
+    {"name": "顶部取消区", "id": "cancel_top", "role": "关闭", "risk": "none"},
+    {"name": "取消引导线", "id": "cancel_guideline", "role": "关闭", "risk": "none"},
+    {"name": "硬币面板", "id": "layout_coin", "role": "容器", "risk": "none"},
+    {"name": "左箭头", "id": "left", "role": "切换", "risk": "none", "note": "上一档币数"},
+    {"name": "右箭头", "id": "right", "role": "切换", "risk": "none", "note": "下一档币数"},
+    {"name": "1 币位", "id": "layout_one", "role": "可点击", "risk": "none", "note": "含 box_one + coin_one"},
+    {"name": "2 币位", "id": "layout_two", "role": "可点击", "risk": "none", "note": "当前选中（尺寸更大）；含 box_two + coin_two"},
+    {"name": "选中锚点", "id": "anchor", "role": "展示", "risk": "none"},
+    {"name": "投币确认（22娘）", "id": "pay_coins", "role": "确认", "risk": "send", "note": "★点下去就真的投币，消耗硬币，永不自动点"},
+    {"name": "提示文案", "id": "prompt", "role": "文本", "risk": "none", "note": "「上划或点击22娘投硬币」"},
+    {"name": "硬币余额", "id": "balance", "role": "文本", "risk": "none", "note": "形如「硬币余额 : 3.0」，可用来确认投币前后变化"},
+    {"name": "同时点赞内容", "id": "checkbox", "role": "复选", "risk": "send", "state_hint": "CheckBox checked=true", "note": "默认勾选！投币时会连带点赞"},
+    {"name": "关闭", "id": "close", "role": "关闭", "risk": "none"},
+    {"name": "如何获取硬币", "id": "coin_help", "text": "如何获取硬币 ？", "role": "导航", "risk": "none"}
+  ],
+  "navigation": [
+    {"action": "点击 left/right 或滑动", "to": "切换投币数量", "verified": false},
+    {"action": "点击 pay_coins", "to": "执行投币", "verified": false, "risk": "send"},
+    {"action": "点击 close / cancel_outside", "to": "关闭面板", "verified": true}
+  ],
+  "uncovered": [
+    "实际投币效果（刻意不做）",
+    "1/2 币之外的档位（本界面只看到 1 和 2）",
+    "「如何获取硬币」页面"
+  ],
+  "notes": "★这个面板有个很隐蔽的坑：底部「同时点赞内容」CheckBox 默认是**勾选**状态。也就是说只点 pay_coins 会同时投币+点赞，产生两个对外动作。自动化若真要做投币，必须先显式取消这个勾选。另外面板用 22娘/33娘 形象做确认按钮（pay_coins），坐标固定但语义不直观，容易误点。"
+}

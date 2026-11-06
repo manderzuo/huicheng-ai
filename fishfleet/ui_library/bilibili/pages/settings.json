@@ -1,0 +1,61 @@
+{
+  "key": "settings",
+  "name": "设置（一级）",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.app.preferences.BiliPreferencesActivity",
+  "entry": "我的 → 更多服务 → 设置（需下滑到底）",
+  "captured_at": "2026-10-31T19:58:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "标题", "text": "设置", "note": "nav_top_bar 内"},
+    {"name": "返回按钮", "label_re": "转到上一层级", "note": "ImageButton，不是常规 iv_back_arrow"}
+  ],
+  "targets": [
+    {"name": "返回", "label_re": "转到上一层级", "role": "导航", "risk": "none"},
+    {"name": "设置项容器", "id": "recycler_view", "role": "列表", "risk": "none", "note": "每项 ViewGroup = android:id/title + android:id/widget_frame(含 indicator 箭头)；带副标题的项还有 android:id/summary"},
+    {"name": "账号资料", "text": "账号资料", "role": "设置", "risk": "none"},
+    {"name": "安全隐私", "text": "安全隐私", "role": "设置", "risk": "none", "note": "登录设备/密码等，敏感区"},
+    {"name": "收货信息", "text": "收货信息", "role": "设置", "risk": "none", "note": "个人隐私"},
+    {"name": "语言", "text": "语言", "role": "设置", "risk": "none"},
+    {"name": "开屏画面设置", "text": "开屏画面设置", "role": "设置", "risk": "none"},
+    {"name": "首页推荐设置", "text": "首页推荐设置", "role": "设置", "risk": "none", "state_hint": "summary=双列/Wi-Fi/免流/移动网络下自动播放"},
+    {"name": "首页头像入口设置", "text": "首页头像入口设置", "role": "设置", "risk": "none"},
+    {"name": "播放设置", "text": "播放设置", "role": "设置", "risk": "none"},
+    {"name": "离线设置", "text": "离线设置", "role": "设置", "risk": "none"},
+    {"name": "追番/追剧设置", "text": "追番/追剧设置", "role": "设置", "risk": "none"},
+    {"name": "推送设置", "text": "推送设置", "role": "设置", "risk": "none"},
+    {"name": "消息设置", "text": "消息设置", "role": "设置", "risk": "none"},
+    {"name": "防骚扰和互动人群设置", "text": "防骚扰和互动人群设置", "role": "设置", "risk": "none"},
+    {"name": "下载管理", "text": "下载管理", "role": "设置", "risk": "none"},
+    {"name": "清理存储空间", "text": "清理存储空间", "role": "设置", "risk": "none", "note": "可能删除缓存，需确认"},
+    {"name": "其他设置", "text": "其他设置", "role": "设置", "risk": "none"},
+    {"name": "定时关闭", "text": "定时关闭", "role": "设置", "risk": "none", "state_hint": "summary=不开启"},
+    {"name": "睡眠提醒", "text": "睡眠提醒", "role": "设置", "risk": "none", "state_hint": "summary=不提醒"},
+    {"name": "深色设置", "text": "深色设置", "role": "设置", "risk": "none"},
+    {"name": "我的客服", "text": "我的客服", "role": "设置", "risk": "none"},
+    {"name": "关于哔哩哔哩", "text": "关于哔哩哔哩", "role": "设置", "risk": "none", "note": "版本号所在页"},
+    {"name": "商务合作", "text": "商务合作", "role": "设置", "risk": "none"},
+    {"name": "用户协议", "text": "用户协议", "role": "设置", "risk": "none"},
+    {"name": "隐私政策", "text": "隐私政策", "role": "设置", "risk": "none"},
+    {"name": "隐私权限设置", "text": "隐私权限设置", "role": "设置", "risk": "none"},
+    {"name": "个人信息收集清单", "text": "个人信息收集清单", "role": "设置", "risk": "none"},
+    {"name": "第三方信息共享清单", "text": "第三方信息共享清单", "role": "设置", "risk": "none"},
+    {"name": "哔哩哔哩（基本功能）隐私政策", "text": "哔哩哔哩（基本功能）隐私政策", "role": "设置", "risk": "none"},
+    {"name": "账号切换", "text": "账号切换", "role": "账号", "risk": "send", "note": "RelativeLayout 包 TextView，无 id；切换账号会改变整个 App 状态，必须确认"},
+    {"name": "退出登录", "text": "退出登录", "role": "账号", "risk": "forbidden", "note": "RelativeLayout 包 TextView，无 id；绝不自动化"}
+  ],
+  "navigation": [
+    {"action": "点击 账号资料", "to": "settings_account", "verified": false},
+    {"action": "点击 安全隐私", "to": "settings_security", "verified": false},
+    {"action": "点击 播放设置", "to": "settings_playback", "verified": false},
+    {"action": "点击 关于哔哩哔哩", "to": "about", "verified": false}
+  ],
+  "uncovered": [
+    "全部二级设置页（账号资料/安全隐私/播放设置/离线设置/推送设置…）",
+    "定时关闭与睡眠提醒的时间选择器",
+    "深色设置的三档选项",
+    "关于页里的版本号与检查更新"
+  ],
+  "notes": "设置项使用 Android 原生 preferences 布局（android:id/title、android:id/summary、android:id/widget_frame），与其他 App 内页面风格不同，定位更稳定。列表项没有稳定资源 id，必须靠 title 文本定位。"
+}

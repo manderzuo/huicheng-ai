@@ -1,0 +1,37 @@
+{
+  "key": "hashtag",
+  "name": "话题标签详情页（#话题）",
+  "package": "com.zhiliaoapp.musically",
+  "activity": "com.ss.android.ugc.aweme.splash.SplashActivity 内独立页",
+  "entry": "搜索结果「话题标签」分栏 → 点某个标签；或视频描述里的 #标签",
+  "captured_at": "2026-11-01T20:37:00+08:00",
+  "device": "SERIAL0001",
+  "evidence_level": "navigation-verified",
+  "sample_subject": "#Travel（95.4M 作品）",
+  "identity": [
+    {"name": "标题为 #话题", "id": "title", "text_re": "^#"},
+    {"name": "话题卡含「作品」计数", "id": "ahn", "text_re": "作品$"}
+  ],
+  "targets": [
+    {"name": "返回", "id": "aok", "label_re": "^返回$", "role": "导航", "risk": "none"},
+    {"name": "标题 #话题", "id": "title", "role": "标题", "risk": "none"},
+    {"name": "分享话题标签", "id": "mcr", "label_re": "^分享话题标签$", "role": "分享", "risk": "send"},
+    {"name": "话题封面", "id": "al6", "role": "展示", "risk": "none"},
+    {"name": "作品数", "id": "ahn", "role": "文本", "risk": "none", "note": "形如「95.4M 作品」"},
+    {"name": "添加到收藏", "id": "p1n", "text": "添加到收藏", "role": "收藏", "risk": "send", "note": "收藏话题"},
+    {"name": "话题描述", "id": "p3y", "role": "文本", "risk": "none", "note": "官方话题介绍文案"},
+    {"name": "视频流", "id": "qk6", "role": "列表", "risk": "none", "note": "ViewPager，竖向刷该话题下的视频（与首页同构）"},
+    {"name": "加入此话题标签", "id": "n28", "text": "加入此话题标签", "role": "发布", "risk": "send", "note": "★截流/发布入口：点后进入投稿并自动带上该话题"}
+  ],
+  "navigation": [
+    {"action": "上下滑视频流", "to": "hashtag", "verified": false, "note": "同页内切换视频"},
+    {"action": "点击「加入此话题标签」", "to": "create", "verified": false, "note": "★进入发布流程，未执行"},
+    {"action": "BACK", "to": "search_result", "verified": true}
+  ],
+  "uncovered": [
+    "话题视频流内的视频页结构（应与 feed 同构，未逐一验证）",
+    "「添加到收藏」后的状态",
+    "话题页的作品/热门切换（若存在）"
+  ],
+  "notes": "★截流价值：话题页是「按兴趣圈人」的入口，同一话题下的视频作者/评论者都是潜在目标。结构比预想的简单：头部话题卡 + 描述 + 竖向视频流。"
+}

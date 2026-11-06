@@ -1,0 +1,34 @@
+{
+  "key": "message_list",
+  "name": "消息分类列表页（回复与@ / 收到喜欢 / 新增粉丝）",
+  "package": "tv.danmaku.bili",
+  "activity": "kntr.common.compose.launcher.VertexActivity",
+  "entry": "消息中心 → 顶部三个入口（回复与@ / 收到喜欢 / 新增粉丝）",
+  "captured_at": "2026-10-31T20:48:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "render_tech": "Jetpack Compose",
+  "account_state_at_capture": "三个分类当前均为空态",
+  "identity": [
+    {"name": "标题", "text_re": "^(回复与@|收到喜欢|新增粉丝)$", "note": "顶部居中"},
+    {"name": "空态图", "label_re": "error"},
+    {"name": "空态文案", "text": "这里还什么都没有呢~"}
+  ],
+  "targets": [
+    {"name": "返回", "role": "导航", "risk": "none", "note": "左上 View 95x95，无 id 无 label"},
+    {"name": "右上操作", "role": "菜单", "risk": "none", "note": "View 91x95，无 id 无 label；推测是「全部已读」或「设置」"},
+    {"name": "标题", "text_re": "^(回复与@|收到喜欢|新增粉丝)$", "role": "文本", "risk": "none"},
+    {"name": "空态图", "label_re": "error", "role": "空态", "risk": "none"},
+    {"name": "空态文案", "text": "这里还什么都没有呢~", "role": "空态", "risk": "none"}
+  ],
+  "empty_state": {
+    "screenshot_note": "无内容时只显示一张 error 插图 + 「这里还什么都没有呢~」",
+    "automation_hint": "判断这三个页有没有数据，看是否存在这段空态文案即可；出现即视为空。"
+  },
+  "navigation": [],
+  "uncovered": [
+    "有内容时的列表项结构（当前账号三个分类全空，无法采集）",
+    "右上角操作按钮的具体功能"
+  ],
+  "notes": "三个入口共用同一套列表模板（Compose），标题不同、内容源不同。本账号注册以来没有评论/点赞/粉丝互动，所以只能采到空态。有数据时的条目结构属**已知入口、内容未知**，需要账号产生互动后才能补。"
+}

@@ -1,0 +1,121 @@
+﻿# FishFleet 主配置
+
+# ============================================================
+# LLM 配置（可多套，按任务路由）
+# ============================================================
+# 使用 DSH 的 opencode-go 通道（自带 key，可复用额度）
+llm:
+  # 主力：决策 + 内容生成（DeepSeek V4.1 Flash，100万上下文，支持图片）
+  default:
+    provider: openai
+    base_url: https://opencode.ai/zen/go/v1
+    api_key: ${OPENCODE_GO_API_KEY}
+    model: deepseek-v4.1-flash
+    temperature: 0.8
+    max_tokens: 8192
+
+  # 视觉：界面理解 + 视频审核
+  vision:
+    provider: openai
+    base_url: https://opencode.ai/zen/go/v1
+    api_key: ${OPENCODE_GO_API_KEY}
+    model: deepseek-v4.1-flash
+    temperature: 0.3
+    max_tokens: 4096
+
+  # 廉价：简单分类（用同一个模型但温度低）
+  cheap:
+    provider: openai
+    base_url: https://opencode.ai/zen/go/v1
+    api_key: ${OPENCODE_GO_API_KEY}
+    model: deepseek-v4-flash
+    temperature: 0.2
+    max_tokens: 2048
+
+  # 备用模型（需要时切换）
+  qwen:
+    provider: openai
+    base_url: https://opencode.ai/zen/go/v1
+    api_key: ${OPENCODE_GO_API_KEY}
+    model: qwen3.8-flash
+    temperature: 0.7
+    max_tokens: 4096
+
+  glm:
+    provider: openai
+    base_url: https://opencode.ai/zen/go/v1
+    api_key: ${OPENCODE_GO_API_KEY}
+    model: glm-5.3
+    temperature: 0.7
+    max_tokens: 4096
+
+routing:
+  decision: default
+  content_gen: default
+  vision: vision
+  classify: cheap
+
+# ============================================================
+# 设备配置
+# ============================================================
+devices:
+  connection: usb            # usb | wifi | otg | auto
+  adb_path: ""          # 空 = 自动探测（bin\adb.exe → runtime → PATH）
+  health_check_interval: 60  # 秒
+  max_concurrency: 8         # 同时操作的设备数
+  auto_reconnect: true
+
+# ============================================================
+# 视频生成（MCP 接入，预留）
+# ============================================================
+video_generation:
+  enabled: true               # 已接入本地 stdio MCP（trae-maker / seedance）；真正生成仍需在界面确认
+  mcp:
+    transport: stdio         # http | stdio
+    command: 'C:\Users\Administrator\.dsh\dsh-runtimes\dsh-primary-runtime\dependencies\node\bin\node.exe'
+    args:
+      - 'C:\Users\Administrator\Documents\deepseek-harness\default-workspace\huicheng-auto\vendor\trae-maker-MCP\skills\aiwork-seedance\mcp\server.mjs'
+    server: ""               # stdio 不用
+    tool: "seedance_generate"
+    timeout: 900
+  prompt_template: |
+    生成一段 {topic} 的短视频。
+    风格：{style}
+    时长：{duration} 秒
+    画面描述：{scene}
+  defaults:
+    style: "写实，治愈系"
+    duration: 15
+    resolution: "1080x1920"
+
+# ============================================================
+# 风控
+# ============================================================
+guard:
+  enabled: true
+  work_hours: [8, 23]        # 只在 8:00-23:00 操作
+  rate_limit:
+    publish_per_device: 3    # 每天每台
+    dm_per_device: 20
+    comment_per_device: 50
+    like_per_device: 200
+  humanize:
+    min_delay: 0.5
+    max_delay: 3.0
+    random_order: true
+
+# ============================================================
+# 审批
+# ============================================================
+approval:
+  publish: false             # 发布前是否需要人工审批
+  dm: true                   # 私信前需要审批
+  comment: false
+
+# ============================================================
+# 存储
+# ============================================================
+storage:
+  db_path: "data/fishfleet.db"
+  media_dir: "data/media"
+  log_dir: "data/logs"

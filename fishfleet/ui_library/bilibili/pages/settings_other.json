@@ -1,0 +1,30 @@
+{
+  "key": "settings_other",
+  "name": "设置 · 其他设置（播放相关）",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.app.preferences.BiliPreferencesActivity",
+  "entry": "我的 → 设置 → 播放设置 → 其他设置",
+  "captured_at": "2026-10-31T20:48:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "标题", "text": "其他设置"},
+    {"name": "返回", "label_re": "转到上一层级"}
+  ],
+  "targets": [
+    {"name": "返回", "label_re": "转到上一层级", "role": "导航", "risk": "none"},
+    {"name": "全屏播放面板展示同时在看人数", "text": "全屏播放面板展示同时在看人数", "role": "开关", "risk": "none", "state_hint": "Switch checked=true"},
+    {"name": "启用重力感应旋屏", "text": "启用重力感应旋屏", "role": "开关", "risk": "none", "state_hint": "Switch checked=true；summary=「可通过重力感应切换半屏/全屏播放器」", "note": "★横屏的第二个可能原因"},
+    {"name": "音量均衡", "text": "音量均衡", "role": "开关", "risk": "none", "state_hint": "Switch checked=true"},
+    {"name": "标准模式", "text": "标准模式", "role": "单选", "risk": "none", "state_hint": "RadioButton(id=android:id/checkbox) checked=true；summary=「自动平衡不同视频间的音量大小」", "note": "音量均衡的子选项"},
+    {"name": "高动态模式", "text": "高动态模式", "role": "单选", "risk": "none", "state_hint": "RadioButton 未选中；summary=「保留更多声音细节，但音量更小」"},
+    {"name": "护眼模式", "text": "护眼模式", "role": "开关", "risk": "none", "state_hint": "Switch 未选中"},
+    {"name": "色觉辅助", "text": "色觉辅助", "role": "开关", "risk": "none", "state_hint": "Switch 未选中"},
+    {"name": "启用https播放", "text": "启用https播放", "role": "开关", "risk": "none", "state_hint": "Switch 未选中；summary=「启用更安全」"}
+  ],
+  "navigation": [],
+  "uncovered": [
+    "各开关的实际效果（未改动）"
+  ],
+  "notes": "【重要】「启用重力感应旋屏」当前为开启，意思是设备一倾斜就可能把播放器切成全屏。这解释了为什么同一条「点卡片」路径有时竖屏有时横屏——很可能是点击瞬间设备姿态触发。自动化前建议：先 `get_orientation`，横了就 `set_orientation portrait`，不要当成失败。本页同时出现 Switch（开关）和 RadioButton（音量均衡的二选一，id=android:id/checkbox），是设置页里唯一带单选组的二级页。"
+}

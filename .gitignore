@@ -1,0 +1,151 @@
+# ============================================================
+#  汇城群控AI版 · Git 忽略清单（脱敏发布用）
+#  2026-11-06：只发布核心代码，不含任何用户数据/密钥/构建产物
+# ============================================================
+
+# ---------- 运行时数据（绝对不能提交）----------
+data/
+logs/
+shots/
+backups/
+watched/
+tasks/
+publish/
+lead_results/
+execution_history/
+publish_history/
+publish_logs/
+ui_db/
+ui_catalog/
+ui_record/
+fb_dumps/
+facebook_dumps/
+capture_review/
+workspace_assets/
+
+# ---------- 敏感配置（含 API Key / 手机串号）----------
+data/llm.json
+llm.json
+mapping.json
+installed_serials.txt
+wifi_devices.csv
+.device_locks/
+*_serials*.txt
+*_devices*.csv
+
+# ---------- 构建产物 ----------
+dist/
+build/_work/
+build/_wb/
+build/_wt/
+build/**/__pycache__/
+*.spec.bak
+*.pyd
+*.pdb
+
+# ---------- 二进制资源（体积大，不入库）----------
+bootstrap/resources/
+build/assets/*.ico.bak
+apk/
+*.apk
+
+# ---------- 第三方/依赖 ----------
+vendor/
+node_modules/
+*.zip
+
+# ---------- 测试与报告（含大量手机串号）----------
+reports/
+tests/
+test_*.py
+test_*.js
+*_dom.js
+diagnose_*.py
+probe_*.py
+verify_*.py
+_patch_*.py
+_patch_*.js
+_rendergrid_new.js
+_drag_block.txt
+
+# ---------- 根目录的一次性调试脚本 ----------
+adbctl.py
+batch_shot.py
+batch_unlock.py
+check_installed.py
+collect_aigc.py
+collect_comments.py
+core.py
+demo_scroll*.py
+diagnose_miss.py
+dm_bili.py
+enter_publish.py
+extract_frames.py
+fill_douyin.py
+fleet.py
+fix_net.py
+goto_*.py
+locator.py
+make_grid.py
+ocr_win.py
+poc_feed_collect.py
+probe_*.py
+publish.py
+publish_douyin.py
+push_to_pool.py
+quick_matrix.py
+run_dm_task.py
+send_to_douyin.py
+test_single.py
+time_check.py
+type_comment.py
+u2_*.py
+uninstall_pkg.py
+verify_relocate.py
+watch_*.py
+_*.py
+_prewarm.py
+_probe_*.py
+
+# ---------- Python / IDE ----------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---------- 编辑器 / 系统 ----------
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- 临时文件 ----------
+*.tmp
+*.temp
+~$*
+诊断结果.txt
+启动失败.txt
+selfcheck.txt
+
+# ---------- 构建工具产物 ----------
+汇城AI构建工具.exe
+
+# ---------- pip temp / bad dirs ----------
+tmp*/
+"*
+
+# ---------- UI 截图（含设备串号，不入库）----------
+screenshots/
+**/screenshots/
+*.md.bak

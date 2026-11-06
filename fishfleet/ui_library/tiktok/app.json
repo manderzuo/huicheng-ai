@@ -1,0 +1,23 @@
+{
+  "package": "com.zhiliaoapp.musically",
+  "app_name": "TikTok",
+  "variant": "international（国际版，非抖音）",
+  "version_name": "35.8.1",
+  "version_code": 2023508010,
+  "min_sdk": 21,
+  "target_sdk": 33,
+  "first_install_time": "2025-08-12 17:34:24",
+  "last_update_time": "2025-08-12 17:34:24",
+  "activity_main": "com.ss.android.ugc.aweme.splash.SplashActivity",
+  "package_candidates_checked": {
+    "com.zhiliaoapp.musically": "命中（本机实际安装）",
+    "com.ss.android.ugc.trill": "本机未安装"
+  },
+  "notes": [
+    "控件 id 为混淆后的短名（如 i5n / q2c / ca8），同一次 dump 内可能重复：例如 d63 同时用于「点赞」与「分享」按钮",
+    "因此 YouTube/TikTok 式 id 不能作为唯一锚点，必须 id + label 正则 + 在页面中的结构位置共同判断",
+    "id 前缀统一为 com.zhiliaoapp.musically:id/",
+    "部分文本控件用 TuxTextLayoutView（如作品描述 desc），与普通 TextView 不同",
+    "Compose/Tux 混合渲染，层级深（首页层级约 190 个节点），dump 一次约 3-6 秒"
+  ]
+}

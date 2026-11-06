@@ -1,0 +1,58 @@
+{
+  "key": "video_detail_portrait",
+  "name": "视频详情页（竖屏态 · 简介 tab）",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.ship.theseus.detail.UnitedBizDetailsActivity",
+  "entry": "DeepLink：adb shell am start -a android.intent.action.VIEW -d 'bilibili://video/<BV号>'（推荐；直接点卡片会进横屏全屏）",
+  "captured_at": "2026-10-31T20:11:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "详情根容器", "id": "fl_root_container", "note": "竖屏时高度 1676（0,149 起）"},
+    {"name": "简介/评论 tab 条", "id": "tabs", "note": "tab_title 文本「简介」「评论」"},
+    {"name": "弹幕输入入口", "id": "danmaku_input_parent", "note": "ComposeView，文字「点我发弹幕」"}
+  ],
+  "targets": [
+    {"name": "视频区", "id": "video_area", "role": "播放器", "risk": "none", "note": "竖屏时 1080x608"},
+    {"name": "简介 tab", "id": "tab_title", "text": "简介", "role": "导航", "risk": "none", "state_hint": "selected"},
+    {"name": "评论 tab", "id": "tab_title", "text": "评论", "role": "导航", "risk": "none", "note": "右侧 tab_sub_title 是评论数，如「564」"},
+    {"name": "发弹幕入口", "id": "danmaku_input_parent", "label_re": "发送弹幕", "role": "输入", "risk": "send"},
+    {"name": "弹幕开关", "label_re": "关闭弹幕", "role": "设置", "risk": "none", "state_hint": "checked 属性表示弹幕开着"},
+    {"name": "UP 头像", "id": "avatar", "label_re": "UP主头像", "role": "导航", "risk": "none"},
+    {"name": "UP 主整行", "id": "author_layout", "label_re": "up主.*点击进入空间页", "role": "导航", "risk": "none", "note": "label 自带 UP名/粉丝数/视频数，一次读全"},
+    {"name": "UP 名", "id": "author_name", "role": "文本", "risk": "none"},
+    {"name": "粉丝数", "id": "fans", "role": "文本", "risk": "none"},
+    {"name": "投稿数", "id": "arc_count", "role": "文本", "risk": "none", "note": "形如「11视频」"},
+    {"name": "IP 属地", "id": "arc_location", "role": "文本", "risk": "none", "note": "常常为空节点"},
+    {"name": "关注按钮", "id": "follow", "label_re": "关注up主", "role": "状态变更", "risk": "send"},
+    {"name": "标题行", "id": "title", "role": "文本", "risk": "none", "note": "外层 ViewGroup label 带「，展开」；点击展开完整标题"},
+    {"name": "播放量", "id": "views", "label_re": "播放", "role": "文本", "risk": "none"},
+    {"name": "弹幕数", "id": "danmakus", "label_re": "条弹幕", "role": "文本", "risk": "none"},
+    {"name": "发布时间", "id": "time", "role": "文本", "risk": "none", "note": "精确到分钟"},
+    {"name": "正在看人数", "id": "online", "role": "文本", "risk": "none"},
+    {"name": "内容标注", "id": "neutrality_label", "role": "状态", "risk": "none", "note": "如「含AI生成内容」；无标注时节点不存在"},
+    {"name": "点赞", "id": "frame_like", "label_re": "点赞，\\d+个点赞", "role": "互动", "risk": "send", "note": "Button；label 直接带总数；数字在 like_num(TextSwitcher)"},
+    {"name": "不喜欢/点踩", "id": "frame_dislike", "label_re": "不喜欢", "role": "互动", "risk": "send"},
+    {"name": "投币", "id": "frame_coin", "label_re": "投币，\\d+个投币", "role": "互动", "risk": "send", "note": "消耗硬币；coin_progress 表示已投币进度"},
+    {"name": "收藏", "id": "frame_fav", "label_re": "收藏，\\d+个收藏", "role": "互动", "risk": "send", "note": "favorite_progress 存在=已收藏"},
+    {"name": "分享", "id": "frame_share", "label_re": "分享，\\d+个分享", "role": "互动", "risk": "send"},
+    {"name": "标签/话题按钮", "id": "title", "role": "导航", "risk": "none", "note": "横向列表，Button：如「发现《永远的奥特曼》」「9.9 迪迦奥特曼」「updream视频」"},
+    {"name": "相关推荐-番剧卡", "id": "cover", "role": "列表项", "risk": "none", "note": "badge=番剧，recommand=榜单名，infos=番剧名，plays/follows=数据"},
+    {"name": "相关推荐-直播卡", "id": "live_badge_title", "role": "列表项", "risk": "none", "note": "live_lottie_layout + author + info_views"},
+    {"name": "相关推荐-广告卡", "id": "ad_tint_frame", "role": "广告", "risk": "none", "note": "label 带「轻点两下查看详情」；自动化应跳过"},
+    {"name": "卡片更多操作", "id": "more", "label_re": "更多操作", "role": "菜单", "risk": "none"}
+  ],
+  "navigation": [
+    {"action": "点击 评论 tab", "to": "video_detail_comments", "verified": true},
+    {"action": "点击 UP 主整行", "to": "up_profile", "verified": false},
+    {"action": "点击 标签按钮", "to": "搜索/话题页", "verified": false},
+    {"action": "点击 投币/收藏/分享", "to": "对应弹层", "verified": false, "risk": "send"}
+  ],
+  "uncovered": [
+    "评论区（长视频详情页版本，与竖屏 Story 的 BottomSheet 不同）",
+    "投币面板、收藏面板、分享面板",
+    "标题展开后的全文",
+    "相关推荐的「换一换」/更多"
+  ],
+  "notes": "【关键】直接点视频卡片会进横屏全屏并被浮层挡住；用 DeepLink（bilibili://video/BV号）能稳定进竖屏详情页。所有互动按钮的 label 都自带总数（「点赞，15092个点赞」），可以一次读出「是否已操作 + 总数」，比读子节点更可靠。"
+}

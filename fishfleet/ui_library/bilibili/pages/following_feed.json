@@ -1,0 +1,44 @@
+{
+  "key": "following_feed",
+  "name": "关注 · 动态流",
+  "package": "tv.danmaku.bili",
+  "activity": "tv.danmaku.bili.MainActivityV2",
+  "entry": "底部导航「关注」",
+  "captured_at": "2026-10-31T19:57:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "顶部标题", "id": "title", "text": "关注", "note": "位于 fo_app_bar"},
+    {"name": "动态列表", "id": "dy_list"}
+  ],
+  "targets": [
+    {"name": "发布动态", "id": "fo_publish_menu", "label_re": "发布动态", "role": "发布", "risk": "send", "note": "会进入发布动态流程，需确认"},
+    {"name": "动态分类 tab", "id": "dy_tv_title", "text_re": "^(全部|视频)$", "role": "导航", "risk": "none", "state_hint": "selected"},
+    {"name": "动态列表", "id": "dy_list", "role": "列表", "risk": "none"},
+    {"name": "动态卡片头", "id": "dy_following_card_header", "role": "容器", "risk": "none", "note": "含头像 dy_avatar、作者名 card_user_name、时间 dy_text_time（形如「3天前 · 投稿了视频」）"},
+    {"name": "卡片更多菜单", "id": "dy_card_more", "role": "菜单", "risk": "none"},
+    {"name": "视频动态-封面", "id": "dy_video_cover", "role": "可点击", "risk": "none", "note": "点击进入播放页（横向卡片）"},
+    {"name": "视频动态-角标", "id": "dy_video_badge", "role": "展示", "risk": "none", "note": "ComposeView，内容不可读，只能靠截图"},
+    {"name": "视频动态-时长", "id": "dy_video_duration", "role": "文本", "risk": "none"},
+    {"name": "视频动态-播放量", "id": "dy_view_count", "role": "文本", "risk": "none", "note": "未加载时显示「-播放」"},
+    {"name": "视频动态-弹幕数", "id": "dy_danmu_count", "role": "文本", "risk": "none", "note": "未加载时显示「-弹幕」"},
+    {"name": "视频动态-标题", "id": "dy_video_title", "role": "文本", "risk": "none"},
+    {"name": "转发", "id": "dy_card_repost", "role": "互动", "risk": "send", "note": "对外发布动作，需确认"},
+    {"name": "评论", "id": "dy_card_comment", "role": "互动", "risk": "send", "note": "打开评论输入，发送前需确认"},
+    {"name": "点赞", "id": "dy_card_like", "role": "互动", "risk": "send", "state_hint": "点赞后图标/文案变化，未实测"},
+    {"name": "展开相关动态", "id": "dy_more_wrapper", "role": "展开", "risk": "none", "note": "文案形如「展开7条相关动态」，id=dy_more_text"},
+    {"name": "图文动态正文", "id": "dy_opus_paragraph_desc_layout", "role": "文本", "risk": "none"}
+  ],
+  "navigation": [
+    {"action": "点击视频封面", "to": "video_detail", "verified": false},
+    {"action": "点击作者名/头像", "to": "up_profile", "verified": false},
+    {"action": "点击评论", "to": "comment_panel", "verified": false}
+  ],
+  "uncovered": [
+    "动态卡片「更多」菜单项（不感兴趣/举报等）",
+    "图文/转发类动态的完整布局",
+    "dy_video_badge 的内容（Compose 自绘）",
+    "发布动态流程"
+  ],
+  "notes": "动态流同样个性化；未登录或关注数为 0 时这里会变成推荐关注页，结构会变。"
+}

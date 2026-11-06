@@ -1,0 +1,42 @@
+{
+  "device_key": "honor_LGE-AN00_w380_1122x2442",
+  "serial": "SERIAL0001",
+  "screen": {
+    "serial": "SERIAL0001",
+    "width": 1122,
+    "height": 2442,
+    "dpi": 477,
+    "status_bar": 63,
+    "nav_bar": 160,
+    "source": "wm",
+    "size_override": true,
+    "density_override": false,
+    "content_h": 2219,
+    "px_per_dp": 2.9813,
+    "dp_w": 376.4,
+    "dp_h": 819.1,
+    "content_dp_h": 744.3,
+    "status_dp": 21.1,
+    "nav_dp": 53.7,
+    "scale": 1.0389,
+    "dpi_scale": 1.1357,
+    "dp_family": "w380"
+  },
+  "baseline": {
+    "width": 1080,
+    "height": 1920,
+    "dpi": 420,
+    "status_bar": 63,
+    "nav_bar": 126,
+    "dp_w": 411.4,
+    "dp_h": 731.4
+  },
+  "dp_offsets": {
+    "douyin.home.search": [
+      27.5,
+      54.0
+    ]
+  },
+  "last_foreground": "com.ss.android.ugc.aweme",
+  "updated_at": 1793782449.625978
+}

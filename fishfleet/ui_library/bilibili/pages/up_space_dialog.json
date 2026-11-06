@@ -1,0 +1,36 @@
+{
+  "key": "up_space_dialog",
+  "name": "UP 主空间弹层（播放页内）",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.video.story.StoryVideoActivity",
+  "entry": "竖屏播放页 → 点击 UP 主头像",
+  "captured_at": "2026-10-31T20:08:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "弹层容器", "id": "design_bottom_sheet"},
+    {"name": "UP 信息区", "id": "space_info_content"},
+    {"name": "UP 投稿网格", "id": "space_list"}
+  ],
+  "targets": [
+    {"name": "UP 头像", "id": "avatar_layout", "role": "导航", "risk": "none"},
+    {"name": "UP 名", "id": "author_name", "role": "文本", "risk": "none"},
+    {"name": "关注按钮", "id": "follow", "role": "状态变更", "risk": "send", "note": "View 类型，label 可能为「关注」"},
+    {"name": "UP 数据行", "id": "title", "role": "文本", "risk": "none", "note": "形如「256粉丝   11投稿   3万获赞」"},
+    {"name": "进入空间", "id": "space_dialog_goto", "text": "进入空间", "role": "导航", "risk": "none", "note": "跳转完整个人主页"},
+    {"name": "投稿项", "role": "列表项", "risk": "none", "note": "2 列：cover + views + pubdate + duration + title + playing_icon(正在播放标记)"},
+    {"name": "投稿-播放量", "id": "views", "role": "文本", "risk": "none"},
+    {"name": "投稿-日期", "id": "pubdate", "role": "文本", "risk": "none", "note": "相对时间（昨天 11:11 / 10月23日）"},
+    {"name": "投稿-时长", "id": "duration", "role": "文本", "risk": "none"},
+    {"name": "投稿-标题", "id": "title", "role": "文本", "risk": "none", "note": "当前播放项带 selected 且前面有空格缩进"}
+  ],
+  "navigation": [
+    {"action": "点击 进入空间", "to": "up_profile", "verified": true},
+    {"action": "点击任一投稿", "to": "video_story（切换视频）", "verified": false}
+  ],
+  "uncovered": [
+    "关注按钮点击后的确认（对外状态变更，未执行）",
+    "下拉查看更多投稿"
+  ],
+  "notes": "这个弹层只是「预览卡」，不是完整主页；两者控件体系不同，不要混用。"
+}

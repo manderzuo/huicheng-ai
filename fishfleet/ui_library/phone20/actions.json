@@ -1,0 +1,533 @@
+{
+  "library": "phone20",
+  "version": 1,
+  "generated_at": "2026-11-01T17:02+08:00",
+  "serial": "SERIAL0001",
+  "executor": "adb -s SERIAL0001 shell <cmd>",
+  "verified_levels": {
+    "help-only": "只确认了命令存在/参数格式（打印过 usage），未实际改状态",
+    "read-verified": "已实际执行查询类命令并拿到本机返回值",
+    "executed": "已实际执行并回读过状态（改状态的验证）",
+    "unverified": "未验证，仅按 Android 12 通用语义登记"
+  },
+  "risk_levels": {
+    "none": "只读或无副作用（查询/截图/展开面板）",
+    "low": "可逆的开关，影响有限（亮度/旋转/勿扰）",
+    "medium": "会断开某些能力或影响正在跑的任务（Wi-Fi/蓝牙开关、深色模式）",
+    "high": "可能中断群控连接或需人工恢复（飞行模式、锁屏、休眠）",
+    "danger": "不可逆或会清数据（卸载、恢复出厂、重启）"
+  },
+  "actions": [
+    {
+      "key": "wifi_on",
+      "name": "打开 Wi-Fi",
+      "group": "network",
+      "risk": "medium",
+      "verified": "help-only",
+      "cmd": "svc wifi enable",
+      "probe": "settings get global wifi_on   # 1=开 0=关",
+      "ui": {"page": "settings_connectivity", "switch_id": "com.android.settings:id/switch_widget", "xy": [960, 443], "qs_tile_label": "WiFi,開啟。,Starlink"},
+      "note": "USB adb 不受影响；如果该机改用 WiFi adb 连（192.168.31.93:5555），关 Wi-Fi 会断连。"
+    },
+    {
+      "key": "wifi_off",
+      "name": "关闭 Wi-Fi",
+      "group": "network",
+      "risk": "medium",
+      "verified": "help-only",
+      "cmd": "svc wifi disable",
+      "probe": "settings get global wifi_on",
+      "ui": {"page": "settings_connectivity", "switch_id": "com.android.settings:id/switch_widget", "xy": [960, 443]},
+      "note": "断网后 App 推送/登录态可能受影响；确认当前 adb 走 USB 再执行。"
+    },
+    {
+      "key": "wifi_connect",
+      "name": "连接到指定 Wi-Fi",
+      "group": "network",
+      "risk": "medium",
+      "verified": "unverified",
+      "cmd": "cmd wifi connect-network \"<SSID>\" open|wpa2 \"<password>\"",
+      "probe": "cmd wifi list-networks",
+      "ui": {"page": "settings_connectivity", "list_id": "com.android.settings:id/twlist", "item_id": "com.android.settings:id/title"},
+      "note": "Android 12 支持 cmd wifi connect-network；本机可用 SSID 观测到 407_5G / TP-LINK_37BD / Chinanet-2.4G-D8E0 / Starlink（已连）。"
+    },
+    {
+      "key": "bluetooth_on",
+      "name": "打开蓝牙",
+      "group": "network",
+      "risk": "low",
+      "verified": "help-only",
+      "cmd": "svc bluetooth enable",
+      "probe": "settings get global bluetooth_on   # 1=开 0=关",
+      "ui": {"page": "settings_bluetooth", "switch_id": "com.android.settings:id/switch_widget", "xy": [960, 443], "qs_tile_label": "藍牙,關閉。,按鍵"},
+      "note": "本机当前 bluetooth_on=0。"
+    },
+    {
+      "key": "bluetooth_off",
+      "name": "关闭蓝牙",
+      "group": "network",
+      "risk": "low",
+      "verified": "help-only",
+      "cmd": "svc bluetooth disable",
+      "probe": "settings get global bluetooth_on",
+      "ui": {"page": "settings_bluetooth", "switch_id": "com.android.settings:id/switch_widget", "xy": [960, 443]}
+    },
+    {
+      "key": "airplane_on",
+      "name": "开飞行模式",
+      "group": "network",
+      "risk": "high",
+      "verified": "read-verified",
+      "cmd": "cmd connectivity airplane-mode enable",
+      "probe": "cmd connectivity airplane-mode   # 输出 enabled / disabled",
+      "ui": {"page": "settings_airplane", "qs_tile_label": "飛航模式,關閉。,按鍵", "qs_xy": [168, 1378]},
+      "note": "会同时关 Wi-Fi 与蜂窝。本机无 SIM，主要影响 Wi-Fi。"
+    },
+    {
+      "key": "airplane_off",
+      "name": "关飞行模式",
+      "group": "network",
+      "risk": "medium",
+      "verified": "read-verified",
+      "cmd": "cmd connectivity airplane-mode disable",
+      "probe": "cmd connectivity airplane-mode",
+      "ui": {"page": "settings_airplane", "qs_tile_label": "飛航模式,關閉。,按鍵"}
+    },
+    {
+      "key": "mobile_data_on",
+      "name": "开移动数据",
+      "group": "network",
+      "risk": "medium",
+      "verified": "unverified",
+      "cmd": "svc data enable",
+      "probe": "settings get global mobile_data",
+      "ui": {"qs_tile_label": "行動數據,關閉。,按鍵", "qs_xy": [660, 1378]},
+      "note": "本机无 SIM 卡，开了也没用。"
+    },
+    {
+      "key": "mobile_data_off",
+      "name": "关移动数据",
+      "group": "network",
+      "risk": "low",
+      "verified": "unverified",
+      "cmd": "svc data disable",
+      "probe": "settings get global mobile_data"
+    },
+    {
+      "key": "autorotate_on",
+      "name": "打开自动旋转",
+      "group": "display",
+      "risk": "low",
+      "verified": "read-verified",
+      "cmd": "settings put system accelerometer_rotation 1",
+      "probe": "settings get system accelerometer_rotation   # 1=开 0=锁",
+      "ui": {"page": "qs_panel_p1", "qs_tile_label": "自動旋轉,設為直向,關閉。,按鍵", "qs_xy": [622, 1378]},
+      "note": "本机当前 accelerometer_rotation=0（锁定）。"
+    },
+    {
+      "key": "autorotate_off",
+      "name": "关闭自动旋转（锁定方向）",
+      "group": "display",
+      "risk": "low",
+      "verified": "read-verified",
+      "cmd": "settings put system accelerometer_rotation 0",
+      "probe": "settings get system accelerometer_rotation",
+      "ui": {"page": "qs_panel_p1", "qs_tile_label": "自動旋轉,設為直向,關閉。,按鍵"},
+      "note": "关闭后屏幕固定在上次 user_rotation 的方向，做批量截图/脚本建议同时锁竖屏。"
+    },
+    {
+      "key": "lock_portrait",
+      "name": "强制竖屏",
+      "group": "display",
+      "risk": "low",
+      "verified": "unverified",
+      "cmd": "settings put system accelerometer_rotation 0; settings put system user_rotation 0",
+      "probe": "settings get system user_rotation   # 0=竖 1=横 2=反竖 3=反横",
+      "note": "群控刷视频/发内容前的标准动作，避免横屏干扰。"
+    },
+    {
+      "key": "lock_landscape",
+      "name": "强制横屏",
+      "group": "display",
+      "risk": "low",
+      "verified": "unverified",
+      "cmd": "settings put system accelerometer_rotation 0; settings put system user_rotation 1",
+      "probe": "settings get system user_rotation"
+    },
+    {
+      "key": "auto_time_zone_on",
+      "name": "打开自动时区",
+      "group": "time",
+      "risk": "low",
+      "verified": "read-verified",
+      "cmd": "settings put global auto_time_zone 1",
+      "probe": "settings get global auto_time_zone   # 1=开 0=关",
+      "ui": {"page": "settings_date_time", "switch_id": "android:id/switch_widget", "xy": [960, 699], "parent": "自動時區 行的 widget_frame"},
+      "note": "本机 auto_time_zone=1。★ 该页 4 个 Switch 共用 id=android:id/switch_widget，点 UI 必须用坐标或父行文本定位。"
+    },
+    {
+      "key": "auto_time_zone_off",
+      "name": "关闭自动时区",
+      "group": "time",
+      "risk": "low",
+      "verified": "read-verified",
+      "cmd": "settings put global auto_time_zone 0",
+      "probe": "settings get global auto_time_zone",
+      "ui": {"page": "settings_date_time", "switch_id": "android:id/switch_widget", "xy": [960, 699]}
+    },
+    {
+      "key": "auto_time_on",
+      "name": "打开自动时间",
+      "group": "time",
+      "risk": "low",
+      "verified": "read-verified",
+      "cmd": "settings put global auto_time 1",
+      "probe": "settings get global auto_time",
+      "ui": {"page": "settings_date_time", "switch_id": "android:id/switch_widget", "xy": [960, 455]}
+    },
+    {
+      "key": "auto_time_off",
+      "name": "关闭自动时间",
+      "group": "time",
+      "risk": "low",
+      "verified": "read-verified",
+      "cmd": "settings put global auto_time 0",
+      "probe": "settings get global auto_time",
+      "note": "关闭后才能用 date 命令改时间；改完记得开回来。"
+    },
+    {
+      "key": "set_time",
+      "name": "设置系统时间",
+      "group": "time",
+      "risk": "medium",
+      "verified": "unverified",
+      "cmd": "date 110117002026.00; settings put global auto_time 0",
+      "probe": "date",
+      "note": "需先 auto_time=0，且非 root 时 date 写权限可能被拒（本机 ro.secure=1）。"
+    },
+    {
+      "key": "auto_timezone_by_location_on",
+      "name": "依定位判定时区",
+      "group": "time",
+      "risk": "low",
+      "verified": "read-verified",
+      "cmd": "settings put secure auto_time_zone_by_location 1",
+      "probe": "settings get secure auto_time_zone_by_location",
+      "ui": {"page": "settings_date_time", "row_text": "依定位設定時區", "xy": [960, 918]},
+      "note": "本页第三个 Switch，属于三星特有项。"
+    },
+    {
+      "key": "hour24_on",
+      "name": "24 小时制",
+      "group": "time",
+      "risk": "low",
+      "verified": "read-verified",
+      "cmd": "settings put system time_12_24 24",
+      "probe": "settings get system time_12_24",
+      "ui": {"page": "settings_date_time", "row_text": "使用 24 小時制", "xy": [960, 1190]}
+    },
+    {
+      "key": "brightness_set",
+      "name": "设置亮度",
+      "group": "display",
+      "risk": "low",
+      "verified": "read-verified",
+      "cmd": "settings put system screen_brightness <0-255>",
+      "probe": "settings get system screen_brightness   # 本机当前 105",
+      "ui": {"page": "settings_display", "seek_id": "com.android.settings:id/brightness_seekbar", "xy": [582, 1243], "qs_seek_id": "com.android.systemui:id/slider", "qs_xy": [540, 1718]},
+      "note": "0~255。UI 的 SeekBar value 是 0-10000 归一化值，adb 这边用 0-255，两者不同，别混用。"
+    },
+    {
+      "key": "auto_brightness_on",
+      "name": "开自动亮度",
+      "group": "display",
+      "risk": "low",
+      "verified": "read-verified",
+      "cmd": "settings put system screen_brightness_mode 1",
+      "probe": "settings get system screen_brightness_mode   # 1=自动 0=手动",
+      "ui": {"page": "settings_display", "row_text": "最佳化亮度", "switch_id": "android:id/switch_widget", "xy": [960, 1418]}
+    },
+    {
+      "key": "auto_brightness_off",
+      "name": "关自动亮度（手动）",
+      "group": "display",
+      "risk": "low",
+      "verified": "read-verified",
+      "cmd": "settings put system screen_brightness_mode 0",
+      "probe": "settings get system screen_brightness_mode",
+      "note": "群控要固定亮度时必须关它，否则系统会自动改。"
+    },
+    {
+      "key": "dark_mode_on",
+      "name": "深色模式开",
+      "group": "display",
+      "risk": "low",
+      "verified": "read-verified",
+      "cmd": "cmd uimode night yes",
+      "probe": "cmd uimode night   # Night mode: yes/no",
+      "ui": {"page": "settings_display", "radio": "深色", "xy": [810, 790], "qs_tile_label": "深色模式,關閉。,按鍵"}
+    },
+    {
+      "key": "dark_mode_off",
+      "name": "深色模式关",
+      "group": "display",
+      "risk": "low",
+      "verified": "read-verified",
+      "cmd": "cmd uimode night no",
+      "probe": "cmd uimode night",
+      "ui": {"page": "settings_display", "radio": "淺色", "xy": [275, 790]}
+    },
+    {
+      "key": "eye_comfort_on",
+      "name": "护眼模式开",
+      "group": "display",
+      "risk": "low",
+      "verified": "read-verified",
+      "cmd": "settings put secure blue_light_filter 1",
+      "probe": "settings get secure blue_light_filter",
+      "ui": {"page": "settings_display", "row_text": "護眼模式", "xy": [960, 1617], "qs_tile_label": "護眼模式,關閉。,按鍵"}
+    },
+    {
+      "key": "eye_comfort_off",
+      "name": "护眼模式关",
+      "group": "display",
+      "risk": "low",
+      "verified": "read-verified",
+      "cmd": "settings put secure blue_light_filter 0",
+      "probe": "settings get secure blue_light_filter"
+    },
+    {
+      "key": "screen_timeout_set",
+      "name": "设置息屏时间",
+      "group": "display",
+      "risk": "low",
+      "verified": "read-verified",
+      "cmd": "settings put system screen_off_timeout <毫秒>",
+      "probe": "settings get system screen_off_timeout   # 本机 2147483647 即永不",
+      "note": "常用值：30000 / 60000 / 2147483647。群控刷机后建议设永不 + stayon。"
+    },
+    {
+      "key": "stay_awake_on",
+      "name": "充电时保持唤醒",
+      "group": "power",
+      "risk": "low",
+      "verified": "help-only",
+      "cmd": "svc power stayon true",
+      "probe": "settings get global stay_on_while_plugged_in   # 本机 7",
+      "ui": {"page": "settings_developer", "row_text": "螢幕不休眠", "xy": [960, 1320]}
+    },
+    {
+      "key": "stay_awake_off",
+      "name": "取消保持唤醒",
+      "group": "power",
+      "risk": "low",
+      "verified": "help-only",
+      "cmd": "svc power stayon false",
+      "probe": "settings get global stay_on_while_plugged_in"
+    },
+    {
+      "key": "volume_set",
+      "name": "设置媒体音量",
+      "group": "sound",
+      "risk": "low",
+      "verified": "read-verified",
+      "cmd": "cmd media_session volume --stream 3 --set <0-15>",
+      "probe": "cmd media_session volume --stream 3 --get   # 本机 4/15",
+      "note": "stream: 3=媒体 2=铃声 5=通知 1=系统。不可用 media 命令（本机没有该二进制）。"
+    },
+    {
+      "key": "dnd_on",
+      "name": "勿扰模式开",
+      "group": "sound",
+      "risk": "low",
+      "verified": "unverified",
+      "cmd": "cmd notification set_dnd on",
+      "probe": "dumpsys notification | grep -i zen_mode",
+      "ui": {"page": "qs_panel_p3", "qs_tile_label": "請勿打擾,關閉。,按鍵", "qs_xy": [660, 1072]},
+      "note": "★ 本机 cmd notification 不支持 get_dnd 子命令，查询改用 dumpsys。"
+    },
+    {
+      "key": "dnd_off",
+      "name": "勿扰模式关",
+      "group": "sound",
+      "risk": "low",
+      "verified": "unverified",
+      "cmd": "cmd notification set_dnd off",
+      "probe": "dumpsys notification | grep -i zen_mode"
+    },
+    {
+      "key": "location_on",
+      "name": "开定位总开关",
+      "group": "privacy",
+      "risk": "low",
+      "verified": "help-only",
+      "cmd": "cmd location set-location-enabled true",
+      "probe": "cmd location is-location-enabled",
+      "ui": {"page": "settings_location", "switch_id": "android:id/switch_widget"},
+      "note": "本机 QS 里「位置」tile 显示开启。"
+    },
+    {
+      "key": "location_off",
+      "name": "关定位总开关",
+      "group": "privacy",
+      "risk": "low",
+      "verified": "help-only",
+      "cmd": "cmd location set-location-enabled false",
+      "probe": "cmd location is-location-enabled"
+    },
+    {
+      "key": "qs_open",
+      "name": "展开通知栏",
+      "group": "ui",
+      "risk": "none",
+      "verified": "help-only",
+      "cmd": "cmd statusbar expand-notifications",
+      "probe": "-",
+      "note": "等价于从状态栏下拉一次。"
+    },
+    {
+      "key": "qs_expand",
+      "name": "展开快捷设置全屏",
+      "group": "ui",
+      "risk": "none",
+      "verified": "help-only",
+      "cmd": "cmd statusbar expand-settings",
+      "probe": "-"
+    },
+    {
+      "key": "qs_collapse",
+      "name": "收起通知栏",
+      "group": "ui",
+      "risk": "none",
+      "verified": "help-only",
+      "cmd": "cmd statusbar collapse",
+      "probe": "-"
+    },
+    {
+      "key": "home",
+      "name": "回桌面",
+      "group": "ui",
+      "risk": "none",
+      "verified": "help-only",
+      "cmd": "input keyevent 3",
+      "probe": "-"
+    },
+    {
+      "key": "back",
+      "name": "返回",
+      "group": "ui",
+      "risk": "none",
+      "verified": "help-only",
+      "cmd": "input keyevent 4",
+      "probe": "-"
+    },
+    {
+      "key": "recents",
+      "name": "打开最近任务",
+      "group": "ui",
+      "risk": "none",
+      "verified": "help-only",
+      "cmd": "input keyevent 187",
+      "probe": "dumpsys activity activities | grep mResumedActivity",
+      "alternate": "点击 237,1857"
+    },
+    {
+      "key": "screenshot",
+      "name": "截图到电脑",
+      "group": "ui",
+      "risk": "none",
+      "verified": "help-only",
+      "cmd": "exec-out screencap -p > out.png",
+      "probe": "-"
+    },
+    {
+      "key": "wake_screen",
+      "name": "点亮屏幕",
+      "group": "power",
+      "risk": "none",
+      "verified": "unverified",
+      "cmd": "input keyevent 224",
+      "probe": "dumpsys power | grep -i 'mWakefulness='"
+    },
+    {
+      "key": "sleep_screen",
+      "name": "熄屏",
+      "group": "power",
+      "risk": "medium",
+      "verified": "unverified",
+      "cmd": "input keyevent 223",
+      "probe": "dumpsys power | grep -i 'mWakefulness='",
+      "note": "熄屏后 adb 仍在线，但部分 App 会暂停。"
+    },
+    {
+      "key": "unlock_swipe",
+      "name": "无密码滑屏解锁",
+      "group": "power",
+      "risk": "medium",
+      "verified": "unverified",
+      "cmd": "input keyevent 224; input swipe 540 1500 540 500 200",
+      "probe": "dumpsys window | grep mDreamingLockscreen",
+      "ui": {"page": "lock_screen", "note": "锁屏界面未在本次采集中抓取（采集时设备已解锁）"}
+    },
+    {
+      "key": "kill_app",
+      "name": "强制停止应用",
+      "group": "app",
+      "risk": "medium",
+      "verified": "unverified",
+      "cmd": "am force-stop <package>",
+      "probe": "pidof <package>",
+      "ui": {"page": "settings_apps", "list_id": "com.android.settings:id/apps_list"}
+    },
+    {
+      "key": "clear_app_data",
+      "name": "清除应用数据",
+      "group": "app",
+      "risk": "high",
+      "verified": "unverified",
+      "cmd": "pm clear <package>",
+      "probe": "dumpsys package <package> | grep dataDir",
+      "note": "会清掉登录态，需重新登录，慎用。"
+    },
+    {
+      "key": "disable_app",
+      "name": "停用应用",
+      "group": "app",
+      "risk": "medium",
+      "verified": "unverified",
+      "cmd": "pm disable-user --user 0 <package>",
+      "probe": "pm list packages -d",
+      "ui": {"page": "settings_apps", "list_id": "com.android.settings:id/apps_list"}
+    },
+    {
+      "key": "enable_app",
+      "name": "启用应用",
+      "group": "app",
+      "risk": "low",
+      "verified": "unverified",
+      "cmd": "pm enable <package>",
+      "probe": "pm list packages -e"
+    },
+    {
+      "key": "uninstall_app",
+      "name": "卸载应用（当前用户）",
+      "group": "app",
+      "risk": "danger",
+      "verified": "unverified",
+      "cmd": "pm uninstall --user 0 <package>",
+      "probe": "pm list packages | grep <package>",
+      "note": "只影响 user 0，系统分区包可恢复。不可自动批量执行，需人工确认。"
+    },
+    {
+      "key": "reboot",
+      "name": "重启手机",
+      "group": "power",
+      "risk": "danger",
+      "verified": "help-only",
+      "cmd": "svc power reboot",
+      "probe": "getprop sys.boot_completed",
+      "ui": {"page": "power_menu", "row_text": "重新啟動", "xy": [540, 856]},
+      "note": "重启会断开 adb 数十秒；群控批量重启要错峰。"
+    }
+  ]
+}

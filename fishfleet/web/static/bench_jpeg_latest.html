@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="zh-CN" data-ready="false">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JPEG Worker latest-only 独立验证</title>
+<style>
+body{margin:20px;background:#101722;color:#e5edf7;font:14px system-ui,sans-serif}h1{font-size:22px}p{line-height:1.6}.warning{color:#ffd383}button{padding:7px 16px}#grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.card{background:#1d2939;padding:10px;border-radius:8px;min-width:0}.card h2{font-size:13px;overflow-wrap:anywhere}.card canvas{display:block;width:100%;height:280px;object-fit:contain;background:#080c12}.stats{white-space:pre-wrap;font:12px/1.6 monospace}#error-log{max-height:200px;overflow:auto;white-space:pre-wrap;color:#ffaaaa}
+</style>
+</head>
+<body>
+<h1>JPEG Worker latest-only · 独立验证</h1>
+<p>先读取 /api/devices，按返回顺序选择前 20 台 online；仅订阅 480 / 25fps / 900000bps，不发送 force。每台最多一个在途解码和一个 latest pending；覆盖旧 pending，不建立历史帧队列。</p>
+<p>固定最多 4 个 Worker：这是区别于汇城按 hardwareConcurrency 选池的保守试验，不依据硬件线程数扩池。ImageDecoder(image/jpeg) 优先，失败回退 createImageBitmap；绘制后关闭输出对象。</p>
+<p class="warning">注意：server reader 在运行中发现 max_size、max_fps、bit_rate 任一变化仍会 stop/start 共享流；不发 force 不代表不会重启。参数相同且正在运行才不会重启。打开本页即订阅；关闭/停止仅断开本页，不停止服务器共享流。</p>
+<p id="status" role="status">初始化…</p>
+<button id="stop" type="button">停止本页</button>
+<div id="grid"></div>
+<h2>错误记录（最近 100 条；累计计数不截断）</h2>
+<pre id="error-log"></pre>
+<script>
+'use strict';
+(() => {
+  const MAX_WORKERS = 4;
+  const devices = new Map();
+  const workers = [];
+  const errorLog = [];
+  const textDecoder = new TextDecoder('utf-8', { fatal: true });
+  const statusNode = document.getElementById('status');
+  let ws = null;
+  let stopped = false;
+  let ready = false;
+  let phase = 'initializing';
+  let cursor = 0;
+  let sequence = 0;
+  let globalErrors = 0;
+  let tickAt = performance.now();
+
+  function recordError(serial, stage, error) {
+    const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+    const device = devices.get(serial);
+    if (device) device.errors++;
+    else globalErrors++;
+    const entry = { at: new Date().toISOString(), serial: serial || null, stage, message };
+    errorLog.push(entry);
+    if (errorLog.length > 100) errorLog.shift();
+    console.error('[jpeg-bench]', entry);
+    document.getElementById('error-log').textContent = errorLog.map(e => `${e.at} ${e.serial || '(page)'} [${e.stage}] ${e.message}`).join('\n');
+  }
+
+  function setPhase(value) {
+    phase = value;
+    statusNode.textContent = `${phase} | ${devices.size} 台 | Worker ${workers.filter(w => !w.dead).length}/${MAX_WORKERS} | ready=${ready} | 页面错误=${globalErrors}`;
+    document.documentElement.dataset.ready = String(ready);
+  }
+
+  function detail() {
+    const now = performance.now();
+    return Array.from(devices.values(), d => ({
+      serial: d.serial, received: d.received, decoded: d.decoded, rendered: d.rendered,
+      lastRxIdle: d.lastRx === null ? null : now - d.lastRx,
+      lastRenderIdle: d.lastRender === null ? null : now - d.lastRender,
+      overwritten: d.overwritten, errors: d.errors,
+      receiveFps: d.receiveFps, renderFps: d.renderFps,
+      inFlight: d.inFlight, pending: d.pending !== null, backend: d.backend,
+    }));
+  }
+
+  function stop() {
+    if (stopped) return;
+    stopped = true;
+    ready = false;
+    if (ws) ws.close();
+    for (const slot of workers) { slot.dead = true; slot.worker.terminate(); }
+    for (const d of devices.values()) { d.pending = null; d.inFlight = false; }
+    clearInterval(uiTimer);
+    setPhase('stopped');
+  }
+
+  window.__jpegBench = {
+    detail, stop,
+    get ready() { return ready; },
+    get state() { return phase; },
+    get errors() { return errorLog.map(e => ({ ...e })); },
+    get globalErrors() { return globalErrors; },
+    get workerCount() { return workers.filter(w => !w.dead).length; },
+    idleUnit: 'milliseconds; null means never received/rendered',
+  };
+  document.getElementById('stop').addEventListener('click', stop);
+  window.addEventListener('pagehide', stop);
+
+  function pump() {
+    if (stopped) return;
+    const list = Array.from(devices.values());
+    if (!list.length) return;
+    for (const slot of workers) {
+      if (slot.dead || slot.job) continue;
+      let selected = null;
+      for (let n = 0; n < list.length; n++) {
+        const index = (cursor + n) % list.length;
+        const d = list[index];
+        if (!d.inFlight && d.pending) {
+          selected = d;
+          cursor = (index + 1) % list.length;
+          break;
+        }
+      }
+      if (!selected) break;
+      const packet = selected.pending;
+      selected.pending = null;
+      selected.inFlight = true;
+      slot.job = { id: ++sequence, serial: selected.serial };
+      try {
+        slot.worker.postMessage({ ...slot.job, ...packet }, [packet.buffer]);
+      } catch (error) {
+        recordError(selected.serial, 'worker-dispatch', error);
+        selected.inFlight = false;
+        slot.job = null;
+      }
+    }
+  }
+
+  function workerFailed(slot, stage, message) {
+    if (slot.dead || stopped) return;
+    recordError(slot.job ? slot.job.serial : null, stage, message);
+    if (slot.job) devices.get(slot.job.serial).inFlight = false;
+    slot.job = null;
+    slot.dead = true;
+    slot.worker.terminate();
+    // Do not retry a broken worker indefinitely. Remaining workers drain latest slots.
+    if (workers.every(w => w.dead)) {
+      stop();
+      setPhase('failed: no usable workers');
+    } else {
+      setPhase(phase);
+      pump();
+    }
+  }
+
+  function addWorker() {
+    const worker = new Worker(new URL('bench_jpeg_worker.js', location.href));
+    const slot = { worker, job: null, dead: false };
+    workers.push(slot);
+    worker.onmessage = ({ data }) => {
+      const frame = data.frame;
+      if (stopped || slot.dead) { if (frame) frame.close(); return; }
+      const job = slot.job;
+      if (!job || data.id !== job.id || data.serial !== job.serial) {
+        if (frame) frame.close();
+        workerFailed(slot, 'worker-protocol', 'Unexpected job identity');
+        return;
+      }
+      const d = devices.get(job.serial);
+      try {
+        for (const warning of data.warnings || []) recordError(d.serial, warning.stage, warning.message);
+        if (data.type === 'decoded' && frame) {
+          d.decoded++;
+          d.backend = data.backend;
+          const width = frame.displayWidth || frame.width;
+          const height = frame.displayHeight || frame.height;
+          if (d.canvas.width !== width || d.canvas.height !== height) {
+            d.canvas.width = width;
+            d.canvas.height = height;
+          }
+          d.context.drawImage(frame, 0, 0);
+          d.rendered++;
+          d.lastRender = performance.now();
+        } else {
+          recordError(d.serial, 'decode', data.message || 'Worker returned no decoded frame');
+        }
+      } catch (error) {
+        recordError(d.serial, 'render', error);
+      } finally {
+        if (frame) frame.close();
+        d.inFlight = false;
+        slot.job = null;
+        pump();
+      }
+    };
+    worker.onerror = event => { event.preventDefault(); workerFailed(slot, 'worker-error', event.message || 'Worker script/runtime error'); };
+    worker.onmessageerror = () => workerFailed(slot, 'worker-messageerror', 'Failed to deserialize worker result');
+  }
+
+  function receive(buffer) {
+    let serial = null;
+    try {
+      if (!(buffer instanceof ArrayBuffer)) throw new Error('Expected binary ArrayBuffer');
+      if (buffer.byteLength < 6) throw new Error('Truncated frame header');
+      const view = new DataView(buffer);
+      const serialLength = view.getUint8(0);
+      const offset = 1 + serialLength + 4;
+      if (!serialLength || offset > buffer.byteLength) throw new Error('Invalid serial length');
+      serial = textDecoder.decode(new Uint8Array(buffer, 1, serialLength));
+      const length = view.getUint32(1 + serialLength, false);
+      if (!length || offset + length !== buffer.byteLength) throw new Error('JPEG length mismatch');
+      const d = devices.get(serial);
+      if (!d) throw new Error('Frame for an unsubscribed serial');
+      d.received++;
+      d.lastRx = performance.now();
+      if (d.pending) d.overwritten++;
+      // Transfer the original WS packet, not a copy; worker decodes its JPEG view.
+      d.pending = { buffer, offset, length };
+      pump();
+    } catch (error) {
+      recordError(serial, 'ws-frame', error);
+    }
+  }
+
+  const uiTimer = setInterval(() => {
+    const now = performance.now();
+    const seconds = (now - tickAt) / 1000;
+    tickAt = now;
+    for (const d of devices.values()) {
+      d.receiveFps = (d.received - d.previousReceived) / seconds;
+      d.renderFps = (d.rendered - d.previousRendered) / seconds;
+      d.previousReceived = d.received;
+      d.previousRendered = d.rendered;
+      d.stats.textContent = `接收 ${d.receiveFps.toFixed(1)} fps / 绘制 ${d.renderFps.toFixed(1)} fps\nreceived ${d.received} decoded ${d.decoded} rendered ${d.rendered}\noverwritten ${d.overwritten} errors ${d.errors}\n${d.backend || 'waiting'} · inFlight ${d.inFlight} pending ${!!d.pending}`;
+    }
+    setPhase(phase);
+  }, 1000);
+
+  async function init() {
+    try {
+      // No polling, screenshot requests, device control, reconnect, or force subscription.
+      const response = await fetch('/api/devices', { cache: 'no-store' });
+      if (!response.ok) throw new Error(`/api/devices HTTP ${response.status}`);
+      const data = await response.json();
+      if (!Array.isArray(data.devices)) throw new Error('Invalid /api/devices payload');
+      if (stopped) return;
+      for (const device of data.devices.filter(d => d.state === 'online').slice(0, 20)) {
+        if (typeof device.serial !== 'string' || !device.serial || devices.has(device.serial)) throw new Error('Invalid/duplicate serial');
+        const card = document.createElement('section');
+        card.className = 'card';
+        const title = document.createElement('h2');
+        title.textContent = device.serial;
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d', { alpha: false });
+        if (!context) throw new Error('Canvas 2D unavailable');
+        const stats = document.createElement('div');
+        stats.className = 'stats';
+        stats.textContent = '等待帧…';
+        card.append(title, canvas, stats);
+        document.getElementById('grid').append(card);
+        devices.set(device.serial, {
+          serial: device.serial, canvas, context, stats, pending: null, inFlight: false,
+          received: 0, decoded: 0, rendered: 0, overwritten: 0, errors: 0,
+          lastRx: null, lastRender: null, receiveFps: 0, renderFps: 0,
+          previousReceived: 0, previousRendered: 0, backend: null,
+        });
+      }
+      if (!devices.size) { setPhase('no online devices'); return; }
+      for (let i = 0; i < Math.min(MAX_WORKERS, devices.size); i++) addWorker();
+      ws = new WebSocket(`${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/ws/all-frames`);
+      ws.binaryType = 'arraybuffer';
+      ws.onopen = () => {
+        if (stopped) { ws.close(); return; }
+        try {
+          ws.send(JSON.stringify({ type: 'sub', serials: Array.from(devices.keys()), max_size: 480, max_fps: 25, bit_rate: 900000 }));
+          ready = true; // Means GET completed and subscription sent, not server acknowledgement.
+          setPhase('subscribed');
+        } catch (error) { recordError(null, 'ws-subscribe', error); stop(); }
+      };
+      ws.onmessage = event => { if (!stopped) receive(event.data); };
+      ws.onerror = () => recordError(null, 'ws-error', 'WebSocket error (browser exposes no additional details)');
+      ws.onclose = event => { ready = false; if (!stopped) setPhase(`disconnected: ${event.code} ${event.reason || ''} (no automatic reconnect)`); };
+      setPhase('connecting');
+    } catch (error) {
+      recordError(null, 'init', error);
+      stop();
+      setPhase('failed');
+    }
+  }
+  init();
+})();
+</script>
+</body>
+</html>

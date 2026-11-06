@@ -1,0 +1,43 @@
+{
+  "key": "movie_channel",
+  "name": "影视频道页（电影 / 电视剧 / 纪录片 / 综艺）",
+  "package": "tv.danmaku.bili",
+  "activity": "kntr.common.compose.launcher.VertexActivity",
+  "entry": "首页 → 影视 → 点「电影」（其它 tab 同理）",
+  "captured_at": "2026-10-31T20:24:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "render_tech": "Jetpack Compose",
+  "identity": [
+    {"name": "频道 tab", "text_re": "^(电影|电视剧|纪录片|综艺)$", "note": "选中的那个字号更大"},
+    {"name": "返回", "label_re": "back"}
+  ],
+  "targets": [
+    {"name": "返回", "label_re": "back", "role": "导航", "risk": "none"},
+    {"name": "频道 tab", "text_re": "^(电影|电视剧|纪录片|综艺)$", "role": "导航", "risk": "none"},
+    {"name": "排行榜", "text": "排行榜", "role": "导航", "risk": "none"},
+    {"name": "找电影", "text": "找电影", "role": "导航", "risk": "none", "note": "文案随频道变化：电视剧频道可能是「找剧」"},
+    {"name": "即将上线", "text": "即将上线", "role": "导航", "risk": "none"},
+    {"name": "大成功", "text": "大成功", "role": "运营位", "risk": "none"},
+    {"name": "赢好礼", "text": "赢好礼", "role": "运营位", "risk": "none", "note": "活动位，可能跳外部"},
+    {"name": "宝藏片单", "text": "宝藏片单", "role": "导航", "risk": "none"},
+    {"name": "黄金厂牌", "text": "黄金厂牌", "role": "导航", "risk": "none"},
+    {"name": "影视卡封面", "label_re": "ogvImage", "role": "可点击", "risk": "none"},
+    {"name": "影视卡角标", "label_re": "ogvBadge", "role": "状态", "risk": "none", "note": "会员/独家/新 等，内容不可读"},
+    {"name": "评分", "text_re": "^\\d+(\\.\\d)?$", "role": "文本", "risk": "none", "note": "如「9.1」「7.3」；电影有评分，部分内容没有"},
+    {"name": "追剧数", "text_re": "追剧$", "role": "文本", "risk": "none", "note": "如「3636追剧」"},
+    {"name": "影视标题", "role": "文本", "risk": "none"},
+    {"name": "影视副标题", "role": "文本", "risk": "none", "note": "卖点短句，如「还有四个问题，对吧」"}
+  ],
+  "navigation": [
+    {"action": "点击频道 tab", "to": "同页切换频道", "verified": false},
+    {"action": "点击影视卡", "to": "bangumi_detail", "verified": false},
+    {"action": "点击 排行榜/找电影/即将上线", "to": "对应列表页", "verified": false}
+  ],
+  "uncovered": [
+    "电视剧/纪录片/综艺 三个频道（结构应同构，未逐个验证）",
+    "排行榜、找电影筛选、即将上线、片单",
+    "影视详情页（是否与 bangumi_detail 完全同构，未验证）"
+  ],
+  "notes": "影视频道页与番剧首页是不同页面：番剧首页在 VertexActivity 但用「正在热播/追番」，影视频道也用 VertexActivity 但顶部是「电影/电视剧/纪录片/综艺」四个 channel tab，卡片是 3 列大卡。识别时看顶部 tab 文本。"
+}

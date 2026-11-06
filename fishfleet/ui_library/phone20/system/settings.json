@@ -1,0 +1,141 @@
+{
+  "key": "settings",
+  "name": "系统设置（設定）— 一级页与关键子页",
+  "package": "com.android.settings",
+  "captured_at": "2026-11-01T16:56 ~ 17:00 +08:00",
+  "evidence_level": "navigation-verified",
+  "common": {
+    "title_id": "com.android.settings:id/collapsing_appbar_extended_title",
+    "back_id": "label=向上導覽 @73,275",
+    "search_button": "label=搜尋設定 @1011,264（一级页右上）",
+    "overflow": "com.android.settings:id/sesl_action_bar_overflow_button @1016,275",
+    "list": "com.android.settings:id/recycler_view",
+    "row_title_id": "android:id/title",
+    "row_summary_id": "android:id/summary",
+    "switch_id": "android:id/switch_widget（★ 开关页/子页通用，但同页多个 Switch 共用同一 id，必须用坐标或所在行文本区分）",
+    "switch_bar": {"id": "com.android.settings:id/switch_bar", "text_id": "com.android.settings:id/switch_text", "switch_id": "com.android.settings:id/switch_widget", "note": "页面顶部总开关条（Wi-Fi/蓝牙/开发者选项等），y≈359..527，开关中心 960,443"}
+  },
+  "settings_home": {
+    "key": "settings_home",
+    "activity": "com.android.settings/.Settings",
+    "entry": "adb shell am start -a android.settings.SETTINGS",
+    "items": [
+      {"text": "連接", "summary": "Wi-Fi • 藍牙 • 飛航模式", "xy": [540, 458]},
+      {"text": "音效與震動", "summary": "聲音模式 • 鈴聲", "xy": [540, 703]},
+      {"text": "通知", "summary": "狀態列 • 請勿打擾", "xy": [540, 895]},
+      {"text": "顯示螢幕", "summary": "螢幕亮度 • 護眼模式 • 導覽列", "xy": [540, 1140]},
+      {"text": "桌布與樣式", "summary": "桌布 • 調色盤", "xy": [540, 1332]},
+      {"text": "主題", "summary": "主題 • 桌布 • 圖示", "xy": [540, 1524]},
+      {"text": "主螢幕", "summary": "版面配置 • 應用程式圖示標記", "xy": [540, 1692]},
+      {"text": "鎖定螢幕", "summary": "螢幕鎖定類型 • Always On Display", "xy": [540, 855]},
+      {"text": "生物辨識與安全性", "summary": "臉部辨識 • 指紋", "xy": [540, 1100]},
+      {"text": "隱私設定", "summary": "權限使用 • 權限管理員", "xy": [540, 1292]},
+      {"text": "位置", "summary": "定位要求", "xy": [540, 1484]},
+      {"text": "安全與緊急狀況", "summary": "醫療資訊 • 無線緊急警報", "xy": [540, 1676]},
+      {"text": "帳號與備份", "summary": "管理帳號 • Smart Switch", "xy": [540, 895]},
+      {"text": "Google", "summary": "Google 服務", "xy": [540, 1088]},
+      {"text": "進階功能", "summary": "Android Auto • 實驗室 • Bixby Routines", "xy": [540, 1332]},
+      {"text": "數位健康與家長監護", "summary": "螢幕開啟時間 • 應用程式計時器 • 就寢模式", "xy": [540, 1577]},
+      {"text": "電池與裝置維護", "summary": "儲存位置 • 記憶體 • 裝置防護", "xy": [540, 777]},
+      {"text": "應用程式", "summary": "預設應用程式 • 應用程式設定", "xy": [540, 972]},
+      {"text": "一般管理", "summary": "語言與鍵盤 • 日期與時間", "xy": [540, 1216]},
+      {"text": "協助工具", "summary": "TalkBack • 單聲道 • 輔助快選", "xy": [540, 1408]},
+      {"text": "軟體更新", "summary": "下載並安裝", "xy": [540, 1648]},
+      {"text": "說明", "xy": [540, 1792], "note": "含「關於手機」入口"}
+    ],
+    "note": "22 项，需要滚动 3 屏才能看全；坐标是各自在滚动到位后的位置，直接用会很坑，建议用 text 定位或 am start 直达。"
+  },
+  "settings_wifi": {
+    "key": "settings_wifi",
+    "activity": "com.android.settings/.Settings$WifiSettingsActivity",
+    "entry": "adb shell am start -a android.settings.WIFI_SETTINGS",
+    "targets": [
+      {"name": "总开关", "id": "com.android.settings:id/switch_widget", "text": "開", "xy": [960, 443], "checked": true, "state_text_id": "com.android.settings:id/switch_text"},
+      {"name": "QR 扫描器", "label": "QR 掃描器", "xy": [900, 275]},
+      {"name": "更多选项", "label": "更多選項", "xy": [1016, 275]},
+      {"name": "当前网络分类", "id": "com.android.settings:id/connected_network_category", "text": "目前網路"},
+      {"name": "当前网络列表", "id": "com.android.settings:id/connected_list"},
+      {"name": "已连接 SSID", "id": "com.android.settings:id/title", "text": "Starlink", "summary": "已連線", "xy": [303, 749]},
+      {"name": "网络详情按钮", "id": "com.android.settings:id/wifi_details", "label": "設定", "xy": [954, 775]},
+      {"name": "可用网络分类", "id": "com.android.settings:id/available_network_category", "text": "可用網路"},
+      {"name": "可用网络列表", "id": "com.android.settings:id/twlist", "note": "子项 title_id=com.android.settings:id/title，逐条 {"}
+    ],
+    "observed_networks": ["Starlink（已连）", "407_5G", "DIRECT-1C-HP Laser 102w", "TP-LINK_37BD", "Chinanet-2.4G-D8E0", "TPJC303"],
+    "note": "点某个 SSID 会弹密码输入框；已保存的网络长按可「清除」/「忘记」。"
+  },
+  "settings_bluetooth": {
+    "key": "settings_bluetooth",
+    "activity": "com.android.settings/.Settings$BluetoothSettingsActivity",
+    "entry": "adb shell am start -a android.settings.BLUETOOTH_SETTINGS",
+    "targets": [
+      {"name": "总开关", "id": "com.android.settings:id/switch_widget", "text": "關", "xy": [960, 443], "checked": false},
+      {"name": "空态文案", "id": "com.android.settings:id/contact_us_view", "text": "開啟藍牙來連接附近裝置。"},
+      {"name": "更多选项", "label": "更多選項", "xy": [1016, 275]}
+    ],
+    "note": "开启后列表会出现已配对设备与附近设备；本机当前关闭。"
+  },
+  "settings_display": {
+    "key": "settings_display",
+    "activity": "com.android.settings/.Settings$DisplaySettingsActivity",
+    "entry": "adb shell am start -a android.settings.DISPLAY_SETTINGS",
+    "targets": [
+      {"name": "浅色主题单选", "id": "com.android.settings:id/radio_button", "row": "淺色", "xy": [275, 790], "checked": true},
+      {"name": "深色主题单选", "id": "com.android.settings:id/radio_button", "row": "深色", "xy": [805, 790], "checked": false},
+      {"name": "深色模式设定", "text": "深色模式設定", "xy": [540, 941]},
+      {"name": "亮度滑杆", "id": "com.android.settings:id/brightness_seekbar", "xy": [582, 1243], "note": "SeekBar 值域 0..10000，与 settings 里的 0..255 不同"},
+      {"name": "最佳化亮度（自动亮度）", "switch_id": "android:id/switch_widget", "row": "最佳化亮度", "xy": [960, 1418], "checked": true},
+      {"name": "护眼模式", "switch_id": "android:id/switch_widget", "row": "護眼模式", "xy": [980, 1617], "checked": false},
+      {"name": "背景效果", "row": "背景效果", "xy": [540, 1742]}
+    ],
+    "note": "★ 本页没有「自动旋转」开关；自动旋转只存在于快捷面板 + settings put system accelerometer_rotation。"
+  },
+  "settings_date_time": {
+    "key": "settings_date_time",
+    "activity": "com.android.settings/.Settings$DateTimeSettingsActivity",
+    "entry": "adb shell am start -a android.settings.DATE_SETTINGS",
+    "targets": [
+      {"name": "自动侦测时间", "row": "自動偵測日期與時間", "switch_id": "android:id/switch_widget", "xy": [960, 455], "checked": true},
+      {"name": "自动时区", "row": "自動時區", "switch_id": "android:id/switch_widget", "xy": [960, 699], "checked": true, "summary": "使用由行動網路提供的時區。"},
+      {"name": "依定位设定时区", "row": "依定位設定時區", "switch_id": "android:id/switch_widget", "xy": [960, 918], "checked": true},
+      {"name": "24小时制", "row": "使用 24 小時制", "switch_id": "android:id/switch_widget", "xy": [960, 1190], "checked": true, "summary": "13:00"},
+      {"name": "时区更新提示", "id": "com.android.settings:id/new_time_zone_desc", "text": "有新的時區定義可用。時區將於手機下次重新啟動時更新。"},
+      {"name": "立即重启按钮", "id": "com.android.settings:id/new_time_zone_btn", "text": "立即重新啟動", "xy": [540, 1585], "risk": "high"}
+    ],
+    "warning": "★★ 本页 4 个开关的 id 完全相同（android:id/switch_widget），坐标才是唯一可靠区分。"
+  },
+  "settings_apps": {
+    "key": "settings_apps",
+    "activity": "com.android.settings/.Settings$ManageApplicationsActivity",
+    "entry": "adb shell am start -a android.settings.APPLICATION_SETTINGS",
+    "targets": [
+      {"name": "搜索应用", "label": "搜尋應用程式", "id": "com.android.settings:id/search_apps", "xy": [900, 275]},
+      {"name": "选择预设应用", "id": "com.android.settings:id/default_app_settings", "text": "選擇預設應用程式", "xy": [540, 480]},
+      {"name": "三星应用程式设定", "id": "com.android.settings:id/samsung_app_settings", "text": "三星應用程式設定", "xy": [540, 733]},
+      {"name": "应用列表", "id": "com.android.settings:id/apps_list", "note": "子项：android:id/title=应用名，android:id/summary=占用大小；点击进入应用详情（卸载/强制停止/存储/权限/通知）"},
+      {"name": "排序依据", "label": "排序依據", "id": "com.android.settings:id/sort_by_button", "xy": [975, 938]}
+    ],
+    "observed": ["三星雲端 19.15 MB", "三星網際網路 506 MB", "小紅書 1.39 GB", "手繪動態攝影 8.15 MB", "日曆 ..."],
+    "note": "「您的應用程式」区默认按名称排序；应用详情页里才有「強制停止 / 儲存空間 / 權限 / 通知 / 解除安裝」。"
+  },
+  "settings_developer": {
+    "key": "settings_developer",
+    "activity": "com.android.settings/.Settings$DevelopmentSettingsDashboardActivity",
+    "entry": "adb shell am start -a android.settings.APPLICATION_DEVELOPMENT_SETTINGS",
+    "targets": [
+      {"name": "开发者选项总开关", "id": "com.android.settings:id/switch_widget", "xy": [960, 443], "checked": true},
+      {"name": "内存", "row": "記憶體", "summary": "已使用約 7.8 GB 之 3.9 GB RAM", "xy": [540, 697]},
+      {"name": "侦错报告", "row": "偵錯報告", "xy": [540, 872]},
+      {"name": "电脑备份密码", "row": "電腦備份密碼", "xy": [540, 1085]},
+      {"name": "萤幕不休眠", "row": "螢幕不休眠", "switch_id": "android:id/switch_widget", "xy": [960, 1320], "checked": true, "summary": "充電時螢幕不會進入休眠"},
+      {"name": "蓝牙 HCI 窥探记录", "row": "啟用藍牙 HCI 窺探記錄", "summary": "已停用", "xy": [540, 1506]},
+      {"name": "正在运行的服务", "row": "正在運作的服務", "xy": [540, 1687]}
+    ],
+    "note": "开发者选项已开启（说明之前有人调过）。往下还有动画缩放、USB 调试、后台进程限制等，本次只采首屏。"
+  },
+  "uncovered": [
+    "連接（二级聚合页）未单独采集 —— 直接用 am start 的 Wi-Fi/蓝牙子页替代",
+    "鎖定螢幕、生物辨識與安全性、隱私設定、位置、帳號與備份、電池與裝置維護、一般管理（語言/日期之外）、協助工具、軟體更新、關於手機 均未逐页展开",
+    "应用详情页（单应用：卸载/清数据/权限）未采集",
+    "开发者选项第二屏（动画缩放/USB 调试/后台进程限制）未采集"
+  ]
+}

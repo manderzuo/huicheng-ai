@@ -1,0 +1,15 @@
+{
+  "target_device_alias": "手机4",
+  "id": "192.168.31.248:5555",
+  "manufacturer_model": "SM-G973U1",
+  "product_name": "Galaxy S10",
+  "android_version": "12",
+  "sdk": 31,
+  "screen": {
+    "physical": "1080x1920",
+    "density": 420,
+    "override_density": 315
+  },
+  "input_method_note": "三星输入法；BACK 键在导航栏 723,1825 区域",
+  "adb_path": "C:\\Program Files (x86)\\huicheng_android\\tools\\adb.exe"
+}

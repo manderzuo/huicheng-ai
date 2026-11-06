@@ -1,0 +1,65 @@
+{
+  "key": "profile_me",
+  "name": "主页（我）",
+  "package": "com.zhiliaoapp.musically",
+  "activity": "com.ss.android.ugc.aweme.splash.SplashActivity（主 TabHost）",
+  "entry": "底部导航「主页」",
+  "captured_at": "2026-11-01T20:30:00+08:00",
+  "device": "SERIAL0001",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "底部「主页」tab 选中", "id": "i5p", "label_re": "^主页$", "state_hint": "selected"},
+    {"name": "昵称按钮", "id": "it3", "note": "顶部标题位置显示昵称"},
+    {"name": "@handle", "id": "kko", "text_re": "^@"}
+  ],
+  "account_snapshot": {
+    "nickname": "ngbf ling",
+    "handle": "@ngbf.ling",
+    "following": 0,
+    "followers": 0,
+    "likes": 0,
+    "bio": "未设置（显示「+ 添加个人简介」）"
+  },
+  "targets": [
+    {"name": "左上 返回/侧栏", "id": "iti", "role": "导航", "risk": "none", "note": "105x105 Button（ofc），无 label"},
+    {"name": "昵称", "id": "it3", "role": "标题", "risk": "none"},
+    {"name": "主页访问量", "id": "eim", "label_re": "^主页访问量$", "role": "数据", "risk": "none", "note": "★截流相关：查看谁访问过你的主页"},
+    {"name": "主页菜单", "label_re": "^主页菜单$", "role": "菜单", "risk": "none", "note": "无 id，右上 105x105；应含设置/隐私/分享等入口"},
+    {"name": "头像", "id": "am8", "label_re": "^图片头像$", "role": "展示", "risk": "none"},
+    {"name": "创建限时动态", "id": "am8", "label_re": "^创建限时动态$", "role": "导航", "risk": "send"},
+    {"name": "@handle", "id": "kko", "role": "文本", "risk": "none"},
+    {"name": "关注数", "id": "kjr", "role": "数据", "risk": "none", "note": "★注意：关注数与「赞」共用 id kjr，靠下方 label 区分"},
+    {"name": "关注 label", "id": "kjq", "text": "关注", "role": "文本", "risk": "none"},
+    {"name": "粉丝数", "id": "kh4", "role": "数据", "risk": "none"},
+    {"name": "粉丝 label", "id": "kh5", "text": "粉丝", "role": "文本", "risk": "none"},
+    {"name": "赞数", "id": "kjr", "role": "数据", "risk": "none"},
+    {"name": "赞 label", "id": "kjq", "text": "赞", "role": "文本", "risk": "none"},
+    {"name": "编辑主页", "id": "cth", "text": "编辑主页", "role": "设置", "risk": "send", "note": "改对外资料"},
+    {"name": "分享主页", "id": "cth", "text": "分享主页", "role": "分享", "risk": "send"},
+    {"name": "添加好友", "id": "ctc", "label_re": "^添加好友$", "role": "导航", "risk": "none"},
+    {"name": "添加个人简介", "id": "kgh", "text": "+ 添加个人简介", "role": "设置", "risk": "send"},
+    {"name": "tab 视频", "label_re": "^视频$", "role": "导航", "risk": "none", "state_hint": "selected", "note": "容器 ie3 + frr 图标 fo0"},
+    {"name": "tab 私密视频", "label_re": "^私密视频$", "role": "导航", "risk": "none"},
+    {"name": "tab 收藏", "label_re": "^收藏$", "role": "导航", "risk": "none"},
+    {"name": "tab 赞过的视频", "label_re": "^赞过的视频$", "role": "导航", "risk": "none"},
+    {"name": "作品网格", "id": "eaf", "role": "列表", "risk": "none", "note": "GridView，无作品时为空"},
+    {"name": "空态文案", "id": "mfu", "text": "分享一张回忆照", "role": "展示", "risk": "none"},
+    {"name": "空态上传按钮", "id": "pyt", "text": "上传", "role": "发布", "risk": "send"}
+  ],
+  "navigation": [
+    {"action": "点击「主页菜单」", "to": "settings", "verified": false},
+    {"action": "点击「主页访问量」", "to": "profile_visitors", "verified": false},
+    {"action": "点击「添加好友」", "to": "add_friends", "verified": false},
+    {"action": "点击「关注数」", "to": "following_list", "verified": false},
+    {"action": "点击「粉丝数」", "to": "fans_list", "verified": false},
+    {"action": "点击 tab「私密视频/收藏/赞过的视频」", "to": "profile_me", "verified": false}
+  ],
+  "uncovered": [
+    "主页菜单展开后的完整项（设置/隐私/创作者工具等）",
+    "主页访问量页",
+    "关注/粉丝列表页（数量为 0）",
+    "收藏/私密视频 tab 的真实列表",
+    "作品网格的卡片结构（本账号 0 作品）"
+  ],
+  "notes": "本账号是 0 关注 0 粉丝 0 作品的白号，主页大量区域是空态。★粉丝数/关注数/赞数三个数字的 id 有复用（kjr/kjq），必须结合下方 label 文本定位。"
+}

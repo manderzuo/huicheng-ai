@@ -1,0 +1,1678 @@
+/* AI 执行工作台。所有规则仅属于工作台或其专用弹窗。 */
+#rp-chat #stage.ai-live-stage { position:relative!important; left:auto!important; top:auto!important; max-width:100%; margin:0 auto; flex:none; z-index:1; box-shadow:none; }
+#rp-chat #stage.ai-live-stage .stage-drag-head { cursor:default; }
+#rp-chat .ai-live-stage-host { width:100%; min-width:0; display:flex; justify-content:center; align-items:flex-start; }
+#rp-chat .exec-observe.ai-live-open #exec-image,
+#rp-chat .exec-observe.ai-live-open #exec-observe-empty { display:none; }
+#rp-chat,
+.exec-dialog {
+  --exec-bg: #1a1d24;
+  --exec-surface: #23262e;
+  --exec-raised: #2b2f38;
+  --exec-line: #3b3f4e;
+  --exec-text: #e8eaed;
+  --exec-muted: #abb1c0;
+  --exec-purple: #6b5ce7;
+  --exec-purple-light: #b3aaff;
+  --exec-purple-bg: #2a2545;
+  --exec-danger: #ffaaaa;
+  box-sizing: border-box;
+  color: var(--exec-text);
+  color-scheme: dark;
+  font: 14px/1.6 "Microsoft YaHei", -apple-system, "Segoe UI", sans-serif;
+  overflow-wrap: anywhere;
+  user-select: text;
+  scrollbar-width: thin;
+  scrollbar-color: #57516c #1a1d24;
+}
+
+#rp-chat *,
+.exec-dialog * {
+  box-sizing: border-box;
+  min-width: 0;
+  scrollbar-width: thin;
+  scrollbar-color: #57516c #1a1d24;
+}
+
+#rp-chat {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--exec-bg);
+  isolation: isolate;
+}
+
+#rp-chat.exec-expanded {
+  position: fixed;
+  inset: 42px 12px 12px;
+  z-index: 150;
+  border: 1px solid #655a9b;
+  border-radius: 12px;
+  box-shadow: 0 20px 64px #0009;
+}
+
+#rp-chat.hidden,
+#rp-chat [hidden],
+.exec-dialog [hidden] {
+  display: none !important;
+}
+
+/* 统一控件：次要操作为默认，紫色主操作和红色危险操作单独强调。 */
+#rp-chat button,
+.exec-dialog button,
+#rp-chat input::file-selector-button,
+.exec-dialog input::file-selector-button {
+  min-height: 34px;
+  max-width: 100%;
+  margin: 0;
+  padding: 6px 12px;
+  border: 1px solid #505165;
+  border-radius: 7px;
+  background: var(--exec-raised);
+  color: var(--exec-text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  transition: background-color .15s, border-color .15s, box-shadow .15s;
+}
+
+#rp-chat button:hover:not(:disabled):not([aria-disabled="true"]),
+.exec-dialog button:hover:not(:disabled):not([aria-disabled="true"]),
+#rp-chat input::file-selector-button:hover,
+.exec-dialog input::file-selector-button:hover {
+  border-color: #9184d1;
+  background: #373344;
+}
+
+#rp-chat button:active:not(:disabled),
+.exec-dialog button:active:not(:disabled) {
+  background: #453c60;
+}
+
+#rp-chat :is(button, input, select, textarea, summary, a):focus-visible,
+.exec-dialog :is(button, input, select, textarea, summary, a):focus-visible {
+  outline: 2px solid #b3aaff;
+  outline-offset: 3px;
+}
+
+#rp-chat :is(button, input, select, textarea):disabled,
+.exec-dialog :is(button, input, select, textarea):disabled,
+#rp-chat [aria-disabled="true"],
+.exec-dialog [aria-disabled="true"] {
+  opacity: .48;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+#rp-chat :is(.exec-button-primary, #exec-start, #exec-new-session, #exec-approve),
+.exec-dialog :is(.exec-button-primary, .primary) {
+  border-color: #8a7ef0;
+  background: var(--exec-purple);
+  color: #fff;
+  font-weight: 600;
+}
+
+#rp-chat :is(.exec-button-primary, #exec-start, #exec-new-session, #exec-approve):hover:not(:disabled),
+.exec-dialog :is(.exec-button-primary, .primary):hover:not(:disabled) {
+  border-color: #b3aaff;
+  background: #7b6ced;
+}
+
+#rp-chat :is(.exec-button-danger, #exec-stop),
+.exec-dialog .exec-button-danger {
+  border-color: #a35f70;
+  background: #39262f;
+  color: var(--exec-danger);
+}
+
+#rp-chat :is(.exec-button-danger, #exec-stop):hover:not(:disabled),
+.exec-dialog .exec-button-danger:hover:not(:disabled) {
+  border-color: #f38a9b;
+  background: #51303d;
+}
+
+#rp-chat :is(input, select, textarea),
+.exec-dialog :is(input, select, textarea) {
+  width: 100%;
+  max-width: 100%;
+  min-height: 36px;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid #505466;
+  border-radius: 7px;
+  background: #15181f;
+  color: var(--exec-text);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  accent-color: var(--exec-purple);
+}
+
+#rp-chat :is(input, textarea)::placeholder,
+.exec-dialog :is(input, textarea)::placeholder {
+  color: #9299aa;
+  opacity: 1;
+}
+
+#rp-chat :is(input, select, textarea):focus,
+.exec-dialog :is(input, select, textarea):focus {
+  border-color: #9688f5;
+}
+
+#rp-chat textarea,
+.exec-dialog textarea {
+  display: block;
+  min-height: 84px;
+  max-height: 360px;
+  resize: vertical;
+}
+
+#rp-chat input[type="file"],
+.exec-dialog input[type="file"] {
+  padding: 6px;
+  font-size: 13px;
+}
+
+#rp-chat input::file-selector-button,
+.exec-dialog input::file-selector-button {
+  margin-right: 10px;
+}
+
+#rp-chat :is(input[type="checkbox"], input[type="radio"]),
+.exec-dialog :is(input[type="checkbox"], input[type="radio"]) {
+  width: 16px;
+  min-height: 16px;
+  flex: 0 0 16px;
+}
+
+/* 顶部控制区与手机选择区不会挤入正文滚动区域。 */
+#rp-chat .rp-chat-head {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--exec-line);
+  background: linear-gradient(110deg, #302947, #20232d 70%);
+}
+
+#rp-chat .rp-chat-head > strong {
+  font-size: 16px;
+  color: #e1dbff;
+}
+
+#rp-chat .rp-chat-head > div,
+#rp-chat .exec-phone-head,
+#rp-chat .exec-actions,
+#rp-chat .exec-assign-row,
+#rp-chat .exec-task-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+#rp-chat .exec-modes {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--exec-line);
+  background: #1d2029;
+}
+
+#rp-chat .exec-modes button {
+  min-width: 96px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--exec-muted);
+}
+
+#rp-chat .exec-modes :is(button.on, button[aria-pressed="true"]) {
+  border-color: #6e60aa;
+  background: var(--exec-purple-bg);
+  color: #ded7ff;
+  box-shadow: inset 0 -2px #9d8cf2;
+}
+
+#rp-chat .exec-phone-picker {
+  flex: 0 0 auto;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--exec-line);
+}
+
+#rp-chat .exec-phone-head {
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+#rp-chat .exec-phone-head button {
+  min-height: 30px;
+  padding: 4px 9px;
+}
+
+#rp-chat #exec-selection-count {
+  color: var(--exec-purple-light);
+}
+
+#rp-chat #exec-phone-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  max-height: 90px;
+  padding: 3px;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+#rp-chat .exec-phone-number {
+  flex: 0 0 auto;
+  min-width: 36px;
+  min-height: 34px;
+  padding: 5px 8px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+#rp-chat :is(.exec-phone-number.on, .exec-phone-number[aria-pressed="true"]) {
+  border-color: #b3aaff;
+  background: #6651ad;
+  color: #fff;
+  box-shadow: inset 0 0 0 1px #b3aaff;
+}
+
+#rp-chat .exec-context {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px 14px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--exec-line);
+  background: #20232c;
+}
+
+#rp-chat .exec-context label {
+  display: flex;
+  flex: 1 1 180px;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--exec-muted);
+}
+
+#rp-chat .exec-context select {
+  flex: 1 1 0;
+  width: 0;
+}
+
+/* 三列工作台：会话独立滚动，编辑独立滚动，观察画面不撑开列。 */
+#rp-chat .exec-conversation-layout {
+  display: grid;
+  grid-template-columns: clamp(156px, 15vw, 216px) minmax(0, 1fr);
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#rp-chat .exec-history {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  padding: 12px;
+  overflow: auto;
+  border-right: 1px solid var(--exec-line);
+  background: #161920;
+  overscroll-behavior: contain;
+}
+
+#rp-chat .exec-history > button {
+  flex: 0 0 auto;
+  width: 100%;
+}
+
+#rp-chat #exec-session-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#rp-chat .exec-session-row {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: #1d2029;
+}
+
+#rp-chat .exec-session-row.active {
+  border-color: #7765bc;
+  background: #302944;
+}
+
+#rp-chat .exec-session-row .exec-session-open {
+  flex: 1 1 0;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#rp-chat .exec-session-row .exec-session-del {
+  flex: 0 0 30px;
+  min-height: 34px;
+  padding: 4px;
+  border: 0;
+  background: transparent;
+  color: #b5a4bd;
+}
+
+#rp-chat .exec-session-row .exec-session-del:hover:not(:disabled) {
+  background: #4b2c39;
+  color: #ffb3bd;
+}
+
+#rp-chat .exec-conversation-main {
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#rp-chat .exec-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 34%);
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#rp-chat .exec-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  padding: 16px;
+  overflow: hidden;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+#rp-chat .exec-feed {
+  flex: 1 1 0;
+  min-height: 170px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 8px 12px 0;
+  scroll-padding-bottom: 12px;
+}
+#rp-chat .exec-feed > * { flex-shrink: 0; }
+
+#rp-chat .exec-editor > * {
+  flex-shrink: 0;
+}
+
+#rp-chat .exec-transcript {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#rp-chat :is(.exec-bubble, .chat-message) {
+  max-width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #3a3b4c;
+  border-radius: 10px;
+  background: var(--exec-surface);
+}
+
+#rp-chat :is(.exec-bubble.user, .chat-message.user) {
+  align-self: flex-end;
+  background: #332b4c;
+  border-color: #534570;
+}
+
+#rp-chat :is(.exec-bubble, .chat-message) strong {
+  color: #c5b9fa;
+  font-size: 13px;
+}
+
+#rp-chat pre,
+.exec-dialog pre {
+  max-width: 100%;
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+#rp-chat :is(.exec-bubble, .chat-message) pre {
+  margin-top: 7px;
+}
+
+#rp-chat :is(#exec-help, #exec-shot-info, .chat-note, .exec-material small) {
+  color: var(--exec-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+#rp-chat .exec-section-label {
+  display: block;
+  margin: 0 0 6px;
+  color: #c4b8f1;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+#rp-chat .exec-material {
+  padding: 12px;
+  border: 1px solid #454052;
+  border-radius: 9px;
+  background: #20222c;
+}
+
+#rp-chat .exec-material summary {
+  padding: 3px 0;
+  color: #d8cef8;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#rp-chat .exec-material[open] summary {
+  margin-bottom: 12px;
+}
+
+#rp-chat .exec-material > :not(summary) {
+  margin-top: 10px;
+}
+
+#rp-chat .exec-material :is(small, video) {
+  display: block;
+}
+
+#rp-chat #exec-preview {
+  width: 100%;
+  max-height: 220px;
+  border-radius: 7px;
+  background: #101218;
+}
+
+/* 图片素材预览：与视频预览同尺寸，避免布局跳动 */
+#rp-chat #exec-preview-image {
+  width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+  border-radius: 7px;
+  background: #101218;
+}
+
+#rp-chat #exec-video-settings {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--exec-line);
+  border-radius: 9px;
+}
+
+#rp-chat #exec-video-status {
+  grid-column: 1 / -1;
+  color: var(--exec-muted);
+  font-size: 13px;
+}
+
+#rp-chat :is(#exec-plan, #exec-progress, #exec-log) {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+#rp-chat :is(#exec-plan, #exec-progress):empty,
+#rp-chat .exec-transcript:empty {
+  display: none;
+}
+
+#rp-chat #exec-log {
+  display: block;
+  max-height: 240px;
+  overflow: auto;
+  padding: 10px;
+  border: 1px solid var(--exec-line);
+  border-radius: 6px;
+  background: #15181f;
+  color: var(--exec-text);
+}
+
+#rp-chat .exec-log-details summary { cursor: pointer; color: #d8cef8; }
+#rp-chat .exec-copy-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+#rp-chat .exec-copy-fields > div { display: flex; flex-direction: column; gap: 6px; }
+#rp-chat .exec-copy-fields textarea { flex: 1; min-height: 100px; }
+#rp-chat .exec-phone-picker .exec-context { padding: 4px 0; border: 0; background: transparent; }
+#rp-chat #exec-saved-shortcut label { display: flex; flex-direction: column; gap: 5px; }
+@media (max-width: 680px) { #rp-chat .exec-copy-fields { grid-template-columns: 1fr; } }
+
+#rp-chat #exec-progress {
+  padding: 9px 12px;
+  border: 1px solid #50436b;
+  border-radius: 8px;
+  background: #27233a;
+  color: #d3c6f9;
+}
+
+#rp-chat .exec-task-bar {
+  margin: 8px 0;
+}
+
+#rp-chat .exec-pending-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 10px 0;
+  padding: 12px;
+  border: 1px solid #917347;
+  border-radius: 9px;
+  background: #30291f;
+  color: #f0dcbb;
+}
+
+#rp-chat .exec-editor > .exec-feed { flex-shrink: 1; }
+#rp-chat .exec-compose {
+  position: relative;
+  bottom: auto;
+  z-index: 1;
+  margin-top: auto;
+  padding: 12px;
+  border: 1px solid #67558b;
+  border-radius: 10px;
+  background: #252331;
+  box-shadow: 0 -8px 20px #1a1d2466;
+}
+
+#rp-chat .exec-compose textarea {
+  min-height: 64px;
+  height: 76px;
+  max-height: 160px;
+  background: #1a1823;
+}
+
+#rp-chat .exec-compose .exec-actions {
+  margin-top: 10px;
+}
+
+#rp-chat .exec-observe {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  padding: 16px;
+  overflow: auto;
+  border-left: 1px solid var(--exec-line);
+  background: #15181f;
+  overscroll-behavior: contain;
+}
+
+#rp-chat .exec-observe > :not(img) {
+  flex: 0 0 auto;
+}
+
+#rp-chat .exec-observe > strong {
+  font-size: 14px;
+  color: #d4caef;
+}
+
+#rp-chat .exec-observe img {
+  display: block;
+  flex: 1 1 0;
+  width: 100%;
+  height: 0;
+  min-height: 120px;
+  max-width: 100%;
+  border: 1px solid #313542;
+  border-radius: 8px;
+  background: #0c0f14;
+  object-fit: contain;
+}
+
+/* 文本反馈不依赖颜色区分；loading 不覆盖按钮文字。 */
+#rp-chat :is(.exec-feedback, .exec-copy-status),
+.exec-dialog .exec-feedback {
+  color: var(--exec-muted);
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+#rp-chat .exec-feedback,
+.exec-dialog .exec-feedback {
+  padding: 10px 12px;
+  border: 1px solid #514565;
+  border-radius: 8px;
+  background: #292334;
+}
+
+#rp-chat :is(.exec-feedback, .exec-copy-status):empty,
+.exec-dialog .exec-feedback:empty {
+  display: none;
+}
+
+#rp-chat :is(.exec-feedback, .exec-copy-status):is(.ok, [data-state="success"]),
+.exec-dialog .exec-feedback:is(.ok, [data-state="success"]) {
+  color: #95dfae;
+}
+
+#rp-chat :is(.exec-feedback, .exec-copy-status):is(.err, [data-state="error"]),
+.exec-dialog .exec-feedback:is(.err, [data-state="error"]) {
+  color: #ffacb7;
+}
+
+#rp-chat .exec-feedback[data-state="warning"],
+.exec-dialog .exec-feedback[data-state="warning"] {
+  color: #ebce97;
+}
+
+#rp-chat .exec-empty-state {
+  padding: 20px 14px;
+  border: 1px dashed #4b435f;
+  border-radius: 9px;
+  background: #201e2b;
+  color: var(--exec-muted);
+  text-align: center;
+  font-size: 13px;
+}
+
+#rp-chat .is-loading,
+.exec-dialog .is-loading {
+  cursor: progress;
+}
+
+#rp-chat .is-loading::after,
+.exec-dialog .is-loading::after {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-left: 8px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  vertical-align: -.1em;
+  animation: exec-workspace-spin .8s linear infinite;
+}
+
+/* 由 JS 将 .exec-dialog 加到 body 下的工作台专用 dialog。 */
+.exec-dialog {
+  position: fixed;
+  inset: 0;
+  width: min(600px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 48px);
+  max-height: calc(100dvh - 48px);
+  margin: auto;
+  padding: 22px;
+  overflow: auto;
+  border: 1px solid #7965ac;
+  border-radius: 12px;
+  background: #20232d;
+  box-shadow: 0 24px 80px #000b;
+  overscroll-behavior: contain;
+}
+
+.exec-dialog::backdrop {
+  background: #0a0b12b8;
+  backdrop-filter: blur(3px);
+}
+
+.exec-dialog :is(h2, h3) {
+  margin: 0 0 14px;
+  color: #d4c6ff;
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+.exec-dialog p {
+  margin: 8px 0 14px;
+  color: var(--exec-muted);
+}
+
+.exec-dialog pre {
+  max-height: 55vh;
+  overflow: auto;
+}
+
+.exec-dialog label {
+  min-width: 0;
+  font-size: 13px;
+}
+
+.exec-dialog label select {
+  width: 0;
+  flex: 1 1 0;
+}
+
+.exec-dialog > div:last-child {
+  flex-wrap: wrap;
+}
+
+.exec-dialog button {
+  margin: 0;
+}
+
+@keyframes exec-workspace-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 中等屏幕收紧会话栏，保留编辑 / 观察双列。 */
+@media (max-width: 1100px) {
+  #rp-chat .exec-conversation-layout {
+    grid-template-columns: 156px minmax(0, 1fr);
+  }
+
+  #rp-chat .exec-body {
+    grid-template-columns: minmax(0, 1fr) minmax(200px, 32%);
+  }
+
+  #rp-chat :is(.exec-editor, .exec-observe) {
+    padding: 12px;
+  }
+}
+
+/* 平板：会话变为横向滚动条，不挤占任务编辑宽度。 */
+@media (max-width: 900px) {
+  #rp-chat .exec-conversation-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  #rp-chat .exec-history {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-right: 0;
+    border-bottom: 1px solid var(--exec-line);
+  }
+
+  #rp-chat .exec-history > button {
+    width: auto;
+  }
+
+  #rp-chat #exec-session-list {
+    flex-direction: row;
+    flex: 0 0 auto;
+  }
+
+  #rp-chat .exec-session-row {
+    width: 156px;
+    flex: 0 0 auto;
+  }
+
+  #rp-chat .exec-context label {
+    flex-basis: 160px;
+  }
+}
+
+/* 窄屏及短视口使用单一纵向滚动，确保底部操作和弹窗可达。 */
+@media (max-width: 680px), (max-height: 600px) {
+  #rp-chat.exec-expanded {
+    inset: 36px 6px 6px;
+    border-radius: 8px;
+  }
+
+  #rp-chat {
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  #rp-chat .rp-chat-head {
+    flex-wrap: wrap;
+    padding: 10px 12px;
+  }
+
+  #rp-chat .exec-modes {
+    padding: 8px 12px;
+    gap: 6px;
+  }
+
+  #rp-chat .exec-modes button {
+    flex: 1 1 100px;
+    min-width: 0;
+  }
+
+  #rp-chat :is(.exec-phone-picker, .exec-context) {
+    padding: 10px 12px;
+  }
+
+  #rp-chat #exec-phone-grid {
+    max-height: 76px;
+  }
+
+  #rp-chat .exec-conversation-layout {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  #rp-chat .exec-history {
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+    max-height: 76px;
+    border-right: 0;
+    border-bottom: 1px solid var(--exec-line);
+  }
+
+  #rp-chat .exec-history > button {
+    width: auto;
+  }
+
+  #rp-chat #exec-session-list {
+    flex: 0 0 auto;
+    flex-direction: row;
+  }
+
+  #rp-chat .exec-session-row {
+    flex: 0 0 156px;
+    width: 156px;
+  }
+
+  #rp-chat .exec-conversation-main,
+  #rp-chat .exec-body {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  #rp-chat .exec-editor {
+    overflow: visible;
+  }
+  #rp-chat .exec-feed {
+    flex-basis: auto;
+    max-height: 45vh;
+    min-height: 180px;
+  }
+
+  #rp-chat .exec-compose {
+    position: static;
+  }
+
+  #rp-chat .exec-observe {
+    min-height: 320px;
+    overflow: visible;
+    border-top: 1px solid var(--exec-line);
+    border-left: 0;
+  }
+
+  #rp-chat .exec-observe img {
+    flex: 0 0 auto;
+    height: 320px;
+    max-height: 65vh;
+  }
+
+  .exec-dialog {
+    width: calc(100vw - 24px);
+    max-width: calc(100vw - 24px);
+    padding: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #rp-chat *,
+  .exec-dialog * {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* ===== 新工作台布局：紧凑、两个入口层级（顶部模式 + 左侧快捷入口） ===== */
+#rp-chat .exec-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+#rp-chat .exec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex: 0 0 auto;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--exec-line);
+  background: linear-gradient(180deg, #262231, #1d1b24);
+}
+#rp-chat .exec-brand { display: flex; align-items: center; gap: 8px; min-width: 0; }
+#rp-chat .exec-brand-mark {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 7px;
+  background: var(--exec-purple); color: #fff; font-size: 12px; font-weight: 700;
+}
+#rp-chat .exec-brand div { display: flex; flex-direction: column; line-height: 1.25; }
+#rp-chat .exec-brand strong { font-size: 14px; }
+#rp-chat .exec-brand small { color: var(--exec-muted); font-size: 11px; }
+#rp-chat .exec-head-actions { display: flex; gap: 6px; flex-shrink: 0; }
+#rp-chat .exec-head-actions button {
+  padding: 4px 10px; font-size: 12px; border-radius: 6px;
+  border: 1px solid var(--exec-line); background: var(--exec-raised); color: var(--exec-text); cursor: pointer;
+}
+#rp-chat .exec-head-actions button:hover { border-color: #6f63a8; }
+
+#rp-chat .exec-modes {
+  display: flex; gap: 4px; flex: 0 0 auto;
+  padding: 5px 10px; border-bottom: 1px solid var(--exec-line); background: #1f2029;
+}
+#rp-chat .exec-modes button {
+  padding: 5px 14px; font-size: 13px; border-radius: 999px; cursor: pointer;
+  border: 1px solid transparent; background: transparent; color: var(--exec-muted);
+}
+#rp-chat .exec-modes button:hover { color: var(--exec-text); background: #2a2c36; }
+#rp-chat .exec-modes button.on {
+  background: var(--exec-purple-bg); color: #ddd6ff; border-color: #6b5ea8;
+}
+
+#rp-chat .exec-layout { display: flex; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+
+#rp-chat .exec-side {
+  flex: 0 0 148px; display: flex; flex-direction: column; gap: 6px;
+  padding: 8px; border-right: 1px solid var(--exec-line); background: #1c1e25; overflow-y: auto;
+}
+#rp-chat .exec-side-title { font-size: 11px; color: var(--exec-muted); letter-spacing: .06em; }
+#rp-chat .exec-quick-list { display: flex; flex-direction: column; gap: 6px; }
+#rp-chat .exec-quick-item {
+  display: flex; flex-direction: column; gap: 1px; text-align: left; cursor: pointer;
+  padding: 7px 9px; border-radius: 7px; border: 1px solid var(--exec-line);
+  background: var(--exec-surface); color: var(--exec-text);
+}
+#rp-chat .exec-quick-item:hover { border-color: #6f63a8; }
+#rp-chat .exec-quick-item.on { border-color: var(--exec-purple); background: var(--exec-purple-bg); }
+#rp-chat .exec-quick-item strong { font-size: 12px; font-weight: 600; }
+#rp-chat .exec-quick-item small { font-size: 10px; color: var(--exec-muted); }
+#rp-chat .exec-side-note { font-size: 10px; color: #7d8496; line-height: 1.5; }
+
+#rp-chat .exec-main {
+  flex: 1 1 auto; min-width: 0; min-height: 0;
+  display: flex; flex-direction: column; gap: 8px; padding: 9px 11px; overflow-y: auto;
+}
+
+#rp-chat .exec-picker {
+  flex: 0 0 auto; border: 1px solid var(--exec-line); border-radius: 8px;
+  background: var(--exec-surface); padding: 6px 8px;
+}
+#rp-chat .exec-picker-head {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px;
+}
+#rp-chat .exec-picker-head strong { font-size: 12px; }
+#rp-chat .exec-picker-head button {
+  padding: 2px 8px; font-size: 11px; border-radius: 5px; cursor: pointer;
+  border: 1px solid var(--exec-line); background: var(--exec-raised); color: var(--exec-text);
+}
+#rp-chat #exec-selection-count { color: var(--exec-purple-light); font-size: 11px; }
+#rp-chat .exec-observe-inline {
+  display: inline-flex; align-items: center; gap: 5px; margin-left: auto; font-size: 11px; color: var(--exec-muted);
+}
+#rp-chat .exec-observe-inline select { max-width: 190px; }
+
+#rp-chat .exec-phone-grid {
+  display: flex; flex-wrap: wrap; gap: 4px;
+  margin-top: 6px; max-height: 78px; overflow-y: auto;
+}
+#rp-chat .exec-phone-number {
+  width: 30px; height: 26px; font-size: 12px; border-radius: 5px; cursor: pointer;
+  border: 1px solid var(--exec-line); background: #22242c; color: var(--exec-text);
+}
+#rp-chat .exec-phone-number:hover { border-color: #6f63a8; }
+#rp-chat .exec-phone-number.on { background: var(--exec-purple); border-color: #8a7ee0; color: #fff; }
+#rp-chat .exec-phone-number:disabled { opacity: .35; cursor: not-allowed; }
+
+/* 抖音截流：采集机 / 回复机两套选择器的小标题 */
+#rp-chat .exec-lead-devices-label {
+  font-size: 12px; color: var(--exec-dim, #8b8fa3);
+  display: flex; align-items: center; gap: 4px;
+}
+#rp-chat .exec-lead-devices-label::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--exec-purple); opacity: .8;
+}
+
+#rp-chat .exec-pane { flex: 0 0 auto; display: flex; flex-direction: column; gap: 7px; }
+
+#rp-chat .exec-label,
+#rp-chat .exec-pane label,
+#rp-chat .exec-inline {
+  display: flex; flex-direction: column; gap: 3px;
+  font-size: 11px; color: var(--exec-muted);
+}
+#rp-chat .exec-inline { flex-direction: row; align-items: center; gap: 6px; }
+#rp-chat .exec-pane input[type=text],
+#rp-chat .exec-pane input:not([type]),
+#rp-chat .exec-pane input[type=number],
+#rp-chat .exec-pane select,
+#rp-chat .exec-pane textarea {
+  padding: 5px 8px; font-size: 12px; border-radius: 6px;
+  border: 1px solid var(--exec-line); background: #191b21; color: var(--exec-text);
+  width: 100%; font-family: inherit;
+}
+#rp-chat .exec-pane textarea { resize: vertical; }
+#rp-chat .exec-pane input:focus, #rp-chat .exec-pane select:focus, #rp-chat .exec-pane textarea:focus {
+  outline: none; border-color: var(--exec-purple);
+}
+#rp-chat .exec-inline input[type=number] { width: 66px; }
+#rp-chat .exec-inline input[type=file] { font-size: 11px; padding: 0; border: 0; background: none; }
+
+/* 素材区：左列按钮，右列上选视频、下预览；预览按影片自身比例，不铺黑边。 */
+#rp-chat .exec-asset-block {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+#rp-chat .exec-asset-actions {
+  display: flex; flex-direction: column; gap: 6px; min-width: 108px;
+}
+#rp-chat .exec-asset-actions button {
+  padding: 6px 12px; font-size: 12px; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--exec-line); background: var(--exec-raised); color: var(--exec-text);
+}
+#rp-chat .exec-asset-actions button:hover { border-color: #6f63a8; }
+#rp-chat .exec-asset-actions .exec-copy-status { font-size: 11px; line-height: 1.4; }
+#rp-chat .exec-asset-main { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+#rp-chat #exec-preview {
+  height: 116px; width: auto; max-width: 100%;
+  border-radius: 6px; background: transparent; display: block; align-self: flex-start;
+}
+
+/* 标题与标签在左（两行），描述在右；整块高度以描述为准。 */
+#rp-chat .exec-copy-fields {
+  display: grid; grid-template-columns: minmax(190px, 1fr) minmax(220px, 1.35fr);
+  gap: 9px; align-items: stretch;
+}
+#rp-chat .exec-copy-left { display: flex; flex-direction: column; gap: 7px; }
+#rp-chat .exec-copy-left label { flex: 1 1 0; justify-content: flex-start; }
+#rp-chat .exec-copy-left input { flex: 1; }
+#rp-chat .exec-copy-right { display: flex; }
+#rp-chat .exec-copy-right label { flex: 1; }
+#rp-chat .exec-copy-right textarea { flex: 1; min-height: 74px; height: 100%; }
+
+#rp-chat .exec-run-row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+#rp-chat .exec-run-row button,
+#rp-chat .exec-pane > button {
+  padding: 6px 14px; font-size: 12px; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--exec-line); background: var(--exec-raised); color: var(--exec-text);
+}
+#rp-chat .exec-run-row button:hover { border-color: #6f63a8; }
+#rp-chat .exec-primary, #rp-chat .exec-run-row .exec-primary {
+  background: var(--exec-purple); border-color: #8a7ee0; color: #fff; font-weight: 600;
+}
+#rp-chat .exec-primary:hover { background: #7a6bec; }
+#rp-chat .exec-danger { border-color: #7d4a52; color: var(--exec-danger); }
+#rp-chat .exec-copy-status { font-size: 11px; color: var(--exec-muted); }
+#rp-chat .exec-copy-status.ok { color: #8fe0a8; }
+#rp-chat .exec-copy-status.err { color: var(--exec-danger); }
+#rp-chat .exec-help { font-size: 11px; color: var(--exec-muted); margin: 0; }
+
+#rp-chat .exec-feedback {
+  flex: 0 0 auto; padding: 5px 10px; font-size: 12px; border-radius: 6px;
+  border: 1px solid var(--exec-line); background: #22242c; color: var(--exec-muted);
+}
+#rp-chat .exec-feedback.ok { border-color: #37624a; color: #9fe6b6; background: #1e2b23; }
+#rp-chat .exec-feedback.err { border-color: #6d4048; color: var(--exec-danger); background: #2b2024; }
+
+#rp-chat .exec-progress { flex: 0 0 auto; font-size: 12px; color: var(--exec-purple-light); min-height: 0; }
+#rp-chat .exec-plan { display: flex; flex-direction: column; gap: 6px; }
+#rp-chat .exec-pending {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 6px 10px; border: 1px solid #7a5bb5; border-radius: 7px;
+  background: var(--exec-purple-bg); font-size: 12px;
+}
+#rp-chat .exec-task-bar { display: flex; gap: 6px; }
+#rp-chat .exec-task-bar button {
+  padding: 4px 10px; font-size: 11px; border-radius: 5px; cursor: pointer;
+  border: 1px solid var(--exec-line); background: var(--exec-raised); color: var(--exec-text);
+}
+
+#rp-chat .exec-log-details { flex: 0 0 auto; border-top: 1px dashed var(--exec-line); padding-top: 5px; }
+#rp-chat .exec-log-details summary {
+  cursor: pointer; font-size: 11px; color: var(--exec-muted); list-style: none;
+}
+#rp-chat .exec-log-details summary::-webkit-details-marker { display: none; }
+#rp-chat .exec-log-details summary::before { content: '▸ '; }
+#rp-chat .exec-log-details[open] summary::before { content: '▾ '; }
+#rp-chat .exec-log-details #exec-log {
+  display: block; max-height: 150px; overflow: auto; margin: 5px 0 0;
+  padding: 7px; border: 1px solid var(--exec-line); border-radius: 6px;
+  background: #15181f; font-size: 11px; line-height: 1.5; white-space: pre-wrap;
+}
+
+#rp-chat .exec-write-log {
+  max-height: 190px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;
+  padding: 7px; border: 1px solid var(--exec-line); border-radius: 7px; background: #1b1d24;
+}
+#rp-chat .exec-bubble {
+  padding: 5px 9px; border-radius: 7px; font-size: 12px;
+  border: 1px solid var(--exec-line); background: var(--exec-surface); max-width: 92%;
+}
+#rp-chat .exec-bubble strong { display: block; font-size: 10px; color: var(--exec-muted); margin-bottom: 1px; }
+#rp-chat .exec-bubble.user { align-self: flex-end; background: var(--exec-purple-bg); border-color: #6b5ea8; }
+#rp-chat #exec-draft { font-family: Consolas, "Courier New", monospace; font-size: 11px; }
+
+#rp-chat .exec-video-list { display: flex; flex-direction: column; gap: 7px; }
+#rp-chat .exec-thumbs {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start;
+  padding: 7px; border: 1px dashed var(--exec-line); border-radius: 7px; background: #1a1c22;
+}
+#rp-chat .exec-thumb {
+  position: relative; width: 78px; height: 78px; border-radius: 6px; overflow: hidden;
+  border: 1px solid var(--exec-line); background: #000; cursor: grab;
+}
+#rp-chat .exec-thumb.dragging { opacity: .45; }
+#rp-chat .exec-thumb.over { border-color: var(--exec-purple); box-shadow: 0 0 0 2px #6b5ce788; }
+#rp-chat .exec-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; user-select: none; }
+#rp-chat .exec-thumb-remove { position:absolute; top:2px; right:2px; z-index:2; width:21px; height:21px; padding:0; border:0; border-radius:50%; background:#16181cdd; color:#fff; cursor:pointer; line-height:21px; }
+#rp-chat .exec-thumb span {
+  position: absolute; left: 0; right: 0; bottom: 0; font-size: 10px; text-align: center;
+  padding: 1px 0; color: #fff; background: #0009;
+}
+#rp-chat .exec-video-item {
+  border: 1px solid var(--exec-line); border-radius: 7px; padding: 7px; background: var(--exec-surface);
+}
+#rp-chat .exec-video-head { display: flex; justify-content: space-between; font-size: 11px; color: var(--exec-muted); margin-bottom: 4px; }
+#rp-chat .exec-video-tid { font-size: 10px; color: #7d8496; margin-top: 3px; word-break: break-all; }
+#rp-chat .exec-video-error {
+  font-size: 11px; line-height: 1.5; margin-top: 3px; padding: 4px 7px;
+  border-radius: 5px; background: #2b2024; color: var(--exec-danger); border: 1px solid #6d4048;
+  white-space: pre-wrap; word-break: break-all;
+}
+
+#rp-chat .exec-assign-list { display: flex; flex-direction: column; gap: 6px; max-height: 46vh; overflow: auto; }
+#rp-chat .exec-assign-list label { flex-direction: row; align-items: center; gap: 8px; }
+#rp-chat .exec-assign-list select { flex: 1; }
+
+@media (max-width: 900px) {
+  #rp-chat .exec-side { flex: 0 0 118px; }
+  #rp-chat .exec-copy-fields { grid-template-columns: 1fr; }
+}
+/* 生成结果：一排最多 4 个；视频按自身比例显示，不留黑边。 */
+#rp-chat .exec-results { display: flex; flex-direction: column; gap: 8px; }
+#rp-chat .exec-results[hidden] { display: none !important; }
+#rp-chat .exec-results-title { font-size: 11px; color: var(--exec-muted); }
+#rp-chat .exec-result-grid {
+  display: grid; gap: 8px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+#rp-chat .exec-result {
+  border: 1px solid var(--exec-line); border-radius: 8px; overflow: hidden;
+  background: #15181f; display: flex; flex-direction: column; min-width: 0;
+}
+#rp-chat .exec-result video {
+  /* 宽度跟随卡片、高度自动：元素比例等于视频比例，不会出现黑边。 */
+  width: 100%; height: auto; display: block; background: transparent;
+}
+#rp-chat .exec-result-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 6px; padding: 4px 7px; font-size: 11px; color: var(--exec-muted);
+}
+#rp-chat .exec-save {
+  padding: 3px 9px; border-radius: 5px; text-decoration: none; font-size: 11px; white-space: nowrap;
+  border: 1px solid #8a7ee0; background: var(--exec-purple); color: #fff;
+}
+#rp-chat .exec-save:hover { background: #7a6bec; }
+@media (max-width: 1200px) { #rp-chat .exec-result-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 900px) { #rp-chat .exec-result-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+@media (max-width: 680px) {
+  #rp-chat .exec-layout { flex-direction: column; }
+  #rp-chat .exec-side {
+    flex: 0 0 auto; flex-direction: row; overflow-x: auto; border-right: 0;
+    border-bottom: 1px solid var(--exec-line);
+  }
+  #rp-chat .exec-quick-list { flex-direction: row; }
+  #rp-chat .exec-side-title, #rp-chat .exec-side-note { display: none; }
+}
+
+/* 右侧实时画面：固定右列，不随主区滚动。 */
+#rp-chat .exec-observe {
+  flex: 0 0 clamp(190px, 21vw, 300px);
+  gap: 8px;
+  padding: 9px;
+  min-width: 0;
+  overflow: auto;
+  background: #15181f;
+}
+#rp-chat .exec-observe > strong { font-size: 12px; color: #d4caef; }
+#rp-chat #exec-observe-empty {
+  font-size: 11px; color: #7d8496; line-height: 1.6;
+  padding: 8px; border: 1px dashed var(--exec-line); border-radius: 7px;
+}
+#rp-chat #exec-shot-info { font-size: 11px; color: var(--exec-muted); word-break: break-all; }
+#rp-chat .exec-observe-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+#rp-chat .exec-observe-actions button {
+  flex: 1 1 auto; padding: 5px 10px; font-size: 12px; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--exec-line); background: var(--exec-raised); color: var(--exec-text);
+}
+#rp-chat .exec-observe-actions button:hover { border-color: #6f63a8; }
+#rp-chat .exec-observe img {
+  flex: 1 1 auto; width: 100%; height: auto; min-height: 120px; max-height: 100%;
+  object-fit: contain; border: 1px solid #313542; border-radius: 8px; background: #000;
+}
+
+/* 左侧栏：会话列表 */
+#rp-chat .exec-side-add {
+  padding: 5px 8px; font-size: 12px; border-radius: 6px; cursor: pointer;
+  border: 1px dashed var(--exec-line); background: transparent; color: var(--exec-text);
+}
+#rp-chat .exec-side-add:hover { border-color: #6f63a8; color: #ddd6ff; }
+#rp-chat .exec-session-list { display: flex; flex-direction: column; gap: 3px; overflow-y: auto; min-height: 0; }
+#rp-chat .exec-quick-history { min-width: 0; overflow-y: auto; }
+#rp-chat .exec-quick-history summary { cursor: pointer; padding: 7px 2px; font-size: 12px; color: var(--exec-muted); }
+#rp-chat .exec-quick-history .exec-record { width: 100%; }
+#rp-chat .exec-record-row { display: flex; align-items: center; gap: 2px; border-radius: 6px; }
+#rp-chat .exec-record-row:hover { background: #23252e; }
+#rp-chat .exec-record {
+  display: flex; flex-direction: column; gap: 1px; text-align: left; cursor: pointer;
+  padding: 5px 7px; border-radius: 6px; border: 1px solid transparent;
+  background: transparent; color: var(--exec-text); min-width: 0; flex: 1;
+}
+#rp-chat .exec-record:hover { background: #23252e; border-color: var(--exec-line); }
+#rp-chat .exec-record.active { background: var(--exec-purple-bg); border-color: #6b5ea8; }
+#rp-chat .exec-record strong {
+  font-size: 11px; font-weight: 500; line-height: 1.35;
+  overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+#rp-chat .exec-record small { font-size: 10px; color: var(--exec-muted); }
+#rp-chat .exec-session-row { display: flex; align-items: center; gap: 2px; border-radius: 6px; }
+#rp-chat .exec-session-row.active { background: var(--exec-purple-bg); }
+#rp-chat .exec-session-open {
+  flex: 1; min-width: 0; text-align: left; padding: 5px 7px; font-size: 12px; cursor: pointer;
+  border: 0; background: transparent; color: var(--exec-text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+#rp-chat .exec-session-row.active .exec-session-open { color: #ddd6ff; }
+#rp-chat .exec-session-del {
+  flex: 0 0 20px; padding: 2px 0; font-size: 11px; cursor: pointer;
+  border: 0; background: transparent; color: #7d8496;
+}
+#rp-chat .exec-session-del:hover { color: var(--exec-danger); }
+
+/* 截流：配置与线索卡 */
+#rp-chat .exec-lead-form { display: flex; flex-direction: column; gap: 8px; }
+#rp-chat .exec-lead-form textarea { width: 100%; }
+#rp-chat .exec-lead-results { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; min-height: 0; }
+#rp-chat .exec-lead-card {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 9px 10px; border-radius: 8px;
+  border: 1px solid var(--exec-line); background: #1d1f27;
+}
+#rp-chat .exec-lead-card strong { font-size: 12px; color: #e6e1ff; font-weight: 500; }
+#rp-chat .exec-lead-text {
+  margin: 0; font-size: 12px; line-height: 1.55; color: var(--exec-text);
+  white-space: pre-wrap; word-break: break-word;
+}
+#rp-chat .exec-lead-why { font-size: 10px; color: #8f86c4; }
+#rp-chat .exec-lead-draft {
+  margin-top: 2px; padding: 6px 8px; border-radius: 6px;
+  background: #23252e; border-left: 2px solid #6b5ea8;
+}
+#rp-chat .exec-lead-draft small { font-size: 10px; color: var(--exec-muted); display: block; margin-bottom: 2px; }
+#rp-chat .exec-lead-draft p { margin: 0; font-size: 12px; line-height: 1.5; color: var(--exec-text); white-space: pre-wrap; }
+/* 小红书号：B 端定位的唯一键，做成可复制的强调行 */
+#rp-chat .exec-lead-id {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin: 2px 0 4px; font-size: 11px; color: #b7f0c8;
+}
+#rp-chat .exec-lead-id button {
+  padding: 1px 8px; font-size: 10px; border-radius: 5px; cursor: pointer;
+  border: 1px solid var(--exec-line); background: var(--exec-raised); color: var(--exec-text);
+}
+
+/* 截流数据表（右上角入口打开） */
+.lead-data-mask {
+  position: fixed; inset: 0; z-index: 2147483000;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(8, 9, 12, .72); backdrop-filter: blur(2px);
+  padding: 18px;
+}
+.lead-data-mask[hidden] { display: none; }
+.lead-data-panel {
+  width: min(94vw, 1680px); height: 88vh;
+  display: flex; flex-direction: column; min-height: 0;
+  background: #17181e; color: #e7e7ee;
+  border: 1px solid #2c2e38; border-radius: 12px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .55);
+  overflow: hidden; font-size: 12px;
+}
+.lead-data-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-bottom: 1px solid #2c2e38; background: #1b1c23;
+}
+.lead-data-head strong { font-size: 14px; }
+.lead-data-summary { color: #9aa0b4; font-size: 11px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lead-data-head-actions { display: flex; gap: 8px; }
+.lead-data-head-actions button,
+.lead-data-foot button {
+  padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;
+  border: 1px solid #3a3d4a; background: #24262f; color: #e7e7ee;
+}
+.lead-data-head-actions button:hover,
+.lead-data-foot button:hover:not(:disabled) { border-color: #6b5ea8; color: #dcd5ff; }
+.lead-data-foot button:disabled { opacity: .45; cursor: default; }
+.lead-data-filters {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 10px 14px; border-bottom: 1px solid #24262f; background: #1a1b22;
+}
+.lead-data-filters label { display: flex; align-items: center; gap: 6px; color: #9aa0b4; }
+.lead-data-filters select,
+.lead-data-filters input {
+  padding: 5px 8px; border-radius: 6px; font-size: 12px;
+  border: 1px solid #3a3d4a; background: #20222a; color: #e7e7ee; outline: none;
+}
+.lead-data-filters input { width: 240px; }
+.lead-data-filters select:focus,
+.lead-data-filters input:focus { border-color: #6b5ea8; }
+.lead-data-count { margin-left: auto; color: #8f86c4; }
+.lead-data-table-wrap { flex: 1; min-height: 0; overflow: auto; }
+.lead-data-table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
+.lead-data-table thead th {
+  position: sticky; top: 0; z-index: 1;
+  padding: 8px 10px; text-align: left; font-weight: 500; font-size: 11px;
+  color: #b8bdd0; background: #20222a; border-bottom: 1px solid #2c2e38;
+  white-space: nowrap;
+}
+.lead-data-table td {
+  padding: 7px 10px; border-bottom: 1px solid #232530;
+  vertical-align: top; line-height: 1.5;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.lead-data-table tbody tr:hover { background: #1e2028; }
+/* 12 columns: never reuse the old 11-column nth-child widths. */
+.lead-data-table { min-width: 1900px; }
+.lead-data-table th, .lead-data-table td { box-sizing: border-box; }
+.lead-data-table th:nth-child(1) { width: 60px; }
+.lead-data-table th:nth-child(2) { width: 125px; }
+.lead-data-table th:nth-child(3) { width: 195px; }
+.lead-data-table th:nth-child(4) { width: 330px; }
+.lead-data-table th:nth-child(5) { width: 75px; }
+.lead-data-table th:nth-child(6) { width: 220px; }
+.lead-data-table th:nth-child(7) { width: 125px; }
+.lead-data-table th:nth-child(8) { width: 195px; }
+.lead-data-table th:nth-child(9) { width: 85px; }
+.lead-data-table th:nth-child(10) { width: 135px; }
+.lead-data-table th:nth-child(11) { width: 240px; }
+.lead-data-table th:nth-child(12) { width: 115px; }
+.lead-col-text, .lead-col-title { white-space: normal; overflow-wrap: anywhere; }
+.lead-cell-preview { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; white-space: pre-wrap; overflow-wrap: anywhere; }
+.lead-cell-expanded .lead-cell-preview { display: block; -webkit-line-clamp: unset; }
+.lead-cell-toggle { display: block; margin-top: 4px; padding: 0; border: 0; background: none; color: #aaa0f5; font: inherit; font-size: 11px; cursor: pointer; }
+.lead-cell-toggle:hover { color: #d9d1ff; text-decoration: underline; }
+.lead-col-author { white-space: nowrap; }
+.lead-data-table tbody tr:nth-child(even) { background: rgba(255,255,255,.015); }
+.lead-col-small { font-size: 11px; color: #9aa0b4; white-space: nowrap; }
+.lead-col-author { color: #cfd3e4; }
+.lead-col-platform { color: #9ad0ff; white-space: nowrap; }
+.lead-col-empty { text-align: center !important; color: #7d8496 !important; padding: 40px 0 !important; }
+.lead-col-state { white-space: nowrap; font-weight: 500; }
+.lead-state-pending { color: #c8cde0; }
+.lead-state-claimed { color: #f0c674; }
+.lead-state-sending { color: #f0a04b; }
+.lead-state-replied { color: #7bd88f; }
+.lead-state-failed { color: #ff7b7b; }
+.lead-state-unknown { color: #d68bff; }
+.lead-state-skipped { color: #7d8496; }
+.lead-data-datebar,.lead-data-archive{border-bottom:1px solid #24262f;}
+.lead-data-date-note{color:#8f96ac;font-size:11px;}
+.lead-data-capacity{padding:8px 14px;color:#9aa0b4;font-size:11px;border-bottom:1px solid #24262f;background:#191a21;}
+.lead-data-archive-title{color:#cfd3e4;}
+.lead-data-foot {
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  padding: 9px 14px; border-top: 1px solid #24262f; background: #1b1c23;
+  color: #9aa0b4;
+}
+@media (max-width: 900px) {
+  #rp-chat .exec-observe { flex: 0 0 190px; }
+  .lead-data-panel { width: 100vw; height: 100vh; border-radius: 0; }
+  .lead-data-filters input { width: 140px; }
+}
+
+/* ==================================================================
+ * 2026-11-03 重构：发布视频 / 截流 合并面板
+ * ================================================================== */
+/* 手机编号：两位数不能折行（之前 10 以后被挤成两行） */
+#rp-chat .exec-phone-number {
+  min-width: 32px; width: auto; padding: 0 6px;
+  white-space: nowrap; line-height: 24px;
+}
+
+/* 平台切换 Tab */
+#rp-chat .exec-platform-tabs {
+  display: flex; gap: 6px; padding: 6px 0 2px;
+  border-bottom: 1px solid var(--exec-line); margin-bottom: 6px;
+}
+#rp-chat .exec-platform-tabs button {
+  padding: 6px 16px; border-radius: 6px 6px 0 0; cursor: pointer;
+  border: 1px solid transparent; border-bottom: none;
+  background: transparent; color: var(--exec-dim, #8b8fa3); font-size: 13px;
+}
+#rp-chat .exec-platform-tabs button:hover { color: var(--exec-text); background: #23252e; }
+#rp-chat .exec-platform-tabs button.on {
+  color: #fff; background: var(--exec-purple-bg);
+  border-color: var(--exec-line);
+}
+
+/* 多素材列表：缩略图网格（与视频生成下方排布一致，一排最多 4 个） */
+#rp-chat .pub-asset-list {
+  display: grid; gap: 8px; margin-top: 6px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  max-height: 320px; overflow-y: auto;
+}
+@media (max-width: 1200px) { #rp-chat .pub-asset-list { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 900px) { #rp-chat .pub-asset-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* 发布素材：全幅缩略图卡（无底栏不挡画面；✕ 右上；拖卡排序） */
+#rp-chat #pub-assets.exec-result-grid { max-height: 360px; overflow-y: auto; }
+#rp-chat .pub-asset-card {
+  position: relative; border: 1px solid var(--exec-line); border-radius: 8px; overflow: hidden;
+  background: #000; min-width: 0; cursor: grab;
+}
+#rp-chat .pub-asset-card.on { border-color: #8a7ee0; box-shadow: 0 0 0 1px #8a7ee0; }
+#rp-chat .pub-asset-card.dragging { opacity: .45; }
+#rp-chat .pub-asset-card.over { border-color: var(--exec-purple); box-shadow: 0 0 0 2px #6b5ce788; }
+#rp-chat .pub-asset-card img { width: 100%; height: auto; display: block; background: #000; pointer-events: none; }
+#rp-chat .pub-asset-label {
+  position: absolute; left: 0; right: 0; bottom: 0; font-size: 10px; text-align: center;
+  padding: 1px 0; color: #fff; background: #0009; pointer-events: none;
+}
+#rp-chat .pub-asset-remove {
+  position: absolute; top: 2px; right: 2px; z-index: 2;
+  width: 22px; height: 22px; min-width: 0; min-height: 0; flex: none; margin: 0; padding: 0;
+  border: 0; border-radius: 50%;
+  background: #16181cdd; color: #fff; cursor: pointer; font-size: 11px; line-height: 22px; text-align: center;
+}
+#rp-chat .pub-asset-play { min-height: 0; }
+#rp-chat .pub-asset-remove:hover { background: #a33; }
+#rp-chat #pub-assets .pub-asset-nothumb { padding: 22px 8px; text-align: center; font-size: 11px; color: #7d8496; }
+#rp-chat .pub-asset-current {
+  position: absolute; left: 4px; top: 4px; font-size: 10px; padding: 1px 6px; border-radius: 4px;
+  background: var(--exec-purple); color: #fff; pointer-events: none;
+}
+#rp-chat #pub-library { max-width: 220px; }
+#rp-chat .pub-asset-play {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  width: 38px; height: 38px; border-radius: 50%; border: 1px solid #ffffff88;
+  background: #000000aa; color: #fff; font-size: 16px; line-height: 38px; text-align: center;
+  cursor: pointer; padding: 0;
+}
+#rp-chat .pub-asset-play:hover { background: var(--exec-purple); border-color: #8a7ee0; }
+#rp-chat .pub-asset-lightbox {
+  position: fixed; inset: 0; z-index: 9999; background: #000000d9;
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+#rp-chat .pub-asset-lightbox video, #rp-chat .pub-asset-lightbox img {
+  max-width: min(900px, 92vw); max-height: 86vh; border-radius: 8px; background: #000;
+}
+#rp-chat .pub-asset-lightbox-close {
+  position: fixed; right: 18px; top: 14px; width: 34px; height: 34px; border-radius: 50%;
+  border: 1px solid var(--exec-line); background: #1b1d24; color: #fff; font-size: 16px; cursor: pointer;
+}
+#rp-chat .pub-asset-badge {
+  position: absolute; left: 4px; bottom: 18px; font-size: 10px; padding: 1px 6px; border-radius: 4px;
+  background: #000a; color: #7ddc9b; border: 1px solid #37624a; pointer-events: none;
+}
+/* 兼容旧行式类名（若有缓存）：按卡片兜底 */
+#rp-chat .pub-asset-row {
+  display: flex; align-items: center; gap: 4px;
+  padding: 4px 8px; border-radius: 5px;
+  border: 1px solid var(--exec-line); background: #22242c;
+}
+#rp-chat .pub-asset-row.on { border-color: #8a7ee0; background: var(--exec-purple-bg); }
+#rp-chat .pub-asset-tag { font-size: 10px; color: #7ddc9b; flex: 0 0 auto; }
+#rp-chat .pub-asset-row button {
+  flex: 0 0 auto; width: 22px; height: 22px; padding: 0;
+  border-radius: 4px; cursor: pointer; font-size: 11px;
+  border: 1px solid var(--exec-line); background: #1b1d24; color: var(--exec-text);
+}
+#rp-chat .pub-asset-row button:disabled { opacity: .3; cursor: not-allowed; }
+
+/* 按素材分配面板 */
+#rp-chat .pub-assign-panel {
+  margin-top: 8px; padding: 8px; border-radius: 6px;
+  border: 1px dashed var(--exec-line); background: #1c1e25;
+  display: flex; flex-direction: column; gap: 8px;
+  max-height: 320px; overflow-y: auto;
+}
+#rp-chat .pub-assign-card { border-top: 1px solid var(--exec-line); padding-top: 6px; }
+#rp-chat .pub-assign-card:first-child { border-top: none; padding-top: 0; }
+#rp-chat .pub-assign-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  font-size: 12px;
+}
+#rp-chat .pub-assign-head strong {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* 执行记录行内动作 */
+#rp-chat .exec-record-actions {
+  display: flex; flex-wrap: wrap; gap: 3px; padding: 2px 0 6px 2px;
+}
+#rp-chat .exec-record-actions button {
+  font-size: 10px; padding: 2px 7px; border-radius: 4px; cursor: pointer;
+  border: 1px solid var(--exec-line); background: #1b1d24; color: var(--exec-dim, #8b8fa3);
+}
+#rp-chat .exec-record-actions button:hover { color: var(--exec-text); border-color: #6f63a8; }
+#rp-chat .exec-record-actions button.exec-danger { color: #ff9a9a; }
+
+/* 发布面板：素材区改成上下排布（按钮一行、素材列表一行、分配面板整行） */
+#rp-chat [data-pane="publish"] .exec-asset-block {
+  display: flex; flex-direction: column; gap: 8px;
+}
+#rp-chat [data-pane="publish"] .exec-asset-actions {
+  flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px;
+}
+#rp-chat .pub-asset-list,
+#rp-chat .pub-assign-panel { flex: 1 1 100%; width: 100%; }
+
+/* 执行记录行：记录占满一行，动作按钮排在它下面一行 */
+#rp-chat .exec-record-row {
+  display: flex; flex-wrap: wrap; align-items: stretch; gap: 2px;
+  border-radius: 6px; margin-bottom: 2px;
+}
+#rp-chat .exec-record-row .exec-record {
+  flex: 1 1 100%; width: 100%; min-width: 0; text-align: left;
+}
+#rp-chat .exec-record-row .exec-record strong,
+#rp-chat .exec-record-row .exec-record small {
+  display: block; white-space: normal; word-break: break-all;
+}
+#rp-chat .exec-record-actions { flex: 1 1 100%; }
+
+/* 执行记录详情（中间区域） */
+#rp-chat .exec-detail-head {
+  display: flex; align-items: baseline; gap: 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--exec-line);
+}
+#rp-chat .exec-detail-head strong { font-size: 15px; }
+#rp-chat .exec-detail-tasks { display: flex; flex-direction: column; gap: 6px; }
+#rp-chat .exec-detail-task {
+  border: 1px solid var(--exec-line); border-radius: 6px;
+  padding: 6px 10px; background: #1c1e25;
+}
+#rp-chat .exec-detail-task-line { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+#rp-chat .exec-detail-state { color: var(--exec-dim, #8b8fa3); }
+#rp-chat .exec-state-executing, #rp-chat .exec-state-queued { color: #7db4ff; }
+#rp-chat .exec-state-completed { color: #7ddc9b; }
+#rp-chat .exec-state-failed, #rp-chat .exec-state-needs_review { color: #ff9a9a; }
+#rp-chat .exec-state-awaiting_approval { color: #ffd479; }
+#rp-chat .exec-detail-reason { margin-top: 4px; font-size: 11px; color: #ff9a9a; }
+#rp-chat .exec-detail-log-head {
+  margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--exec-line);
+  font-size: 12px; color: var(--exec-dim, #8b8fa3);
+}
+#rp-chat .exec-detail-events {
+  flex: 1 1 auto; min-height: 160px; max-height: 420px; overflow-y: auto;
+  border: 1px solid var(--exec-line); border-radius: 6px;
+  background: #14161b; padding: 6px 8px; font-size: 11px; line-height: 1.7;
+}
+#rp-chat .exec-detail-event { display: flex; gap: 8px; }
+#rp-chat .exec-detail-time { color: #6f7588; flex: 0 0 auto; font-variant-numeric: tabular-nums; }
+#rp-chat .exec-detail-endreason { margin-top: 4px; font-size: 11px; color: #7db4ff; }
+#rp-chat .leadx-copy-phones {
+  margin-top: 6px; padding: 4px 10px; font-size: 11px; border-radius: 5px; cursor: pointer;
+  border: 1px dashed var(--exec-line); background: #1b1d24; color: var(--exec-dim, #8b8fa3);
+}
+#rp-chat .leadx-copy-phones:hover { color: var(--exec-text); border-color: #6f63a8; }
+
+/* ===== 回复面板：采集批次列表（2026-11-06 主人反馈文字看不清） =====
+   要点：两行文本，行高必须够；超长关键词省略不换行；
+   关键是 flex 子项要给 min-width:0，否则 nowrap 会把行高挤塌、文字重叠。 */
+#reply-batches {
+  max-height: 240px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 2px;
+}
+#reply-batches .exec-quick-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  min-height: 50px;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  overflow: hidden;
+}
+#reply-batches .exec-quick-item strong,
+#reply-batches .exec-quick-item small {
+  display: block;
+  min-width: 0;          /* flex 子项允许收缩，否则 ellipsis 不生效 */
+  max-width: 100%;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#reply-batches .exec-quick-item strong { font-size: 12px; }
+#reply-batches .exec-quick-item small { font-size: 10.5px; }
+#reply-batches .exec-quick-item:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}

@@ -1,0 +1,41 @@
+{
+  "key": "dynamic_detail",
+  "name": "动态详情页（图文动态）",
+  "package": "tv.danmaku.bili",
+  "activity": "kntr.common.compose.launcher.VertexActivity",
+  "entry": "搜索结果·图文 tab → 点动态条目；或关注动态流 → 点卡片",
+  "captured_at": "2026-10-31T21:03:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "render_tech": "Jetpack Compose",
+  "identity": [
+    {"name": "作者 + 时间", "note": "作者名与「2026年10月31日 11:42」成对出现"},
+    {"name": "底部评论占位", "text": "点我发评论"}
+  ],
+  "targets": [
+    {"name": "返回", "role": "导航", "risk": "none", "note": "左上 View 95x95，无 id"},
+    {"name": "转发", "label_re": "转发", "role": "分享", "risk": "send"},
+    {"name": "更多", "label_re": "更多", "role": "菜单", "risk": "none"},
+    {"name": "作者头像", "role": "导航", "risk": "none", "note": "View 95x95"},
+    {"name": "作者名", "role": "文本", "risk": "none", "note": "如「DeepSeek鲸鱼娘在运营」"},
+    {"name": "发布时间", "role": "文本", "risk": "none", "note": "精确到分钟"},
+    {"name": "关注按钮", "role": "状态变更", "risk": "send", "note": "文案「关注」"},
+    {"name": "话题标签", "role": "导航", "risk": "none", "note": "如「万圣节狂欢」，是可点击的话题"},
+    {"name": "图片格子", "role": "展示", "risk": "none", "note": "九宫格布局：3 列；正方形图 326x326，长图/横图 326x146；本页共 6 格"},
+    {"name": "评论输入入口", "text": "点我发评论", "role": "输入", "risk": "send"},
+    {"name": "评论数", "role": "文本", "risk": "none", "note": "「133」"},
+    {"name": "点赞数", "role": "文本", "risk": "none", "note": "「61」"},
+    {"name": "分享/收藏数", "role": "文本", "risk": "none", "note": "「925」，最右图标"},
+    {"name": "互动图标本体", "role": "互动", "risk": "send", "note": "★图标无 id 也无 label，只能靠坐标；右侧数字才是可读的"}
+  ],
+  "navigation": [
+    {"action": "点击 作者", "to": "up_profile", "verified": false},
+    {"action": "点击 话题标签", "to": "话题页", "verified": false}
+  ],
+  "uncovered": [
+    "多图查看器（点图片后的全屏浏览）",
+    "评论区展开",
+    "转发面板"
+  ],
+  "notes": "动态详情和专栏详情是同一个 Activity（VertexActivity）的两套布局：动态有「话题标签 + 九宫格图片」，专栏有「所属文集 + 长正文」。两者都以「点我发评论」作为底部输入占位文案，可作为共同锚点。★底部互动图标同样没有 id/label，只有数字可读。"
+}

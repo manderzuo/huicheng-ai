@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>WebCodecs 20 路并发验证</title>
+<style>
+  body { margin:0; background:#111; color:#ddd; font:12px/1.4 Consolas,monospace; }
+  #bar { position:sticky; top:0; background:#1b1b1b; padding:8px 12px; border-bottom:1px solid #333; z-index:9; }
+  #bar b { color:#4fc3f7; }
+  #grid { display:grid; grid-template-columns:repeat(10,1fr); gap:2px; padding:2px; }
+  .cell { position:relative; background:#000; }
+  .cell canvas { width:100%; display:block; }
+  .tag { position:absolute; top:0; left:0; background:rgba(0,0,0,.6); color:#0f0; font-size:10px; padding:1px 3px; }
+  .err { color:#f66; }
+</style>
+</head>
+<body>
+<div id="bar">
+  <button id="go">开始 20 路</button>
+  <button id="stop">停止</button>
+  <span id="stat">就绪</span>
+</div>
+<div id="grid"></div>
+<script src="/static/h264.js"></script>
+<script>
+(function () {
+  const grid = document.getElementById('grid');
+  const statEl = document.getElementById('stat');
+  let players = [];
+  let timer = null;
+
+  function setStat(t) { statEl.innerHTML = t; }
+
+  async function probe() {
+    const out = [];
+    if (!window.VideoDecoder) { return 'VideoDecoder 不存在'; }
+    const codecs = ['avc1.42E01E', 'avc1.4D401F', 'avc1.64001F', 'avc1.64001E'];
+    const modes = ['no-preference', 'prefer-hardware', 'prefer-software'];
+    for (const c of codecs) {
+      for (const m of modes) {
+        try {
+          const r = await VideoDecoder.isConfigSupported({
+            codec: c, codedWidth: 224, codedHeight: 480,
+            hardwareAcceleration: m,
+          });
+          const got = r.config ? r.config.hardwareAcceleration : '?';
+          out.push(c + ' ' + m + ' -> ' + (r.supported ? 'OK' : 'NO') + ' [' + got + ']');
+        } catch (e) {
+          out.push(c + ' ' + m + ' -> ERR ' + e.message);
+        }
+      }
+    }
+    return out.join(' | ');
+  }
+
+  async function start() {
+    stop();
+    const r = await fetch('/api/devices');
+    const data = await r.json();
+    const devs = (data.devices || data || []).filter(d => d.online !== false).slice(0, 20);
+    if (!devs.length) { setStat('<span class="err">没有在线设备</span>'); return; }
+
+    setStat('创建 ' + devs.length + ' 路…');
+    grid.innerHTML = '';
+    players = [];
+
+    for (const d of devs) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      const cv = document.createElement('canvas');
+      cv.width = 224; cv.height = 480;
+      const tag = document.createElement('div');
+      tag.className = 'tag';
+      tag.textContent = (d.index || d.serial.slice(-4));
+      cell.appendChild(cv);
+      cell.appendChild(tag);
+      grid.appendChild(cell);
+
+      if (!window.H264Player) { setStat('<span class="err">h264.js 未加载</span>'); return; }
+      const p = new H264Player(cv);
+      p.serial = d.serial;
+      p.active = true;
+      p._tag = tag;
+      p._lastCount = 0;
+      p._lastT = performance.now();
+      p._fps = 0;
+      // ★ 花屏/卡顿观测：统计解码错误与丢帧
+      p._errN = 0;
+      p._dropN = 0;
+      p._gapMax = 0;
+      p._lastFrameT = performance.now();
+      const origErr = p._onWcsDecodeError ? p._onWcsDecodeError.bind(p) : null;
+      p._onWcsDecodeError = function (m) {
+        p._errN++;
+        if (origErr) { try { origErr(m); } catch (e) {} }
+      };
+      try { p.start(d.serial); } catch (e) { tag.textContent += ' ERR'; }
+      players.push(p);
+    }
+
+    timer = setInterval(() => {
+      let total = 0, alive = 0, lines = [];
+      const now = performance.now();
+      for (const p of players) {
+        const n = p.frameCount || 0;
+        const dt = (now - p._lastT) / 1000;
+        const fps = dt > 0 ? (n - p._lastCount) / dt : 0;
+        p._lastCount = n; p._lastT = now;
+        p._fps = fps;
+        total += fps;
+        if (n > 0) alive++;
+        if (p._tag) p._tag.textContent = (p.serial.slice(-4)) + ' ' + fps.toFixed(1);
+      }
+      const summary =
+        'R=' + players.length +
+        ' A=' + alive +
+        ' T=' + total.toFixed(1) +
+        ' AVG=' + (players.length ? (total / players.length).toFixed(1) : '0');
+      setStat(
+        '路数 <b>' + players.length + '</b>  ' +
+        '有帧 <b>' + alive + '</b>  ' +
+        '总帧率 <b>' + total.toFixed(1) + ' fps</b>  ' +
+        '平均 <b>' + (players.length ? (total / players.length).toFixed(1) : '0') + ' fps/路</b>'
+      );
+      // 供 CDP /json/list 读取
+      document.title = 'BENCH ' + summary;
+    }, 1000);
+
+    setStat('已启动 ' + players.length + ' 路，等待首帧…');
+    // 能力探测结果写入全局与标题
+    try {
+      window.__probe = await probe();
+      document.title = 'PROBE ' + window.__probe;
+      console.log('[probe]', window.__probe);
+    } catch (e) {}
+  }
+
+  function stop() {
+    if (timer) { clearInterval(timer); timer = null; }
+    for (const p of players) { try { p.stop(); } catch (e) {} }
+    players = [];
+  }
+
+  document.getElementById('go').onclick = start;
+  document.getElementById('stop').onclick = stop;
+  window.__bench = {
+    summary: () => players.map(p => ({
+      s: p.serial,
+      fps: +(p._fps || 0).toFixed(2),
+      frames: p.frameCount || 0,
+      err: p._errN || 0,
+      drop: p._dropped || 0,
+      q: (p.decoder && p.decoder.state === 'configured') ? p.decoder.decodeQueueSize : -1,
+    })),
+    health: () => ({
+      players: players.length,
+      errTotal: players.reduce((a, p) => a + (p._errN || 0), 0),
+      dropTotal: players.reduce((a, p) => a + (p._dropped || 0), 0),
+      closed: players.filter(p => !p.decoder || p.decoder.state === 'closed').length,
+      memMB: performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1048576) : -1,
+    }),
+    switchDevice: (idx) => {
+      // 模拟「切换软件/切换选中设备」：把指定序号设为 active，其余停用
+      players.forEach((p, i) => { p.active = (i === idx); });
+      return idx;
+    },
+    reactivateAll: () => { players.forEach(p => { p.active = true; }); return players.length; },
+  };
+
+  // ?auto=1 自动开始（无人值守测试用）
+  if (location.search.indexOf('auto') >= 0) {
+    setTimeout(start, 800);
+  }
+})();
+</script>
+</body>
+</html>

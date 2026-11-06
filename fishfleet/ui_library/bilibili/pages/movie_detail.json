@@ -1,0 +1,50 @@
+{
+  "key": "movie_detail",
+  "name": "影视详情页（电影 · 竖屏）",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.ship.theseus.detail.UnitedBizDetailsActivity",
+  "entry": "影视频道页 → 点电影卡（本次从热门页卡片进入，实测为竖屏）",
+  "captured_at": "2026-10-31T20:26:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "类型标签", "label_re": "guideImage", "note": "同层文本是内容类型，如「电影」"},
+    {"name": "选集区", "label_re": "episode_selector_episode_switch", "note": "同番剧详情"}
+  ],
+  "targets": [
+    {"name": "视频区", "id": "video_area", "role": "播放器", "risk": "none", "note": "竖屏 1080x608"},
+    {"name": "类型标签", "label_re": "guideImage", "role": "展示", "risk": "none", "note": "文本如「电影」「电视剧」「纪录片」"},
+    {"name": "影视标题", "id": "intro_text", "role": "文本", "risk": "none", "note": "ComposeView；同层 TextView 也带标题"},
+    {"name": "追剧按钮", "id": "cl_follow", "role": "状态变更", "risk": "send", "note": "电影/剧集是「追剧」，番剧是「追番」"},
+    {"name": "播放量", "role": "文本", "risk": "none", "note": "数据行第一个"},
+    {"name": "追剧数", "role": "文本", "risk": "none", "note": "数据行第二个"},
+    {"name": "正在看人数", "role": "文本", "risk": "none"},
+    {"name": "评分", "role": "文本", "risk": "none", "note": "电影有评分（如 9.1），部分影片无评分，此节点可能缺失"},
+    {"name": "详情", "text": "详情", "role": "导航", "risk": "none"},
+    {"name": "VIP 推广条", "id": "rl_vip_container", "role": "推广", "risk": "none", "note": "tv_single_vip_desc 文案动态"},
+    {"name": "点赞", "id": "frame_like", "label_re": "点赞，\\d+个点赞", "role": "互动", "risk": "send"},
+    {"name": "投币", "id": "frame_coin", "label_re": "投币，\\d+个投币", "role": "互动", "risk": "send"},
+    {"name": "收藏", "id": "frame_fav", "label_re": "收藏，\\d+个收藏", "role": "互动", "risk": "send"},
+    {"name": "下载位", "id": "frame_recommend", "role": "功能", "risk": "none", "note": "影视多为「版权受限」，不可下载"},
+    {"name": "分享", "id": "frame_share", "label_re": "分享，\\d+个分享", "role": "互动", "risk": "send"},
+    {"name": "直播预约卡", "id": "card_view_background", "role": "运营位", "risk": "none", "note": "tvTitle=预约标题，tvConfirm=「预约直播」，点击会改变预约状态（send）"},
+    {"name": "选集标题", "text": "选集", "role": "分组", "risk": "none"},
+    {"name": "选集项", "label_re": "episode_selector_episode_switch", "role": "列表", "risk": "none", "note": "电影通常只有「正片」一项，带时长和「会员」标"},
+    {"name": "UP 主头像", "id": "avatar", "role": "导航", "risk": "none", "note": "影视详情页里 UP 是官方号（如「哔哩哔哩电影」）"},
+    {"name": "UP 主整行", "id": "author_layout", "label_re": "up主", "role": "导航", "risk": "none"},
+    {"name": "认证标", "id": "verify", "role": "展示", "risk": "none"},
+    {"name": "粉丝数", "id": "fans", "role": "文本", "risk": "none", "note": "如「843.8万粉丝」"},
+    {"name": "关注按钮", "id": "follow", "label_re": "关注up主", "role": "状态变更", "risk": "send"}
+  ],
+  "navigation": [
+    {"action": "点击 选集项", "to": "播放正片", "verified": false, "risk": "send"},
+    {"action": "点击 追剧", "to": "对外追剧", "verified": false, "risk": "send"},
+    {"action": "点击 预约直播", "to": "预约状态变更", "verified": false, "risk": "send"}
+  ],
+  "uncovered": [
+    "电影评论 tab",
+    "详情页（演职员/剧情简介）",
+    "预约直播的确认流程"
+  ],
+  "notes": "【重要实测】同一条路径（首页→热门→点卡片）这次进入的是**竖屏**详情页（orientation=portrait，1080x1676），没有横屏。说明「点卡片必横屏」不成立，之前那次横屏是偶发（可能与点击位置/卡片类型/当时播放状态有关）。竖屏详情页与番剧/影视详情共用同一 Activity 和同一套操作栏 id。"
+}

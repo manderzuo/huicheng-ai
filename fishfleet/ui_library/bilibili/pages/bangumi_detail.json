@@ -1,0 +1,58 @@
+{
+  "key": "bangumi_detail",
+  "name": "番剧详情页（ogv 竖屏）",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.ship.theseus.detail.UnitedBizDetailsActivity",
+  "entry": "番剧分区 → 点番剧卡；或搜索结果 → 番剧 tab",
+  "captured_at": "2026-10-31T20:17:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "番剧追番按钮", "id": "cl_follow", "note": "含 vFollowBg + follow(「追番」)"},
+    {"name": "选集区", "label_re": "episode_selector_episode_switch", "note": "普通视频详情页没有这个，可用来区分"}
+  ],
+  "targets": [
+    {"name": "视频区", "id": "video_area", "role": "播放器", "risk": "none", "note": "同普通详情页"},
+    {"name": "顶部广告条", "id": "title_layout", "role": "广告", "risk": "none", "note": "文案动态（本次「B省联萌 低至4.0折」）；有关闭按钮 close"},
+    {"name": "关闭广告条", "id": "close", "role": "操作", "risk": "none"},
+    {"name": "内嵌 WebView 广告", "id": "web_view", "role": "广告", "risk": "none", "note": "一大块 H5 广告，内部节点 id 是随机串（iUd4Gvd5SD 等），不可依赖；应直接跳过"},
+    {"name": "简介 tab", "id": "tab_title", "text": "简介", "role": "导航", "risk": "none", "state_hint": "selected"},
+    {"name": "评论 tab", "id": "tab_title", "text": "评论", "role": "导航", "risk": "none", "note": "tab_sub_title 是评论数"},
+    {"name": "发弹幕", "id": "danmaku_input_parent", "label_re": "发送弹幕", "role": "输入", "risk": "send"},
+    {"name": "弹幕开关", "label_re": "关闭弹幕", "role": "设置", "risk": "none", "state_hint": "checked"},
+    {"name": "番剧标题", "id": "intro_text", "role": "文本", "risk": "none", "note": "ComposeView；同层 ImageView 的 label 也带剧名"},
+    {"name": "追番按钮", "id": "cl_follow", "role": "状态变更", "risk": "send", "note": "内部 follow 文案「追番」/「已追番」"},
+    {"name": "播放量", "role": "文本", "risk": "none", "note": "数据行第一个，形如「4190万」"},
+    {"name": "追番数", "role": "文本", "risk": "none", "note": "数据行第二个，形如「84.2万」"},
+    {"name": "正在看人数", "role": "文本", "risk": "none"},
+    {"name": "评分", "role": "文本", "risk": "none", "note": "形如「9.5分」；未评分番剧可能没有"},
+    {"name": "详情", "text": "详情", "role": "导航", "risk": "none", "note": "打开番剧完整信息（简介/制作/声优）"},
+    {"name": "VIP 推广条", "id": "rl_vip_container", "role": "推广", "risk": "none", "note": "tv_single_vip_desc 文案动态；含「立即领取」，属付费引导"},
+    {"name": "点赞", "id": "frame_like", "label_re": "点赞，\\d+个点赞", "role": "互动", "risk": "send"},
+    {"name": "投币", "id": "frame_coin", "label_re": "投币，\\d+个投币", "role": "互动", "risk": "send"},
+    {"name": "收藏", "id": "frame_fav", "label_re": "收藏，\\d+个收藏", "role": "互动", "risk": "send"},
+    {"name": "下载/推荐位", "id": "frame_recommend", "role": "功能", "risk": "none", "note": "版权受限时显示「版权受限」并且不可点"},
+    {"name": "分享", "id": "frame_share", "label_re": "分享，\\d+个分享", "role": "互动", "risk": "send"},
+    {"name": "选集标题", "text": "选集", "role": "分组", "risk": "none"},
+    {"name": "完结状态", "role": "文本", "risk": "none", "note": "形如「已完结，全12话」；连载中是「更新至第N话」"},
+    {"name": "选集展开", "label_re": "episode_selector_popup", "role": "展开", "risk": "none"},
+    {"name": "分集卡片", "label_re": "episode_selector_episode_switch", "role": "列表", "risk": "none", "note": "每条 = 集数 + 标题 + 可选「会员」标；横向 4 列"},
+    {"name": "分集-集数", "role": "文本", "risk": "none", "note": "形如「第 1 话」（注意前后有空格）"},
+    {"name": "分集-标题", "role": "文本", "risk": "none"},
+    {"name": "分集-会员标", "text": "会员", "role": "状态", "risk": "none", "note": "存在表示该集需要大会员"},
+    {"name": "特别企划 tab", "label_re": "extra_episode_selector_season_switch", "role": "导航", "risk": "none", "note": "PV / 特别企划"},
+    {"name": "PV 卡片", "label_re": "extra_episode_selector_episode_switch", "role": "列表", "risk": "none", "note": "时长 + 标题（PV1/PV2/先行PV…）"}
+  ],
+  "navigation": [
+    {"action": "点击 分集卡片", "to": "播放该集", "verified": false, "risk": "send", "note": "会消耗流量，会员集需大会员"},
+    {"action": "点击 追番", "to": "对外追番", "verified": false, "risk": "send"},
+    {"action": "点击 详情", "to": "番剧信息页", "verified": false}
+  ],
+  "uncovered": [
+    "评论 tab（未点，结构与普通视频详情页基本一致）",
+    "详情页（制作信息）",
+    "选集展开弹窗（episode_selector_popup）",
+    "会员集的付费墙"
+  ],
+  "notes": "番剧详情页和普通视频详情页共用同一个 Activity 和同一批操作栏 id（frame_like/coin/fav/share），但番剧多了「追番/选集/评分/特别企划」，且中间会插一整块 WebView 广告。识别时看 episode_selector_episode_switch 是否存在。"
+}

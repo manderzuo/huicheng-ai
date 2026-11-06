@@ -1,0 +1,54 @@
+{
+  "device_key": "5g_i15proMax_w360_720x1612",
+  "serial": "SERIAL0001",
+  "screen": {
+    "serial": "SERIAL0001",
+    "width": 720,
+    "height": 1612,
+    "dpi": 320,
+    "status_bar": 63,
+    "nav_bar": 106,
+    "source": "wm",
+    "size_override": false,
+    "density_override": false,
+    "content_h": 1443,
+    "px_per_dp": 2.0,
+    "dp_w": 360.0,
+    "dp_h": 806.0,
+    "content_dp_h": 721.5,
+    "status_dp": 31.5,
+    "nav_dp": 53.0,
+    "scale": 0.6667,
+    "dpi_scale": 0.7619,
+    "dp_family": "w360"
+  },
+  "baseline": {
+    "width": 1080,
+    "height": 1920,
+    "dpi": 420,
+    "status_bar": 63,
+    "nav_bar": 126,
+    "dp_w": 411.4,
+    "dp_h": 731.4
+  },
+  "dp_offsets": {
+    "xiaohongshu.home.search": [
+      27.0,
+      48.0
+    ],
+    "tiktok.home.search": [
+      28.0,
+      55.0
+    ],
+    "douyin.home.search": [
+      26.0,
+      48.0
+    ],
+    "douyin.home.tab_home": [
+      36.0,
+      72.5
+    ]
+  },
+  "last_foreground": "com.ss.android.ugc.aweme",
+  "updated_at": 1793790687.45034
+}

@@ -1,0 +1,40 @@
+{
+  "key": "weekly_must_watch",
+  "name": "每周必看（H5 页面）",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.app.comm.aghanim.core.activity.WebGeneralComposeActivity",
+  "entry": "首页 → 热门 → 入口条「每周必看」",
+  "captured_at": "2026-10-31T20:39:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "render_tech": "WebView（H5，但文本节点可读）",
+  "identity": [
+    {"name": "WebView", "text": "每周必看", "note": "整个 Activity 是一个 WebView，text 属性是页面标题"},
+    {"name": "返回", "role": "导航", "note": "左上角 View 95x95，无 id 无 label"}
+  ],
+  "targets": [
+    {"name": "WebView 根", "role": "容器", "risk": "none", "note": "text 属性=页面标题（如「每周必看」），可用作识别"},
+    {"name": "返回", "role": "导航", "risk": "none", "note": "左上 View，无 id"},
+    {"name": "订阅", "text": "订阅", "role": "状态变更", "risk": "send", "note": "订阅该栏目，属对外状态"},
+    {"name": "期号标题", "text_re": "^第\\d+期", "role": "文本", "risk": "none", "note": "形如「第397期 把各地写成loveme」"},
+    {"name": "条目封面", "note": "Image 节点的 text 是图片文件名（含 @450w_282h_1e_1c 等裁切后缀）"},
+    {"name": "条目标题", "role": "文本", "risk": "none"},
+    {"name": "条目 UP 主", "role": "文本", "risk": "none"},
+    {"name": "条目数据", "role": "文本", "risk": "none", "note": "形如「634.7万观看 · 10月24日」"},
+    {"name": "编辑点评", "note": "「quotation」图标 + 一句点评文本，如「家乡就是love me」"}
+  ],
+  "navigation": [
+    {"action": "点击条目", "to": "video_detail（H5 内跳转或唤起 App）", "verified": false}
+  ],
+  "uncovered": [
+    "订阅的确认流程",
+    "往期列表",
+    "条目点击后的实际落点"
+  ],
+  "sibling_pages": {
+    "入站必刷": {"same_template": true, "evidence": "同样进 WebGeneralComposeActivity，WebView.text=「入站必刷上新啦」，栏目名「热门情报局」，条目结构一致"},
+    "预测广场": {"same_template": false, "activity": "tv.danmaku.bili.ui.webview.MWebActivity", "evidence": "进 MWebActivity，只有 webview 容器，内部节点一个都读不到"},
+    "每日有料": {"same_template": false, "activity": "tv.danmaku.bili.ui.webview.MWebActivity", "evidence": "2026-10-31 实测：进 MWebActivity，只有 webview 容器，内部不可读"}
+  },
+  "notes": "【重要修正】同样是 WebView，这个页面的文本节点**可以**通过 uiautomator 读到（TextView/Image 都在），只是内部节点 id 是随机哈希（如 iLQLtBm8np），完全不可依赖。所以「WebView 一定读不到」是错的——取决于具体 WebView 容器：WebGeneralComposeActivity 可读文本，MWebActivity 与 UP 主主页不可读。同一条入口条上就并存两种实现。"
+}

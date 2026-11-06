@@ -1,0 +1,28 @@
+{
+  "key": "contacts",
+  "name": "通讯录（我的关注 / 我的粉丝）",
+  "package": "tv.danmaku.bili",
+  "activity": "kntr.common.compose.launcher.VertexActivity",
+  "entry": "首页 → 消息 → 右上三点 → 通讯录",
+  "captured_at": "2026-10-31T22:10:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "标题", "text": "通讯录"},
+    {"name": "两个 tab", "text_re": "^(我的关注|我的粉丝)$"},
+    {"name": "空态文案", "text": "这里还什么都没有呢~"}
+  ],
+  "targets": [
+    {"name": "返回", "role": "导航", "risk": "none"},
+    {"name": "标题", "text": "通讯录", "role": "文本", "risk": "none"},
+    {"name": "我的关注", "text": "我的关注", "role": "导航", "risk": "none", "note": "当前选中（下划线）"},
+    {"name": "我的粉丝", "text": "我的粉丝", "role": "导航", "risk": "none"},
+    {"name": "空态文案", "text": "这里还什么都没有呢~", "role": "空态", "risk": "none"}
+  ],
+  "account_state": "关注 0 / 粉丝 0，所以两个 tab 都是空态",
+  "uncovered": [
+    "有关注/粉丝时的列表项结构",
+    "点列表项后能否发起私信（这才是关键问题）"
+  ],
+  "notes": "通讯录本质是「关注列表 / 粉丝列表」，是消息中心三点菜单里的第 2 项。**这是目前找到的最接近私信入口的地方**，但因为账号关注数为 0，点进去看不到任何人，无法继续验证「点人能发私信」这条路径。"
+}

@@ -1,0 +1,34 @@
+{
+  "key": "inbox_activity",
+  "name": "活动（所有动态 / 通知）",
+  "package": "com.zhiliaoapp.musically",
+  "activity": "com.ss.android.ugc.aweme.splash.SplashActivity（主 TabHost 内独立页）",
+  "entry": "收件箱 →「活动」",
+  "captured_at": "2026-11-01T20:29:00+08:00",
+  "device": "SERIAL0001",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "标题「活动」", "id": "p8h", "text": "活动", "label_re": "所有动态"},
+    {"name": "空态按钮「所有动态」", "id": "o7_", "text": "所有动态"}
+  ],
+  "targets": [
+    {"name": "返回", "id": "aoi", "label_re": "^返回$", "role": "导航", "risk": "none"},
+    {"name": "标题「活动」", "id": "p8h", "text": "活动", "role": "标题", "risk": "none"},
+    {"name": "筛选条件", "id": "gnx", "label_re": "^筛选条件$", "role": "筛选", "risk": "none", "note": "★通知筛选（全部/点赞/评论/关注/提及），未展开"},
+    {"name": "通知列表", "id": "lp_", "role": "列表", "risk": "none"},
+    {"name": "空态图标", "id": "fqc", "role": "展示", "risk": "none"},
+    {"name": "空态按钮", "id": "o7_", "text": "所有动态", "role": "筛选", "risk": "none"},
+    {"name": "空态说明", "id": "message_tv", "text": "关于账号的通知将会显示在这里。", "role": "展示", "risk": "none"}
+  ],
+  "navigation": [
+    {"action": "BACK", "to": "inbox", "verified": true},
+    {"action": "点击「筛选条件」", "to": "inbox_activity_filter", "verified": false}
+  ],
+  "uncovered": [
+    "★筛选条件面板（通知分类 tab）未展开",
+    "有通知时的条目结构（谁/什么动作/哪条视频/时间/未读点）",
+    "通知条目点击跳转（视频页 / 对方主页 / 评论定位）",
+    "「全部已读」「关注回关」类快捷操作"
+  ],
+  "notes": "★截流相关：通知页是「谁看了我/谁赞了我/谁关注了我」的回捞入口，条目点击可直达对方主页。本账号 0 通知，只能采空态。"
+}

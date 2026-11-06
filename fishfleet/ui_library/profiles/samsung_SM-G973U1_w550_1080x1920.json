@@ -1,0 +1,37 @@
+{
+  "device_key": "samsung_SM-G973U1_w550_1080x1920",
+  "serial": "SERIAL0001",
+  "screen": {
+    "serial": "SERIAL0001",
+    "width": 1080,
+    "height": 1920,
+    "dpi": 315,
+    "status_bar": 63,
+    "nav_bar": 126,
+    "source": "wm",
+    "size_override": false,
+    "density_override": true,
+    "content_h": 1731,
+    "px_per_dp": 1.9688,
+    "dp_w": 548.6,
+    "dp_h": 975.2,
+    "content_dp_h": 879.2,
+    "status_dp": 32.0,
+    "nav_dp": 64.0,
+    "scale": 1.0,
+    "dpi_scale": 0.75,
+    "dp_family": "w550"
+  },
+  "baseline": {
+    "width": 1080,
+    "height": 1920,
+    "dpi": 420,
+    "status_bar": 63,
+    "nav_bar": 126,
+    "dp_w": 411.4,
+    "dp_h": 731.4
+  },
+  "dp_offsets": {},
+  "last_foreground": "com.ss.android.ugc.aweme",
+  "updated_at": 1793810411.3834996
+}

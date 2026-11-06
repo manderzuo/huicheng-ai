@@ -1,0 +1,37 @@
+{
+  "device_key": "samsung_SM-G975U1_w410_1080x1920",
+  "serial": "SERIAL0001",
+  "screen": {
+    "serial": "SERIAL0001",
+    "width": 1080,
+    "height": 1920,
+    "dpi": 420,
+    "status_bar": 63,
+    "nav_bar": 126,
+    "source": "wm",
+    "size_override": false,
+    "density_override": false,
+    "content_h": 1731,
+    "px_per_dp": 2.625,
+    "dp_w": 411.4,
+    "dp_h": 731.4,
+    "content_dp_h": 659.4,
+    "status_dp": 24.0,
+    "nav_dp": 48.0,
+    "scale": 1.0,
+    "dpi_scale": 1.0,
+    "dp_family": "w410"
+  },
+  "baseline": {
+    "width": 1080,
+    "height": 1920,
+    "dpi": 420,
+    "status_bar": 63,
+    "nav_bar": 126,
+    "dp_w": 411.4,
+    "dp_h": 731.4
+  },
+  "dp_offsets": {},
+  "last_foreground": "com.ss.android.ugc.aweme",
+  "updated_at": 1793764928.742205
+}

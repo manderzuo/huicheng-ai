@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>H.264 WebCodecs 测试</title>
+<style>
+  body { background: #111; color: #ddd; font-family: system-ui, sans-serif; padding: 20px; }
+  h2 { color: #4da3ff; }
+  #wrap { display: flex; gap: 20px; align-items: flex-start; }
+  canvas { background: #000; border: 1px solid #333; max-height: 80vh; }
+  .panel { background: #1a1a1a; padding: 16px; border-radius: 8px; min-width: 280px; }
+  .row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #2a2a2a; }
+  .val { color: #4ade80; font-family: monospace; }
+  button { background: #2563eb; color: #fff; border: 0; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-right: 8px; }
+  button:hover { background: #1d4ed8; }
+  #log { background: #0a0a0a; padding: 10px; border-radius: 6px; height: 160px; overflow-y: auto; font-family: monospace; font-size: 12px; margin-top: 12px; }
+  .err { color: #f87171; }
+  .ok { color: #4ade80; }
+</style>
+</head>
+<body>
+<h2>H.264 / WebCodecs 实时流测试</h2>
+
+<div id="wrap">
+  <div>
+    <canvas id="cv" width="408" height="720"></canvas>
+  </div>
+  <div class="panel">
+    <div class="row"><span>状态</span><span class="val" id="status">未连接</span></div>
+    <div class="row"><span>分辨率</span><span class="val" id="res">-</span></div>
+    <div class="row"><span>帧率</span><span class="val" id="fps">-</span></div>
+    <div class="row"><span>总帧数</span><span class="val" id="total">0</span></div>
+    <div class="row"><span>WebCodecs</span><span class="val" id="wc">-</span></div>
+    <div style="margin-top: 16px;">
+      <input id="serial" value="SERIAL0001" style="background:#222;color:#ddd;border:1px solid #333;padding:6px;border-radius:4px;width:180px;">
+      <button id="btn">开始</button>
+      <button id="stop">停止</button>
+    </div>
+    <div id="log"></div>
+  </div>
+</div>
+
+<script src="/static/h264.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const cv = $('cv');
+let player = null;
+window.getPlayer = () => player;
+
+function log(msg, cls = '') {
+  const d = document.createElement('div');
+  d.className = cls;
+  d.textContent = new Date().toLocaleTimeString() + '  ' + msg;
+  $('log').prepend(d);
+  if ($('log').children.length > 100) $('log').lastChild.remove();
+}
+
+$('wc').textContent = ('VideoDecoder' in window) ? '✓ 支持' : '✗ 不支持';
+$('wc').style.color = ('VideoDecoder' in window) ? '#4ade80' : '#f87171';
+
+$('btn').onclick = () => {
+  const serial = $('serial').value.trim();
+  if (!serial) return;
+
+  if (player) player.stop();
+
+  player = new H264Player(cv);
+  window.player = player;
+  player.onFps = (f) => {
+    $('fps').textContent = f + ' fps';
+    $('total').textContent = player.frameCount;
+    $('res').textContent = cv.width + '×' + cv.height;
+  };
+  player.onError = (e) => log(e, 'err');
+
+  $('status').textContent = '连接中...';
+  player.start(serial);
+  log('连接 ' + serial);
+
+  setTimeout(() => {
+    if (player && player.fps > 0) {
+      $('status').textContent = '播放中';
+      $('status').style.color = '#4ade80';
+    }
+  }, 3000);
+};
+
+$('stop').onclick = () => {
+  if (player) { player.stop(); player = null; }
+  $('status').textContent = '已停止';
+  $('fps').textContent = '-';
+  log('已停止');
+};
+
+if (!('VideoDecoder' in window)) {
+  log('浏览器不支持 WebCodecs，请用 Chrome/Edge 94+', 'err');
+}
+
+// ==================== 交互：点击 / 滑动 ====================
+let realW = 1080, realH = 2280;      // 设备真实分辨率
+let dragging = false;
+let dragStart = null;
+let moved = false;
+
+async function loadDeviceSize(serial) {
+  try {
+    const r = await fetch('/api/devices');
+    const d = await r.json();
+    const dev = (d.devices || []).find(x => x.serial === serial);
+    if (dev && dev.width && dev.height) {
+      if (realW !== dev.width || realH !== dev.height) {
+        realW = dev.width;
+        realH = dev.height;
+        log(`设备分辨率更新为 ${realW}x${realH}`);
+      }
+    }
+  } catch (e) { /* 忽略 */ }
+}
+
+// canvas 坐标 → 设备坐标
+function toDevice(e) {
+  const rect = cv.getBoundingClientRect();
+  const rx = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  const ry = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+  return { x: Math.round(rx * realW), y: Math.round(ry * realH) };
+}
+
+async function post(url, data) {
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  return r.json();
+}
+
+cv.style.cursor = 'crosshair';
+cv.style.touchAction = 'none';
+
+cv.addEventListener('mousedown', (e) => {
+  if (e.button !== 0) return;
+  dragging = true;
+  moved = false;
+  dragStart = toDevice(e);
+  e.preventDefault();
+});
+
+cv.addEventListener('mousemove', (e) => {
+  if (!dragging) return;
+  const p = toDevice(e);
+  const dx = p.x - dragStart.x, dy = p.y - dragStart.y;
+  if (Math.hypot(dx, dy) > 30) moved = true;
+});
+
+cv.addEventListener('mouseup', async (e) => {
+  if (!dragging) return;
+  dragging = false;
+
+  // ★ 每次点击前刷新设备真实分辨率（可能被 wm size 改过）
+  await loadDeviceSize($('serial').value.trim());
+
+  const p = toDevice(e);
+
+  if (!moved) {
+    // 单击
+    log(`点击 (${p.x}, ${p.y})`);
+    try { await post('/api/tap', { serial: $('serial').value.trim(), x: p.x, y: p.y }); }
+    catch (err) { log('点击失败: ' + err.message, 'err'); }
+  } else {
+    // 滑动
+    log(`滑动 (${dragStart.x},${dragStart.y}) → (${p.x},${p.y})`);
+    try {
+      await post('/api/swipe-points', {
+        serial: $('serial').value.trim(),
+        x1: dragStart.x, y1: dragStart.y,
+        x2: p.x, y2: p.y, duration: 300,
+      });
+    } catch (err) { log('滑动失败: ' + err.message, 'err'); }
+  }
+  dragStart = null;
+});
+
+// 右键 = 返回
+cv.addEventListener('contextmenu', async (e) => {
+  e.preventDefault();
+  log('返回键');
+  try { await post('/api/key', { serial: $('serial').value.trim(), key: 'back' }); }
+  catch (err) { log('失败: ' + err.message, 'err'); }
+});
+
+// 开始按钮加载设备分辨率
+const _origBtn = $('btn').onclick;
+$('btn').onclick = () => {
+  loadDeviceSize($('serial').value.trim());
+  if (_origBtn) _origBtn();
+};
+</script>
+</body>
+</html>

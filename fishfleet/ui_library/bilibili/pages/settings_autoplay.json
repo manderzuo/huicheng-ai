@@ -1,0 +1,31 @@
+{
+  "key": "settings_autoplay",
+  "name": "设置 · 自动播放设置",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.app.preferences.BiliPreferencesActivity",
+  "entry": "我的 → 设置 → 播放设置 → 自动播放设置",
+  "captured_at": "2026-10-31T20:23:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "标题", "text": "自动播放设置"},
+    {"name": "返回", "label_re": "转到上一层级"}
+  ],
+  "targets": [
+    {"name": "流量网络下自动播放", "text": "流量网络下自动播放", "role": "开关", "risk": "none", "state_hint": "Switch checked=true（当前开启）"},
+    {"name": "视频详情页直接播放", "text": "视频详情页直接播放", "role": "开关", "risk": "none", "state_hint": "Switch checked=true；summary=「进入视频详情页后自动播放视频」"},
+    {"name": "视频详情页直接全屏", "text": "视频详情页直接全屏", "role": "开关", "risk": "none", "state_hint": "Switch checked=false（当前关闭）；summary=「进入视频详情页后自动全屏播放视频」", "note": "★这就是「点视频卡进横屏」的元凶开关，当前是关的"},
+    {"name": "动态/活动页单列视频是否自动播放", "text": "动态/活动页单列视频是否自动播放", "role": "设置", "risk": "none", "state_hint": "summary=「开启自动播放」", "note": "二级页"},
+    {"name": "首页自动播放", "text": "首页自动播放", "role": "设置", "risk": "none", "state_hint": "summary=「Wi-Fi/免流/移动网络下自动播放」", "note": "二级页"}
+  ],
+  "switch_id_note": "本页三个开关都是 id=tv.danmaku.bili:id/switchWidget 的 Switch，位置区分靠 android:id/title 文本；checked 属性可直接读。",
+  "navigation": [
+    {"action": "点击 动态/活动页单列视频是否自动播放", "to": "（二级页）", "verified": false},
+    {"action": "点击 首页自动播放", "to": "（二级页）", "verified": false}
+  ],
+  "uncovered": [
+    "「动态/活动页单列视频」二级页",
+    "「首页自动播放」二级页"
+  ],
+  "notes": "★重要发现：横屏问题的根因在「视频详情页直接全屏」这一项，实测当前为关闭。若自动化遇到进详情页就横屏，先检查这里。本次点热门卡片仍出现横屏，说明除该开关外还有别的触发路径（可能是点击位置落在播放器上触发全屏，值得后续验证）。"
+}

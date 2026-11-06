@@ -1,0 +1,40 @@
+{
+  "key": "hot_feed",
+  "name": "热门（首页「热门」分区）",
+  "package": "tv.danmaku.bili",
+  "activity": "tv.danmaku.bili.MainActivityV2",
+  "entry": "首页顶部 tab → 热门",
+  "captured_at": "2026-10-31T20:02:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "render_tech": "混合：列表为原生，顶部入口条为 Compose",
+  "identity": [
+    {"name": "分区 tab 选中", "id": "tab_title", "text": "热门", "note": "selected"},
+    {"name": "顶部入口条", "id": "hot_entrance_compose", "note": "ComposeView"}
+  ],
+  "targets": [
+    {"name": "排行榜", "text": "排行榜", "role": "导航", "risk": "none", "note": "无 id，靠文本"},
+    {"name": "每周必看", "text": "每周必看", "role": "导航", "risk": "none", "state_hint": "可带「更新啦」标记"},
+    {"name": "入站必刷", "text": "入站必刷", "role": "导航", "risk": "none"},
+    {"name": "预测广场", "text": "预测广场", "role": "导航", "risk": "none"},
+    {"name": "每日有料", "text": "每日有料", "role": "导航", "risk": "none"},
+    {"name": "NEXT大会", "text": "NEXT大会", "role": "导航", "risk": "none", "note": "活动运营位，会随节点变化"},
+    {"name": "视频卡片", "id": "video_layout", "role": "列表项", "risk": "none", "note": "横版：cover + title + duration + desc_1 + desc_2 + recommend_reason + more"},
+    {"name": "卡片标题", "id": "title", "role": "文本", "risk": "none"},
+    {"name": "时长", "id": "duration", "role": "文本", "risk": "none", "note": "label 是「N分钟N秒」自然语言，text 是 20:24"},
+    {"name": "UP 主", "id": "desc_1", "role": "文本", "risk": "none", "note": "label 形如「up主XXX」；联合创作会带「等联合创作」"},
+    {"name": "播放数·发布时间", "id": "desc_2", "role": "文本", "risk": "none", "note": "形如「369.8万播放 · 9小时前」"},
+    {"name": "推荐理由", "id": "recommend_reason", "role": "展示", "risk": "none", "note": "部分卡片没有，View 类型，文本读不到"},
+    {"name": "卡片更多", "id": "more", "label_re": "更多", "role": "菜单", "risk": "none"}
+  ],
+  "navigation": [
+    {"action": "点击卡片封面", "to": "video_detail", "verified": true},
+    {"action": "点击 排行榜", "to": "ranking", "verified": false}
+  ],
+  "uncovered": [
+    "排行榜/每周必看/入站必刷/预测广场/每日有料 各页",
+    "卡片更多菜单",
+    "下拉刷新与分页"
+  ],
+  "notes": "热门页是「横版视频列表」，与首页推荐的「竖版卡片流」是两种完全不同的布局；卡片点击后进入的是传统详情页（不是 Story）。"
+}

@@ -1,0 +1,53 @@
+{
+  "key": "live_room",
+  "name": "直播间",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.bililive.room.ui.roomv3.LiveRoomActivityV3",
+  "entry": "直播分区 → 点任意直播卡",
+  "captured_at": "2026-10-31T20:28:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "直播间根容器", "id": "room_root_layout"},
+    {"name": "播放器", "id": "mp4PlayerView"},
+    {"name": "底部控制组", "id": "bottom_controllers_group"}
+  ],
+  "targets": [
+    {"name": "直播间容器", "id": "roomContainerView", "role": "容器", "risk": "none"},
+    {"name": "播放器", "id": "mp4PlayerView", "role": "播放器", "risk": "none"},
+    {"name": "投屏容器", "id": "live_castscreen_container", "role": "功能", "risk": "none"},
+    {"name": "超级聊天遮罩", "id": "super_chat_mask_layout", "role": "展示", "risk": "none"},
+    {"name": "弹幕列表", "id": "recycler_v2", "role": "列表", "risk": "none", "note": "每条弹幕是一个 TextView(id=text)，格式「用户名: 内容」；系统消息形如「用户名 进入直播间」"},
+    {"name": "弹幕单条", "id": "text", "role": "文本", "risk": "none", "note": "含富文本前缀标记，如「/img 用户名: 内容」「/img /img 粉丝团3 用户名: [表情]」"},
+    {"name": "榜单", "id": "fl_rank_lynx", "role": "展示", "risk": "none", "note": "Lynx 渲染"},
+    {"name": "主播卡片", "label_re": "first-line-anchor-card-entry", "role": "导航", "risk": "none"},
+    {"name": "顶部关注按钮", "label_re": "first-line-follow-button", "role": "状态变更", "risk": "send"},
+    {"name": "更多直播入口", "label_re": "second-line-more-live-entry", "role": "导航", "risk": "none"},
+    {"name": "运营横幅", "id": "live_operation_banner_container", "role": "运营位", "risk": "none", "note": "覆盖整个直播间的活动层，可能拦截点击"},
+    {"name": "顶部操作容器", "id": "top_operation_container", "role": "运营位", "risk": "none"},
+    {"name": "挂件 WebView", "id": "pendantWebViewContainer", "role": "挂件", "risk": "none", "note": "右下角活动挂件，H5；内部不可读"},
+    {"name": "播放器控制器", "id": "player_controller_parent", "role": "容器", "risk": "none"},
+    {"name": "水印/房间号", "id": "roomid", "role": "展示", "risk": "none", "note": "roomid 是纯数字房间号，可作直播间唯一标识"},
+    {"name": "底部控制组", "id": "bottom_controllers_group", "role": "容器", "risk": "none"},
+    {"name": "更多", "id": "more_entrance", "role": "菜单", "risk": "none"},
+    {"name": "发弹幕输入框", "id": "live_send_danmaku", "role": "输入", "risk": "send", "note": "TextView 占位，点击弹输入面板"},
+    {"name": "表情", "id": "bt_emotion_show", "role": "输入", "risk": "none"},
+    {"name": "快捷礼物", "id": "fr_speedy_send_gift", "role": "付费", "risk": "forbidden", "note": "一键送礼，直接扣费"},
+    {"name": "礼物按钮", "id": "live_send_gift", "role": "付费", "risk": "forbidden", "note": "打开礼物面板；red_dot 表示有新礼物"},
+    {"name": "底部关注（+）", "id": "live_bottom_follow_pill", "role": "状态变更", "risk": "send", "note": "follow_action / follow_avatar / follow_plus 三个子节点"},
+    {"name": "直播间进场提示", "id": "text", "role": "文本", "risk": "none", "note": "「用户名 进入直播间」"}
+  ],
+  "navigation": [
+    {"action": "点击 主播卡片", "to": "up_profile", "verified": false},
+    {"action": "点击 礼物", "to": "礼物面板", "verified": false, "risk": "forbidden"},
+    {"action": "点击 更多", "to": "更多菜单", "verified": false},
+    {"action": "返回", "to": "直播分区", "verified": false}
+  ],
+  "uncovered": [
+    "礼物面板细节（涉及付费，刻意不进）",
+    "更多菜单项",
+    "直播间横屏态",
+    "粉丝团/大航海面板"
+  ],
+  "notes": "直播间是「播放器 + 弹幕 + 一堆 Lynx/WebView 运营层」的叠层结构，很多运营位整屏覆盖（live_operation_banner_container 1080x1536），点击容易被它吃掉。★送礼相关控件（fr_speedy_send_gift / live_send_gift）属 forbidden，任何自动化都必须排除。roomid 是稳定的直播间标识。"
+}

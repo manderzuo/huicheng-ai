@@ -1,0 +1,35 @@
+{
+  "key": "search_bangumi",
+  "name": "搜索结果 · 番剧 tab",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.search2.main.BiliMainSearchActivity",
+  "entry": "搜索结果页 → 点「番剧」tab",
+  "captured_at": "2026-10-31T20:57:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "番剧 tab 选中", "id": "tab_title", "text": "番剧", "note": "selected"},
+    {"name": "ogv 结果容器", "id": "ogv_container"}
+  ],
+  "targets": [
+    {"name": "分类 tab", "id": "tab_title", "text_re": "^(综合|番剧|直播|用户|影视|图文)$", "role": "导航", "risk": "none", "state_hint": "selected"},
+    {"name": "空态图", "id": "image", "role": "空态", "risk": "none"},
+    {"name": "空态文案", "id": "text", "text_re": "暂无搜索结果", "role": "空态", "risk": "none", "note": "「暂无搜索结果，\\n为你推荐热门内容」——搜不到时会用推荐内容兜底"},
+    {"name": "番剧项容器", "id": "ogv_container", "role": "列表项", "risk": "none"},
+    {"name": "封面", "id": "cover", "role": "可点击", "risk": "none"},
+    {"name": "番剧名", "id": "title", "role": "文本", "risk": "none"},
+    {"name": "类型标签", "id": "tag", "role": "文本", "risk": "none", "note": "斜杠分隔，如「原创/搞笑/日常/励志」「漫画改/热血/战斗/搞笑」；有的条目没有"},
+    {"name": "立即观看", "id": "play_button", "text": "立即观看", "role": "导航", "risk": "none"},
+    {"name": "评分", "id": "score", "role": "文本", "risk": "none", "note": "如「9.0」「9.9」；部分条目无评分"},
+    {"name": "评分单位", "id": "score_text", "text": "分", "role": "文本", "risk": "none"},
+    {"name": "评分人数", "id": "count", "role": "文本", "risk": "none", "note": "形如「1534人参与」「7.8万人参与」"}
+  ],
+  "navigation": [
+    {"action": "点击番剧项/立即观看", "to": "bangumi_detail", "verified": false}
+  ],
+  "uncovered": [
+    "有真实结果时的布局差异（本次搜索词「deepseek」在番剧类无结果，走的是推荐兜底）",
+    "影视 / 图文 两个 tab"
+  ],
+  "notes": "番剧 tab 是纵向大卡列表（不是网格），每项含封面/名称/类型标签/立即观看/评分/评分人数。★搜不到时会显示「暂无搜索结果，为你推荐热门内容」并填充 ogv_container——所以**看到列表不等于搜到了**，必须检查这条空态文案。"
+}

@@ -1,0 +1,34 @@
+{
+  "key": "search_filter",
+  "name": "搜索结果 · 筛选面板",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.search2.main.BiliMainSearchActivity",
+  "entry": "搜索结果页右上角 filter_icon",
+  "captured_at": "2026-10-31T19:55:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "遮罩", "id": "mask"},
+    {"name": "筛选滚动容器", "id": "filter_scroll_view", "note": "面板高度约 886px，下部被 mask 覆盖"}
+  ],
+  "targets": [
+    {"name": "遮罩（点击关闭）", "id": "mask", "role": "关闭", "risk": "none"},
+    {"name": "筛选容器", "id": "container_list", "role": "容器", "risk": "none"},
+    {"name": "排序选项", "id": "content_tv", "text_re": "^(默认排序|新发布|播放多|弹幕多)$", "role": "单选", "risk": "none", "state_hint": "selected"},
+    {"name": "发布时间选项", "id": "content_tv", "text_re": "^(不限|最近一天|最近一周|最近半年)$", "role": "单选", "risk": "none", "state_hint": "selected"},
+    {"name": "自定义起始日期", "id": "pub_time_start", "role": "输入", "risk": "none", "note": "形如「2026年10月1日」，点击弹日期选择器"},
+    {"name": "自定义结束日期", "id": "pub_time_end", "role": "输入", "risk": "none"},
+    {"name": "内容时长选项", "id": "content_tv", "text_re": "^(不限|0-10分钟|10-30分钟|30-60分钟|60-120分钟|120分钟\\+)$", "role": "单选", "risk": "none", "state_hint": "selected"},
+    {"name": "音画质量选项", "id": "content_tv", "text_re": "^(不限|8K|4K|1080P|120帧|60帧|HDR|高级音质)$", "role": "单选", "risk": "none", "state_hint": "selected", "note": "最后一行为两列，部分被底部遮罩裁切"}
+  ],
+  "navigation": [
+    {"action": "点击任一 content_tv 选项", "to": "search_result（刷新结果）", "verified": false},
+    {"action": "点击 mask", "to": "search_result", "verified": true}
+  ],
+  "uncovered": [
+    "选项点击后是否立即关闭面板并刷新（未实测，避免改变结果集判断）",
+    "自定义日期选择器弹窗",
+    "音画质量第 2 行（120帧/60帧/HDR/高级音质）的可点区域是否被遮罩挡住"
+  ],
+  "notes": "同一 id content_tv 复用于所有选项组，定位时必须同时约束所在分组标题（排序方式/发布时间/内容时长/音画质量）或文本。"
+}

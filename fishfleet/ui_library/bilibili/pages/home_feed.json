@@ -1,0 +1,52 @@
+{
+  "key": "home_feed",
+  "name": "首页 · 推荐流",
+  "package": "tv.danmaku.bili",
+  "activity": "tv.danmaku.bili.MainActivityV2",
+  "entry": "启动 App 默认页 / 底部导航「首页」",
+  "captured_at": "2026-10-31T19:55:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "collected",
+  "identity": [
+    {"name": "底部首页 tab 选中", "id": "bottom_navigation", "note": "label 含「首页,5之1,标签」且 selected"},
+    {"name": "顶部分区 tab 条", "id": "tabs_layout", "note": "首个 tab 通常为「直播」"}
+  ],
+  "targets": [
+    {"name": "个人主页入口", "id": "avatar_layout", "label_re": "个人主页", "role": "导航", "risk": "none", "note": "左上角头像，label=个人主页，按钮"},
+    {"name": "搜索栏", "id": "expand_search", "label_re": "搜索栏", "role": "导航", "risk": "none", "note": "点击进入 BiliMainSearchActivity"},
+    {"name": "搜索词提示", "id": "search_text", "role": "文本", "risk": "none", "note": "展示当前推荐搜索词，内容随服务端变化，不可作为锚点"},
+    {"name": "游戏中心入口", "label_re": "游戏中心", "role": "导航", "risk": "none"},
+    {"name": "消息入口", "label_re": "消息", "id": "animator_icon", "role": "导航", "risk": "none", "state_hint": "label 可能带「N条未读」，红点 id=bili_badge_view"},
+    {"name": "顶部分区 tab 条", "id": "tabs", "role": "导航", "risk": "none", "note": "HorizontalScrollView；子项 id=tab_title，label 形如「推荐,7之2,标签」"},
+    {"name": "当前分区 tab", "id": "tab_title", "text_re": "^(直播|推荐|热门|动画|影视|S16|新征程)$", "role": "导航", "risk": "none", "state_hint": "selected 属性表示当前选中", "note": "分区的数量和名称由服务端下发，7 个只是本次观测值"},
+    {"name": "全部分区入口", "id": "category_image", "label_re": "分区", "role": "导航", "risk": "none"},
+    {"name": "首页 banner", "id": "banner", "role": "展示", "risk": "none", "note": "可能是广告（ad_banner_item_container）；广告位点击会跳外部/活动页"},
+    {"name": "推荐卡片列表", "id": "recycler_view", "role": "列表", "risk": "none"},
+    {"name": "卡片-竖版视频", "role": "列表项", "risk": "none", "note": "容器 label 一次性给出：标题、播放量、弹幕数、时长、UP主名、点赞数"},
+    {"name": "卡片封面", "id": "cover", "role": "可点击", "risk": "none", "note": "点击进入播放页（竖屏沉浸式）"},
+    {"name": "卡片-播放量", "id": "cover_left_text1", "role": "文本", "risk": "none"},
+    {"name": "卡片-弹幕数", "id": "cover_left_text2", "role": "文本", "risk": "none"},
+    {"name": "卡片-时长", "id": "cover_right_text", "role": "文本", "risk": "none"},
+    {"name": "卡片-标题", "id": "title", "role": "文本", "risk": "none"},
+    {"name": "卡片-点赞数", "id": "desc", "role": "文本", "risk": "none", "note": "形如「1万点赞」"},
+    {"name": "卡片-更多菜单", "id": "more", "label_re": "更多", "role": "菜单", "risk": "none", "note": "长按/点击出现「不感兴趣」等，未展开验证"},
+    {"name": "广告卡片", "id": "ad_tint_frame", "role": "广告", "risk": "none", "note": "label 含「创作推广」；与普通卡片结构相似，自动化时应跳过"},
+    {"name": "底部-首页", "id": "bottom_navigation", "label_re": "首页", "role": "导航", "risk": "none", "state_hint": "selected"},
+    {"name": "底部-关注", "id": "bottom_navigation", "label_re": "关注", "role": "导航", "risk": "none"},
+    {"name": "底部-发布内容", "id": "home_publish_icon", "label_re": "发布内容", "role": "导航", "risk": "none", "note": "中间「+」；点击进入投稿流程，属对外副作用，需确认"},
+    {"name": "底部-会员购", "id": "bottom_navigation", "label_re": "会员购", "role": "导航", "risk": "none", "note": "电商模块，涉及付款"},
+    {"name": "底部-我的", "id": "bottom_navigation", "label_re": "我的", "role": "导航", "risk": "none"}
+  ],
+  "navigation": [
+    {"action": "点击 expand_search", "to": "search_home", "verified": true},
+    {"action": "点击底部「我的」", "to": "profile_me", "verified": false},
+    {"action": "点击卡片 cover", "to": "video_detail", "verified": false},
+    {"action": "点击 avatar_layout", "to": "profile_me", "verified": false}
+  ],
+  "uncovered": [
+    "分区 tab 除「推荐」外的内容（直播/热门/动画/影视/S16/新征程）",
+    "首页下拉刷新与「不感兴趣」菜单",
+    "顶部消息角标的具体数量规则"
+  ],
+  "notes": "首页内容全部由服务端个性化下发，账号/地区/时间都会影响卡片集合；控件 id 稳定，内容不可作为识别锚点。"
+}

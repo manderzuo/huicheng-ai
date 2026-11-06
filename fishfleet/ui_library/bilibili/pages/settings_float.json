@@ -1,0 +1,31 @@
+{
+  "key": "settings_float",
+  "name": "设置 · 小窗播放/后台听视频设置",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.app.preferences.BiliPreferencesActivity",
+  "entry": "我的 → 设置 → 播放设置 → 小窗播放/后台听视频设置",
+  "captured_at": "2026-10-31T20:46:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "标题", "text": "小窗播放/后台听视频设置"},
+    {"name": "分组标题", "id": "title", "text_re": "^(小窗播放设置|后台听视频设置)$"}
+  ],
+  "targets": [
+    {"name": "返回", "label_re": "转到上一层级", "role": "导航", "risk": "none"},
+    {"name": "分组-小窗播放设置", "id": "title", "text": "小窗播放设置", "role": "分组", "risk": "none"},
+    {"name": "应用外自动小窗播放", "text": "应用外自动小窗播放", "role": "开关", "risk": "none", "state_hint": "Switch；summary=「切出APP时自动出小窗，继续播放视频/直播」"},
+    {"name": "应用内自动小窗播放", "text": "应用内自动小窗播放", "role": "开关", "risk": "none", "state_hint": "Switch；summary=「切到APP内其他页面时出小窗，继续播放视频」"},
+    {"name": "小窗默认尺寸", "text": "小窗默认尺寸", "role": "设置", "risk": "none", "state_hint": "custom_indicator_text=「默认」+ indicator 箭头", "note": "二级页，选小窗尺寸"},
+    {"name": "分组-后台听视频设置", "id": "title", "text": "后台听视频设置", "role": "分组", "risk": "none"},
+    {"name": "后台听视频", "text": "后台听视频", "role": "开关", "risk": "none", "state_hint": "Switch；summary=「锁屏或切到后台时，继续播放视频声音」"}
+  ],
+  "navigation": [
+    {"action": "点击 小窗默认尺寸", "to": "尺寸选择", "verified": false}
+  ],
+  "uncovered": [
+    "小窗默认尺寸的选择页",
+    "开关的实际效果（未改动，避免影响主人使用）"
+  ],
+  "notes": "本页是「分组 + 开关 + 一个带箭头的二级项」混合形态：开关是 switchWidget，带箭头的二级项用 custom_indicator_text 显示当前值（「默认」）+ indicator 箭头。"
+}

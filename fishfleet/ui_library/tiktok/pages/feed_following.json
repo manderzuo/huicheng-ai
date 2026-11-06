@@ -1,0 +1,43 @@
+{
+  "key": "feed_following",
+  "name": "首页 · 已关注（空态 → 热门创作者引导）",
+  "package": "com.zhiliaoapp.musically",
+  "activity": "com.ss.android.ugc.aweme.splash.SplashActivity（主 TabHost）",
+  "entry": "首页顶部 tab「已关注」（从「推荐」左滑或点击）",
+  "captured_at": "2026-11-01T20:27:00+08:00",
+  "device": "SERIAL0001",
+  "evidence_level": "navigation-verified",
+  "state": "本账号关注数为 0，因此「已关注」流为空，落到服务端下发的热门创作者引导卡",
+  "identity": [
+    {"name": "顶部「已关注」tab 选中", "label_re": "^已关注$", "state_hint": "selected"},
+    {"name": "空态标题「热门创作者」", "id": "pqy", "text": "热门创作者", "note": "★首次进入时层级里读不到（只有空容器），第二次进入后才出现文本节点。属加载时序问题，不能假设一定读到"},
+    {"name": "空态副标题", "id": "p3y", "text": "关注某个账号，以查看其最新视频。"}
+  ],
+  "targets": [
+    {"name": "顶部-已关注 tab", "label_re": "^已关注$", "role": "导航", "risk": "none", "state_hint": "selected"},
+    {"name": "顶部-推荐 tab", "label_re": "^推荐$", "role": "导航", "risk": "none"},
+    {"name": "左上 LIVE 入口", "id": "fj6", "role": "导航", "risk": "none", "note": "位于 0,126，层级无 label，只能靠位置/id；点击进入直播"},
+    {"name": "右上 搜索按钮", "id": "fj6", "role": "导航", "risk": "none", "note": "位于 933,126，与 LIVE 同 id ★需靠坐标区分"},
+    {"name": "引导卡容器", "id": "nlk", "role": "列表", "risk": "none"},
+    {"name": "创作者卡片", "id": "cls", "role": "列表项", "risk": "send", "note": "外层 cls/ehg/gl9；当前选中卡带 selected"},
+    {"name": "卡片-封面/背景", "id": "gl9", "role": "展示", "risk": "none"},
+    {"name": "卡片-关闭 X", "id": "c09", "role": "控件", "risk": "none", "note": "右上角 63x63"},
+    {"name": "卡片-作者头像", "id": "al6", "role": "展示", "risk": "none"},
+    {"name": "卡片-作者名", "id": "q4j", "role": "文本", "risk": "none", "note": "如「Guardman」"},
+    {"name": "卡片-@handle", "id": "l0t", "role": "文本", "risk": "none", "note": "如「@mcgardman」"},
+    {"name": "卡片-关注按钮", "id": "ep7", "text": "关注", "role": "关注", "risk": "send", "note": "★Button，点击立即关注，无二次确认"},
+    {"name": "story 创建环", "id": "mq2", "role": "导航", "risk": "none", "note": "mq3 容器 + storybadgeicon + 「创建」"},
+    {"name": "旧版卡片容器（兼容）", "id": "mq3", "role": "容器", "risk": "none", "note": "首次进入时的空容器，与 cls 结构的差异随版本/加载态变化"}
+  ],
+  "navigation": [
+    {"action": "点击顶部「推荐」", "to": "feed", "verified": true},
+    {"action": "点击左上 LIVE", "to": "live", "verified": false},
+    {"action": "点击右上搜索", "to": "search", "verified": false}
+  ],
+  "uncovered": [
+    "有真实关注对象时的「已关注」视频流（本账号关注数 0，无法采集到真实流结构）",
+    "热门创作者卡的滑动/换一批逻辑",
+    "卡片关注按钮点击后的状态变化（未验证，属 send 不执行）"
+  ],
+  "notes": "★重要修正：首次进入时「热门创作者」「关注某个账号…」以及红色关注按钮都读不到（层级只有空容器），截图能看到；但**第二次进入时这些文本和按钮都出现在层级里**（pqy/p3y/q4j/l0t/ep7）。结论：这是加载时序 + 自绘混合导致的，不是永久不可读。自动化时应先等待文本节点出现再判定，超时则回退截图。"
+}

@@ -1,0 +1,43 @@
+{
+  "key": "column_detail",
+  "name": "专栏详情页（图文阅读）",
+  "package": "tv.danmaku.bili",
+  "activity": "kntr.common.compose.launcher.VertexActivity",
+  "entry": "搜索结果·图文 tab → 点专栏条目；或动态/首页的专栏卡",
+  "captured_at": "2026-10-31T21:02:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "render_tech": "Jetpack Compose",
+  "identity": [
+    {"name": "封面区", "note": "顶部 1080x608 的 View（无 id）"},
+    {"name": "作者 + 发布时间", "note": "作者名与「2026年8月24日 13:16」成对出现"},
+    {"name": "底部评论占位", "text": "点我发评论"}
+  ],
+  "targets": [
+    {"name": "封面/头图", "role": "展示", "risk": "none", "note": "View，无 id"},
+    {"name": "返回", "role": "导航", "risk": "none", "note": "左上 View 95x95，无 id 无 label"},
+    {"name": "转发", "label_re": "转发", "role": "分享", "risk": "send"},
+    {"name": "更多", "label_re": "更多", "role": "菜单", "risk": "none"},
+    {"name": "作者头像", "role": "导航", "risk": "none", "note": "View 95x95"},
+    {"name": "作者名", "role": "文本", "risk": "none", "note": "如「17173妖气山」"},
+    {"name": "发布时间", "role": "文本", "risk": "none", "note": "精确到分钟，「2026年8月24日 13:16」"},
+    {"name": "关注按钮", "role": "状态变更", "risk": "send", "note": "文案「关注」"},
+    {"name": "所属文集", "role": "导航", "risk": "none", "note": "如「妖气山编辑在想什么」+「7篇」"},
+    {"name": "正文区", "role": "容器", "risk": "none", "note": "View 1002x404，正文内容在内部但多数节点无 id"},
+    {"name": "评论输入入口", "text": "点我发评论", "role": "输入", "risk": "send", "note": "占位文案，点击进入评论编辑"},
+    {"name": "点赞", "role": "互动", "risk": "send", "note": "图标无 id，右侧数字「14」是可读的"},
+    {"name": "评论数", "role": "文本", "risk": "none", "note": "「223」"},
+    {"name": "投币", "label_re": "投币", "role": "互动", "risk": "send"},
+    {"name": "收藏/分享", "role": "互动", "risk": "send", "note": "最右侧图标，带数字「210」，但无 label 无 id"}
+  ],
+  "navigation": [
+    {"action": "点击 作者", "to": "up_profile", "verified": false},
+    {"action": "点击 所属文集", "to": "文集列表", "verified": false}
+  ],
+  "uncovered": [
+    "正文完整结构（图片/代码块/引用等富文本节点）",
+    "评论区展开后的样子",
+    "转发面板"
+  ],
+  "notes": "专栏详情是纯 Compose 阅读器：除了「转发/更多/投币」三个 label 和几段文本，几乎所有控件都没有 id。底部操作条 4 个图标（赞/评/币/藏）只有数字可读，图标本身无 label——定位只能靠坐标或相对位置，稳定性差。"
+}

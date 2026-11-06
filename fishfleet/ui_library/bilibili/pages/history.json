@@ -1,0 +1,41 @@
+{
+  "key": "history",
+  "name": "历史记录",
+  "package": "tv.danmaku.bili",
+  "activity": "kntr.common.compose.launcher.VertexActivity",
+  "entry": "我的 → 历史记录",
+  "captured_at": "2026-10-31T20:00:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "render_tech": "Jetpack Compose",
+  "identity": [
+    {"name": "标题", "text": "历史记录", "note": "无资源 id，只能靠 text 匹配"}
+  ],
+  "targets": [
+    {"name": "返回", "role": "导航", "risk": "none", "note": "左上角 View，95x95，无 id 无 label"},
+    {"name": "标题", "text": "历史记录", "role": "文本", "risk": "none"},
+    {"name": "搜索我的历史记录", "label_re": "搜索我的历史记录", "role": "功能", "risk": "none", "note": "有 label，无 id"},
+    {"name": "更多（右上）", "label_re": "更多", "role": "菜单", "risk": "none"},
+    {"name": "筛选 tab", "text_re": "^(全部|视频|直播|专栏)$", "role": "导航", "risk": "none", "note": "无 id；选中态靠样式区分，节点上不一定有 selected 属性"},
+    {"name": "批量管理", "label_re": "批量管理", "role": "操作", "risk": "none", "note": "进入多选删除模式，删除属破坏性操作"},
+    {"name": "时间分组标题", "text_re": "^(今天|昨天|更早)$", "role": "分组", "risk": "none"},
+    {"name": "条目标题", "role": "文本", "risk": "none", "note": "TextView，无 id"},
+    {"name": "条目 UP 名", "role": "文本", "risk": "none", "note": "TextView，无 id"},
+    {"name": "条目时间", "role": "文本", "risk": "none", "note": "形如「2026年10月31日 19:57」"},
+    {"name": "观看进度", "role": "文本", "risk": "none", "note": "形如「00:18 / 04:03」，直播条目没有"},
+    {"name": "状态标记", "role": "状态", "risk": "none", "note": "已看完 / 直播 / 未开播 / 直播中，靠文本判断"},
+    {"name": "条目更多菜单", "label_re": "更多", "role": "菜单", "risk": "none"},
+    {"name": "未关注直播的「关注」按钮", "text": "关注", "role": "状态变更", "risk": "send", "note": "历史页可直接关注，属对外状态变更"}
+  ],
+  "navigation": [
+    {"action": "点击条目", "to": "video_detail", "verified": false},
+    {"action": "点击批量管理", "to": "history_batch", "verified": false}
+  ],
+  "uncovered": [
+    "视频/直播/专栏 分类下的差异",
+    "批量管理与删除流程",
+    "条目更多菜单项",
+    "搜索历史记录"
+  ],
+  "notes": "【重要】这是 Compose 页面，除了 label（无障碍文本）之外几乎没有资源 id。自动化定位只能靠 text/label + 兄弟节点相对位置 + 屏幕坐标，稳定性低于布局型页面。"
+}

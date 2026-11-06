@@ -1,0 +1,134 @@
+﻿[
+    {
+        "key":  "settings_connectivity",
+        "name":  "連接/Wi-Fi",
+        "activity":  "com.android.settings/.Settings$WifiSettingsActivity",
+        "bytes":  323963
+    },
+    {
+        "key":  "settings_bluetooth",
+        "name":  "藍牙",
+        "activity":  "com.android.settings/.Settings$BluetoothSettingsActivity",
+        "bytes":  294725
+    },
+    {
+        "key":  "settings_data_usage",
+        "name":  "數據用量",
+        "activity":  "com.android.settings/.Settings$DataUsageSummaryActivity",
+        "bytes":  297670
+    },
+    {
+        "key":  "settings_airplane",
+        "name":  "飛航模式",
+        "activity":  "com.android.settings/.Settings$AirplaneModeSettingsActivity",
+        "bytes":  313497
+    },
+    {
+        "key":  "settings_sound",
+        "name":  "音效與震動",
+        "activity":  "com.android.settings/.Settings$SoundSettingsActivity",
+        "bytes":  340085
+    },
+    {
+        "key":  "settings_notification",
+        "name":  "通知",
+        "activity":  "com.android.settings/.Settings$ConfigureNotificationSettingsActivity",
+        "bytes":  347895
+    },
+    {
+        "key":  "settings_display",
+        "name":  "顯示螢幕",
+        "activity":  "com.android.settings/.Settings$DisplaySettingsActivity",
+        "bytes":  347042
+    },
+    {
+        "key":  "settings_wallpaper",
+        "name":  "桌布與樣式",
+        "activity":  "com.android.settings/.Settings$DisplaySettingsActivity",
+        "bytes":  347046
+    },
+    {
+        "key":  "settings_security",
+        "name":  "生物辨識與安全性",
+        "activity":  "com.android.settings/.Settings$BiometricsAndSecuritySettingsActivity",
+        "bytes":  371506
+    },
+    {
+        "key":  "settings_privacy",
+        "name":  "隱私設定",
+        "activity":  "com.android.settings/.Settings$PrivacyDashboardActivity",
+        "bytes":  370944
+    },
+    {
+        "key":  "settings_location",
+        "name":  "位置",
+        "activity":  "com.android.settings/.Settings$LocationSettingsActivity",
+        "bytes":  364205
+    },
+    {
+        "key":  "settings_accounts",
+        "name":  "帳號與備份",
+        "activity":  "com.android.settings/.Settings$AccountDashboardActivity",
+        "bytes":  369625
+    },
+    {
+        "key":  "settings_accessibility",
+        "name":  "協助工具",
+        "activity":  "com.samsung.accessibility/.homepage.AccessibilityHomepageActivity",
+        "bytes":  370347
+    },
+    {
+        "key":  "settings_language",
+        "name":  "語言與輸入",
+        "activity":  "com.android.settings/.Settings$LocalePickerActivity",
+        "bytes":  368144
+    },
+    {
+        "key":  "settings_date_time",
+        "name":  "日期與時間",
+        "activity":  "com.android.settings/.Settings$DateTimeSettingsActivity",
+        "bytes":  368376
+    },
+    {
+        "key":  "settings_about",
+        "name":  "關於手機",
+        "activity":  "com.android.settings/.Settings$MyDeviceInfoActivity",
+        "bytes":  376151
+    },
+    {
+        "key":  "settings_developer",
+        "name":  "開發者選項",
+        "activity":  "com.android.settings/.Settings$DevelopmentSettingsDashboardActivity",
+        "bytes":  368755
+    },
+    {
+        "key":  "settings_reset",
+        "name":  "重設",
+        "activity":  "com.android.settings/.Settings$DevelopmentSettingsDashboardActivity",
+        "bytes":  368759
+    },
+    {
+        "key":  "settings_update",
+        "name":  "軟體更新",
+        "activity":  "com.google.android.gms/.update.SystemUpdateActivity",
+        "bytes":  383639
+    },
+    {
+        "key":  "settings_battery",
+        "name":  "電池省電",
+        "activity":  "com.samsung.android.lool/com.samsung.android.sm.battery.ui.mode.BatterySaverSettingsActivity",
+        "bytes":  408758
+    },
+    {
+        "key":  "settings_storage",
+        "name":  "儲存空間",
+        "activity":  "com.sec.android.app.myfiles/.external.ui.AnalyzeStorageActivity",
+        "bytes":  451387
+    },
+    {
+        "key":  "settings_apps",
+        "name":  "應用程式",
+        "activity":  "com.android.settings/.Settings$ManageApplicationsActivity",
+        "bytes":  456988
+    }
+]

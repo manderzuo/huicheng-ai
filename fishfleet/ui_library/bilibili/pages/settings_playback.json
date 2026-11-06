@@ -1,0 +1,49 @@
+{
+  "key": "settings_playback",
+  "name": "设置 · 播放设置（含竖屏模式子页）",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.app.preferences.BiliPreferencesActivity",
+  "entry": "我的 → 设置 → 播放设置",
+  "captured_at": "2026-10-31T20:22:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "标题", "text_re": "^(播放设置|竖屏模式设置|自动播放设置)$"},
+    {"name": "返回", "label_re": "转到上一层级"}
+  ],
+  "targets": [
+    {"name": "返回", "label_re": "转到上一层级", "role": "导航", "risk": "none"},
+    {"name": "自动播放设置", "text": "自动播放设置", "role": "设置", "risk": "none", "note": "二级页，含移动网络/Wi-Fi 下自动播放等"},
+    {"name": "竖屏模式设置", "text": "竖屏模式设置", "role": "设置", "risk": "none", "note": "二级页"},
+    {"name": "小窗播放/后台听视频设置", "text": "小窗播放/后台听视频设置", "role": "设置", "risk": "none"},
+    {"name": "弹幕/字幕设置", "text": "弹幕/字幕设置", "role": "设置", "risk": "none"},
+    {"name": "清晰度设置", "text": "清晰度设置", "role": "设置", "risk": "none"},
+    {"name": "其他设置", "text": "其他设置", "role": "设置", "risk": "none"},
+    {"name": "竖屏模式开关", "id": "switchWidget", "text": "竖屏视频全屏用竖屏模式播放", "role": "开关", "risk": "none", "state_hint": "Switch 的 checked 属性；summary=「全屏后可以上下滑视频」"}
+  ],
+  "sub_pages": {
+    "竖屏模式设置": {
+      "items": [
+        {"title": "竖屏视频全屏用竖屏模式播放", "summary": "全屏后可以上下滑视频", "widget": "Switch", "id": "tv.danmaku.bili:id/switchWidget"}
+      ],
+      "note": "只有这一项开关，当前为 checked（开启）。它控制的是「竖屏视频全屏时用竖屏而不是横屏」，不是自动全屏。"
+    },
+    "清晰度设置": {
+      "items": [
+        {"title": "优先播放HDR清晰度", "summary": "大会员且设备支持时优先选中", "widget": "Switch", "checked": false}
+      ],
+      "note": "只有这一项；开启后大会员+支持 HDR 的设备会优先选 HDR。"
+    }
+  },
+  "navigation": [
+    {"action": "点击 自动播放设置", "to": "settings_autoplay", "verified": true},
+    {"action": "点击 弹幕/字幕设置", "to": "settings_danmaku", "verified": true},
+    {"action": "点击 竖屏模式设置", "to": "本条 sub_pages", "verified": true},
+    {"action": "点击 清晰度设置", "to": "本条 sub_pages", "verified": true}
+  ],
+  "uncovered": [
+    "小窗播放/后台听视频设置 的内容",
+    "其他设置 的内容"
+  ],
+  "notes": "设置二级页同样是原生 preferences 布局：android:id/title + android:id/summary + android:id/widget_frame，开关是 id=switchWidget 的 Switch，checked 属性可读。★未找到「自动全屏」开关——长视频详情页进横屏的原因还需在「自动播放设置」里确认。"
+}

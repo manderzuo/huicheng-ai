@@ -1,0 +1,34 @@
+{
+  "key": "favorites",
+  "name": "我的收藏（收藏 / 追更）",
+  "package": "tv.danmaku.bili",
+  "activity": "tv.danmaku.bili.ui.favorites.FavoritesActivityV2",
+  "entry": "我的 → 我的收藏",
+  "captured_at": "2026-10-31T20:00:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "account_state_at_capture": "收藏为空（此账号未收藏任何内容），页面处于空状态",
+  "identity": [
+    {"name": "顶部 tab", "id": "tab_layout", "note": "收藏 / 追更，tab_title selected 表示当前"},
+    {"name": "空状态文案", "text_re": "收藏的视频、图文都会在这里展示"}
+  ],
+  "targets": [
+    {"name": "返回", "role": "导航", "risk": "none", "note": "tool_bar_container 内 ImageButton，无 id 无 label，只能按坐标 0-110px 区域点"},
+    {"name": "收藏 tab", "id": "tab_title", "text": "收藏", "role": "导航", "risk": "none", "state_hint": "selected"},
+    {"name": "追更 tab", "id": "tab_title", "text": "追更", "role": "导航", "risk": "none", "note": "追番/追剧更新列表"},
+    {"name": "内容列表", "id": "view_pager", "role": "列表", "risk": "none"},
+    {"name": "空状态容器", "id": "error_view", "role": "空态", "risk": "none", "note": "ComposeView"},
+    {"name": "空状态提示", "text_re": "收藏的视频、图文都会在这里展示", "role": "文本", "risk": "none"},
+    {"name": "去首页收藏", "text": "去首页收藏", "role": "导航", "risk": "none"}
+  ],
+  "navigation": [
+    {"action": "点击 追更 tab", "to": "favorites_follow", "verified": false},
+    {"action": "点击 去首页收藏", "to": "home_feed", "verified": false}
+  ],
+  "uncovered": [
+    "有收藏内容时的列表布局（当前账号为空，无法采集）",
+    "追更 tab 的内容",
+    "收藏夹分类/新建收藏夹入口"
+  ],
+  "notes": "空状态与有内容状态是两套布局，本次只采到空状态。需要账号有收藏才能补齐列表结构。"
+}

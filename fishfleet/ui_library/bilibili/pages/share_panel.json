@@ -1,0 +1,39 @@
+{
+  "key": "share_panel",
+  "name": "分享面板（视频详情页）",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.ship.theseus.detail.UnitedBizDetailsActivity",
+  "entry": "视频详情页 → 点「分享」（frame_share）",
+  "captured_at": "2026-10-31T20:52:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "遮罩", "id": "blank_layout"},
+    {"name": "分享标题", "id": "title", "text": "分享"},
+    {"name": "取消按钮", "id": "cancel", "text": "取消"}
+  ],
+  "targets": [
+    {"name": "遮罩（点击关闭）", "id": "blank_layout", "role": "关闭", "risk": "none"},
+    {"name": "面板容器", "id": "content_layout", "role": "容器", "risk": "none"},
+    {"name": "标题", "id": "title", "text": "分享", "role": "文本", "risk": "none"},
+    {"name": "分享目标（第一行）", "id": "item", "text_re": "^(QQ|QQ空间|复制链接|更多)$", "role": "操作", "risk": "send", "note": "点「QQ/QQ空间」会跳第三方并可能直接发送；「复制链接」只写剪贴板，风险最低"},
+    {"name": "分享目标（第二行）", "id": "item", "text_re": "^(动态|消息|助TA必火|图片分享|下载分享|标记点分享)$", "role": "操作", "risk": "send", "note": "「动态」「消息」= 对外发布；「图片分享」「下载分享」「标记点分享」= 生成本地文件，较安全"},
+    {"name": "活动角标", "id": "badge_tag", "text": "领百元券", "role": "推广", "risk": "none", "note": "挂在「助TA必火」上；助TA必火是付费推广，属 forbidden"},
+    {"name": "取消", "id": "cancel", "text": "取消", "role": "关闭", "risk": "none"}
+  ],
+  "panel_rows": {
+    "row1": ["QQ", "QQ空间", "复制链接", "更多"],
+    "row2": ["动态", "消息", "助TA必火（带「领百元券」角标）", "图片分享", "下载分享", "标记点分享"]
+  },
+  "navigation": [
+    {"action": "点击 复制链接", "to": "写剪贴板后关闭", "verified": false},
+    {"action": "点击 动态/消息", "to": "外部发布流程", "verified": false, "risk": "send"},
+    {"action": "点击 取消/遮罩", "to": "返回详情页", "verified": false}
+  ],
+  "uncovered": [
+    "「更多」里的完整分享渠道列表（含第三方 App）",
+    "「图片分享」「标记点分享」的二级页面",
+    "各渠道点击后的实际行为"
+  ],
+  "notes": "分享面板是底部弹出式（BottomSheet 风格），两行图标网格 + 底部整条「取消」。所有分享项共用 id=item，只能靠 text 区分。★「助TA必火」是付费推广（badge 还带「领百元券」），必须归入 forbidden；「动态」「消息」属对外发布，归 send。真正无副作用的是「复制链接」和「取消」。"
+}

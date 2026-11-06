@@ -1,0 +1,33 @@
+{
+  "key": "dm_new_chat",
+  "name": "新建聊天（选人面板）",
+  "package": "com.zhiliaoapp.musically",
+  "activity": "com.ss.android.ugc.aweme.splash.SplashActivity（底部工作表）",
+  "entry": "收件箱 → 左上「新建聊天」",
+  "captured_at": "2026-11-01T20:29:30+08:00",
+  "device": "SERIAL0001",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "底部工作表容器", "id": "d3e", "label_re": "底部工作表"},
+    {"name": "标题「新建聊天」", "id": "it3", "text": "新建聊天"}
+  ],
+  "targets": [
+    {"name": "面板容器", "id": "d3e", "label_re": "底部工作表", "role": "容器", "risk": "none"},
+    {"name": "标题", "id": "it3", "text": "新建聊天", "role": "标题", "risk": "none"},
+    {"name": "关闭/更多", "id": "ita", "role": "导航", "risk": "none", "note": "右上角 105x105 按钮，无 label"},
+    {"name": "搜索输入框", "id": "lwn", "role": "输入", "risk": "none", "note": "EditText，可直接输入用户名/handle；输入不发送，安全"},
+    {"name": "搜索图标", "id": "gw6", "role": "展示", "risk": "none"},
+    {"name": "候选列表", "id": "ch4", "role": "列表", "risk": "none"},
+    {"name": "分组标题", "text": "选择一个群聊", "role": "分组", "risk": "none", "note": "无群聊时显示，下方为空"}
+  ],
+  "navigation": [
+    {"action": "输入 handle 后选择用户", "to": "dm_chat", "verified": false, "note": "★截流核心：搜人→进入会话→发私信，最后一步不点发送"},
+    {"action": "BACK", "to": "inbox", "verified": true}
+  ],
+  "uncovered": [
+    "真实输入后的搜索联想结果与用户卡结构",
+    "群聊创建流程",
+    "进入会话后的消息列表与输入框结构"
+  ],
+  "notes": "★这是私信链路的入口页。输入框可安全输入（不会外发），从搜索结果点人进入会话也是只读操作；真正的外发点在会话页的发送按钮。"
+}

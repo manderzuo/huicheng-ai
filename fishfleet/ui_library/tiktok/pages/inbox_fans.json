@@ -1,0 +1,37 @@
+{
+  "key": "inbox_fans",
+  "name": "新粉丝",
+  "package": "com.zhiliaoapp.musically",
+  "activity": "com.ss.android.ugc.aweme.splash.SplashActivity（主 TabHost 内独立页）",
+  "entry": "收件箱 →「新粉丝」",
+  "captured_at": "2026-11-01T20:28:40+08:00",
+  "device": "SERIAL0001",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "顶部 tab 标题「新粉丝」", "id": "it3", "text": "新粉丝"},
+    {"name": "空态标题「新粉丝」", "id": "osx", "text": "新粉丝"}
+  ],
+  "targets": [
+    {"name": "返回", "id": "iti", "role": "导航", "risk": "none", "note": "105x105，Button 无 id/label，位于 21,165"},
+    {"name": "顶部 tab「新粉丝」", "id": "it3", "text": "新粉丝", "role": "导航", "risk": "none"},
+    {"name": "列表", "id": "eqs", "role": "列表", "risk": "none"},
+    {"name": "空态图标", "id": "osi", "role": "展示", "risk": "none"},
+    {"name": "空态标题", "id": "osx", "text": "新粉丝", "role": "展示", "risk": "none"},
+    {"name": "空态说明", "id": "orz", "text": "关注你的人将会出现在这里", "role": "展示", "risk": "none"}
+  ],
+  "navigation": [
+    {"action": "BACK", "to": "inbox", "verified": true}
+  ],
+  "uncovered": [
+    "有粉丝时的粉丝列表项结构（头像/昵称/回关按钮/时间）",
+    "列表项点击进入对方主页",
+    "右上角是否有「全部已读」类操作"
+  ],
+  "notes": "★截流相关：粉丝列表是回捞已有互动人群的入口之一，但本账号粉丝数为 0，只能采到空态。真实列表结构需换有粉丝的账号补采。",
+  "list_item_schema_expected": [
+    "头像（可点进主页）",
+    "昵称 / @handle",
+    "关注时间或「新」标记",
+    "回关按钮（Follow back）— send 类"
+  ]
+}

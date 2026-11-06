@@ -1,0 +1,44 @@
+{
+  "key": "ranking",
+  "name": "排行榜（全区排行榜）",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.lib.ui.GeneralActivity",
+  "entry": "首页 → 热门 → 顶部入口条「排行榜」",
+  "captured_at": "2026-10-31T20:36:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "标题", "text": "全区排行榜"},
+    {"name": "分类 tab", "id": "tab_title", "text_re": "^(全站|番剧|国创|纪录片|电影|电视剧|动画|游戏|鬼畜|音乐)$"}
+  ],
+  "targets": [
+    {"name": "返回", "role": "导航", "risk": "none", "note": "nav_top_bar 内 ImageButton，无 id 无 label"},
+    {"name": "标题", "text": "全区排行榜", "role": "文本", "risk": "none"},
+    {"name": "右上图标1", "id": "animator_icon", "role": "菜单", "risk": "none", "note": "无 label；可能是往期排行榜/榜单规则"},
+    {"name": "右上图标2", "id": "icon", "role": "菜单", "risk": "none", "note": "无 label"},
+    {"name": "分类 tab", "id": "tab_title", "role": "导航", "risk": "none", "state_hint": "selected"},
+    {"name": "榜单列表", "id": "recycler", "role": "列表", "risk": "none"},
+    {"name": "榜单项", "id": "video_layout", "role": "列表项", "risk": "none"},
+    {"name": "封面", "id": "cover", "role": "可点击", "risk": "none"},
+    {"name": "排名", "id": "tv_rank_num", "role": "文本", "risk": "none", "note": "前 3 名常显示奖牌图标而非数字，此时该节点为空或缺失"},
+    {"name": "标题", "id": "title", "role": "文本", "risk": "none"},
+    {"name": "时长", "id": "tv_duration", "role": "文本", "risk": "none"},
+    {"name": "UP 主", "id": "up_name", "role": "文本", "risk": "none"},
+    {"name": "数据容器", "id": "rank_info_container", "role": "容器", "risk": "none"},
+    {"name": "播放量", "id": "rank_play_num", "role": "文本", "risk": "none"},
+    {"name": "弹幕数", "id": "rank_danmaku_num", "role": "文本", "risk": "none"},
+    {"name": "条目更多", "id": "anchor_more", "role": "菜单", "risk": "none"},
+    {"name": "展开该 UP 全部上榜", "id": "up_more_contain", "role": "展开", "risk": "none", "note": "up_more_text=「显示此UP主全部上榜视频」+ up_more_expand 箭头；只在同一 UP 有多条上榜时出现"}
+  ],
+  "navigation": [
+    {"action": "点击分类 tab", "to": "换榜单", "verified": false},
+    {"action": "点击榜单项", "to": "video_detail", "verified": false},
+    {"action": "点击 展开该 UP 全部上榜", "to": "展开内联列表", "verified": false}
+  ],
+  "uncovered": [
+    "右上两个图标的菜单内容",
+    "各分类榜单的差异（结构应同构）",
+    "往期榜单"
+  ],
+  "notes": "排行榜是原生实现、id 齐全，是最好自动化的一类页面。排名前 3 名用奖牌图标代替数字，所以 tv_rank_num 可能读不到，需要按「列表顺序」推断名次。"
+}

@@ -1,0 +1,59 @@
+{
+  "key": "feed",
+  "name": "首页 · 推荐流（For You）",
+  "package": "com.zhiliaoapp.musically",
+  "activity": "com.ss.android.ugc.aweme.splash.SplashActivity（启动器后由主 TabHost 承载）",
+  "entry": "启动 App 默认进入；底部导航「首页」",
+  "captured_at": "2026-11-01T20:26:00+08:00",
+  "device": "SERIAL0001",
+  "evidence_level": "collected",
+  "identity": [
+    {"name": "底部「首页」tab 选中", "id": "i5n", "label_re": "^首页$", "state_hint": "selected"},
+    {"name": "右侧操作栏存在点赞按钮", "label_re": "点赞视频", "note": "最稳的页面锚点：TikTok 视频页独有"},
+    {"name": "顶部「推荐 / 已关注」双 tab", "note": "推荐 selected 时为推荐流"}
+  ],
+  "targets": [
+    {"name": "底部-首页", "id": "i5n", "label_re": "^首页$", "role": "导航", "risk": "none", "state_hint": "selected"},
+    {"name": "底部-好友", "id": "i5m", "label_re": "^好友$", "role": "导航", "risk": "none"},
+    {"name": "底部-创建", "id": "i5k", "label_re": "^创建$", "role": "导航", "risk": "none", "note": "进入拍摄/发布流程，属对外副作用，需确认"},
+    {"name": "底部-收件箱", "id": "i5o", "label_re": "^收件箱$", "role": "导航", "risk": "none"},
+    {"name": "底部-主页", "id": "i5p", "label_re": "^主页$", "role": "导航", "risk": "none"},
+
+    {"name": "顶部-已关注 tab", "label_re": "^已关注$", "role": "导航", "risk": "none", "note": "容器为混淆类 k3b，内部 android:id/text1；未选中时无 selected"},
+    {"name": "顶部-推荐 tab", "label_re": "^推荐$", "role": "导航", "risk": "none", "state_hint": "selected"},
+
+    {"name": "作者头像", "id": "q2c", "label_re": "主页$", "role": "导航", "risk": "none", "note": "label 形如「昵称 主页」，点击进入作者个人主页"},
+    {"name": "关注按钮", "id": "epu", "role": "关注", "risk": "send", "label_re": "^关注", "note": "未关注时 label=「关注 昵称」；已关注时按钮变为头像下方的勾/取消关注区（待验证）"},
+    {"name": "点赞按钮", "id": "d63", "label_re": "^点赞视频", "role": "互动", "risk": "send", "note": "★id 与「分享」按钮重复，必须靠 label 区分。label 含总数，如「点赞视频。9.2 万个赞」"},
+    {"name": "点赞数", "id": "d60", "text_re": "^[0-9.]+\\s*万?$", "role": "文本", "risk": "none"},
+    {"name": "评论按钮", "id": "ca8", "label_re": "阅读或添加评论", "role": "互动", "risk": "none", "note": "打开评论区属纯浏览；label 含评论总数"},
+    {"name": "评论数", "id": "c7z", "text_re": "^[0-9]+$", "role": "文本", "risk": "none"},
+    {"name": "收藏按钮", "id": "e8q", "label_re": "收藏", "role": "互动", "risk": "send", "note": "label=「将此视频添加到或移出收藏。」，无状态词，需看图标颜色或收藏数变化"},
+    {"name": "收藏数", "id": "e8_", "role": "文本", "risk": "none"},
+    {"name": "分享按钮", "id": "d63", "label_re": "分享视频", "role": "互动", "risk": "send", "note": "★与点赞同 id，靠 label 前缀区分；仅「打开面板」可做，点具体渠道=外发"},
+    {"name": "分享数", "id": "md5", "role": "文本", "risk": "none"},
+    {"name": "原声/音乐", "id": "ipu", "label_re": "^音乐：", "role": "导航", "risk": "none", "note": "label 含曲名与作者，如「音乐：Shizuku Kimono Rental 创作的 原声 - ...」"},
+    {"name": "作者昵称", "id": "title", "role": "文本", "risk": "none", "note": "Button 控件，text=昵称；点击进入作者主页"},
+    {"name": "作品描述", "id": "desc", "role": "文本", "risk": "none", "note": "TuxTextLayoutView，text 为完整文案（含话题标签）"},
+    {"name": "转发条", "id": "pss", "text": "转发", "role": "文本", "risk": "none", "note": "转发说明条，非按钮"},
+    {"name": "查看原内容", "text": "查看原内容", "role": "导航", "risk": "none", "note": "仅转载/合拍类视频出现"},
+    {"name": "视频进度条", "id": "m37", "role": "控件", "risk": "none", "note": "SeekBar，value 表示进度"},
+    {"name": "视频/长按区域", "id": "long_press_layout", "label_re": "^视频$", "role": "容器", "risk": "none", "note": "双击点赞、长按弹出菜单（不感兴趣/保存等）"}
+  ],
+  "navigation": [
+    {"action": "点击底部「好友」", "to": "friends", "verified": false},
+    {"action": "点击底部「收件箱」", "to": "inbox", "verified": false},
+    {"action": "点击底部「主页」", "to": "profile_me", "verified": false},
+    {"action": "点击顶部「已关注」", "to": "feed_following", "verified": false},
+    {"action": "点击评论按钮 ca8", "to": "comment_panel", "verified": false},
+    {"action": "点击作者头像 q2c / 昵称 title", "to": "profile_author", "verified": false},
+    {"action": "点击原声 ipu", "to": "sound_detail", "verified": false},
+    {"action": "点击分享 d63", "to": "share_panel", "verified": false}
+  ],
+  "uncovered": [
+    "双击点赞、长按菜单",
+    "上滑切换下一个视频后的层级差异",
+    "已关注 tab 的流内容"
+  ],
+  "notes": "首页是个人化推荐流，内容（作者、文案、计数）随账号/地区/时间变化，不能当锚点；锚点用「点赞视频」label + 底部导航 selected。控件 id 为混淆短名，跨版本可能变化，跨版本复用前需重新校验。"
+}

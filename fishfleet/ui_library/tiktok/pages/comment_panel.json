@@ -1,0 +1,68 @@
+{
+  "key": "comment_panel",
+  "name": "评论区（底部面板）",
+  "package": "com.zhiliaoapp.musically",
+  "activity": "com.ss.android.ugc.aweme.splash.SplashActivity（视频页内叠层）",
+  "entry": "视频页右侧「评论」按钮（ca8）",
+  "captured_at": "2026-11-01T20:34:00+08:00",
+  "device": "SERIAL0001",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "评论总数按钮", "id": "mmg", "text_re": "条评论$"},
+    {"name": "关闭评论", "id": "aok", "label_re": "^关闭评论$"},
+    {"name": "评论列表", "id": "l56"}
+  ],
+  "targets": [
+    {"name": "相关搜索条", "id": "fe_", "text": "‎⁨搜索：⁩", "role": "展示", "risk": "none", "note": "后面 h1u 为可点搜索词（如「にしちゃん辞めた理由」），点击跳到搜索结果"},
+    {"name": "评论总数", "id": "mmg", "text_re": "条评论$", "role": "标题", "risk": "none"},
+    {"name": "关闭评论", "id": "aok", "label_re": "^关闭评论$", "role": "导航", "risk": "none"},
+    {"name": "评论列表", "id": "l56", "role": "列表", "risk": "none"},
+
+    {"name": "评论-头像", "id": "al6", "role": "导航", "risk": "none", "note": "外层 egd/ek3；点头像进对方主页 ★截流关键"},
+    {"name": "评论-昵称", "id": "title", "role": "导航", "risk": "none", "note": "Button，text=昵称；点击也可进主页"},
+    {"name": "评论-正文", "id": "cim", "role": "文本", "risk": "none"},
+    {"name": "评论-点赞", "id": "hfh", "label_re": "^点赞或取消点赞$", "role": "互动", "risk": "send"},
+    {"name": "评论-点赞数", "id": "pbc", "role": "文本", "risk": "none"},
+    {"name": "评论-点踩", "id": "fe7", "label_re": "^点踩或取消点踩$", "role": "互动", "risk": "send"},
+    {"name": "评论-时间", "id": "c_x", "role": "文本", "risk": "none", "note": "形如 08-17"},
+    {"name": "评论-回复", "id": "c_3", "text": "回复", "role": "回复", "risk": "send", "note": "★点击会切入「回复某人」输入态，是截流二次触达入口；不点发送就安全"},
+    {"name": "评论-查看回复", "id": "pj2", "text_re": "^查看 \\d+ 条回复$", "role": "导航", "risk": "none", "note": "展开子回复"},
+    {"name": "评论-回复横条", "id": "h_0", "role": "展示", "risk": "none"},
+
+    {"name": "快捷表情条", "id": "e4m", "role": "输入", "risk": "none", "note": "GridView，7 个表情：😁🥰😂😳😏😅🥺；每个 dtg label=表情本身"},
+    {"name": "输入态底部面板", "id": "mm9", "role": "面板", "risk": "none", "note": "输入聚焦后出现，含 mm8 工具组"},
+    {"name": "输入框", "id": "c88", "role": "输入", "risk": "none", "note": "★EditText；未聚焦时 189,1661 / 聚焦后 188,683"},
+    {"name": "我的头像", "id": "c7g", "role": "展示", "risk": "none"},
+    {"name": "在评论中提及某人", "id": "gic", "label_re": "^在评论中提及某人$", "role": "控件", "risk": "none"},
+    {"name": "添加表情到评论", "id": "gmy", "label_re": "^添加表情到评论$", "role": "控件", "risk": "none"},
+    {"name": "表情/更多", "id": "gqj", "role": "控件", "risk": "none", "note": "输入框右侧图标位（未输入时用于触发表情面板）"},
+    {"name": "发布评论按钮", "id": "bcr", "label_re": "^发布评论$", "role": "发送", "risk": "send", "note": "★真正的发送按钮；仅在输入框有内容时出现（929,830），无二次确认，点了立即发布"}
+  ],
+  "send_button_logic": {
+    "empty_state": "输入框为空时，底部只有头像 + 输入框 + 3 个图标（提及/表情/表情更多），没有「发布评论」",
+    "typed_state": "输入框有内容后，出现 Button id=bcr label=「发布评论」，位于输入框右侧",
+    "no_confirm": "点击立即发布，无二次确认弹窗",
+    "tested": "输入了 1 个字符，观察到「发布评论」按钮出现，未点击"
+  },
+  "input_test": {
+    "performed": true,
+    "content": "hi（实际落入 1 个字符「i」，首个字符被键盘弹起吞掉，说明输入首字符时需等键盘就绪）",
+    "cleanup": "BACKSPACE 清空，未发布"
+  },
+  "navigation": [
+    {"action": "点击「发布评论」", "to": "comment_panel（评论上屏）", "verified": false, "note": "★未执行"},
+    {"action": "点击评论者头像/昵称", "to": "profile_author", "verified": false},
+    {"action": "点击「回复」", "to": "comment_panel（回复输入态）", "verified": false},
+    {"action": "点击「查看 N 条回复」", "to": "comment_panel（展开子回复）", "verified": false},
+    {"action": "BACK", "to": "feed", "verified": true}
+  ],
+  "uncovered": [
+    "★发布评论后的上屏与「评论成功」提示",
+    "点「回复」后的 @某人 输入态结构",
+    "子回复列表展开后的结构",
+    "评论长按菜单（复制/举报/删除）",
+    "按「最新/最热」排序切换（本次未出现该控件）",
+    "评论加载更多"
+  ],
+  "notes": "★截流核心页：评论区是批量触达用户最直接的入口（评昵称/头像可进主页，回复可二次触达）。1. 评论项结构清晰，昵称 title / 正文 cim；2. 发送守卫：以「发布评论」按钮(bcr)是否存在判断是否已输入；3. 输入首字符易丢，自动化时先点输入框、等键盘就绪再输入；4. ★★为什么点昵称：评论里有视频/贴纸时，缩略图紧贴头像右侧（x≈125 起），点头像偶尔会误开视频页；昵称在 x≈145、正文正上方，两侧留白，实测把连续失败的三个关键词从 0 条救回 8/6 条（2026-11-02）；5. 评论容器 h_d 的坐标会与上方视频描述区重叠，描述区作者名也是 id=title，识别昵称必须用「与正文同列 + 紧贴正文上方」约束。"
+}

@@ -1,0 +1,51 @@
+{
+  "key": "up_profile",
+  "name": "UP 主个人主页",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.app.authorspace.local.LocalAuthorSpaceActivity",
+  "entry": "播放页 → UP 主空间弹层 → 进入空间；或搜索结果 → 用户卡片",
+  "captured_at": "2026-10-31T20:09:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "blocked",
+  "render_tech": "WebView（H5）",
+  "identity": [
+    {"name": "WebView 根节点", "id": "web_view", "note": "整个 Activity 只有一个 WebView，内部 DOM 不可见"}
+  ],
+  "targets": [
+    {"name": "（无可用控件）", "note": "uiautomator 只能看到 WebView 容器本身，页面内所有按钮/文字/列表都拿不到节点"}
+  ],
+  "visual_structure_from_screenshot": {
+    "screenshot": "screenshots/up_profile_webview.png",
+    "sections": [
+      "顶部：返回 / 消息 / 搜索 / 更多（半透明浮在头图上）",
+      "头图 + 头像（右下角带「大」标识）",
+      "数据行：粉丝 / 关注 / 获赞 三个数字",
+      "关注按钮（粉色整条，文案「+ 关注」）",
+      "昵称 + 等级牌 LvN + 年度大会员 + 粉丝团 + 装扮徽章",
+      "个性签名 + 右侧「详情」",
+      "IP 属地（形如「IP属地：广东」）",
+      "tab：主页 / 动态 / 投稿 / 追番（选中项有下划线）",
+      "子 tab：视频 / 图文",
+      "工具行：播放全部 / 排序（最新发布）",
+      "投稿列表：封面 + 标题 + 时间 + 播放数 + 弹幕数 + 右侧更多"
+    ],
+    "note": "以上来自截图人工判读，不是控件层级；坐标会随分辨率/内容长度变化"
+  },
+  "navigation": [
+    {"action": "点击 tab（主页/动态/投稿/追番）", "to": "同页切换", "verified": false},
+    {"action": "点击关注", "to": "对外关注", "verified": false, "risk": "send"}
+  ],
+  "uncovered": [
+    "页面内全部交互（受 WebView 限制，无法用节点定位）",
+    "动态 tab / 追番 tab",
+    "关注动作"
+  ],
+  "limitation": "UP 主主页是纯 WebView（H5）。Mobile MCP 的 uiautomator 层级拿不到任何内部控件，只能靠截图判读或坐标点击。2026-10-31 实测排查：`adb shell cat /proc/net/unix | grep webview_devtools` 无任何输出，说明该 release 包**没有开启 WebView 调试**，因此 CDP 路线也不可用（除非能改包/注入 hook）。可行替代：① 用原生弹层 `up_space_dialog` 拿 UP 名/粉丝数/投稿列表；② 若必须读完整主页，只能截图 + 视觉识别。",
+  "webview_debug_probe": {
+    "checked_at": "2026-10-31T20:33:00+08:00",
+    "command": "adb shell cat /proc/net/unix | grep -i webview_devtools",
+    "result": "no output",
+    "conclusion": "WebView remote debugging 未开启，chrome://inspect / CDP 不可用"
+  },
+  "status": "此后所有 UP 主页相关任务都需要额外的 WebView 调试通道，否则只能人工截图。"
+}

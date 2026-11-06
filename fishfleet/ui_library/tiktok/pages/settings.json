@@ -1,0 +1,73 @@
+{
+  "key": "settings",
+  "name": "设置与隐私（一级）",
+  "package": "com.zhiliaoapp.musically",
+  "activity": "com.ss.android.ugc.aweme.splash.SplashActivity 内独立页",
+  "entry": "主页 → 右上「主页菜单」→「设置与隐私」",
+  "captured_at": "2026-11-01T20:35:00+08:00",
+  "device": "SERIAL0001",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "标题「设置与隐私」", "id": "it3", "text": "设置与隐私"},
+    {"name": "分组标题「账号」", "text": "账号", "note": "分组标题用 id=text（无 label）"}
+  ],
+  "settings_entry_sheet": {
+    "name": "主页菜单（底部工作表）",
+    "container": {"id": "d3e", "label": "底部工作表"},
+    "items": [
+      {"text": "TikTok Studio", "role": "导航", "risk": "none", "note": "创作者工作室"},
+      {"text": "余额", "role": "导航", "risk": "forbidden", "note": "★钱包/充值，涉及金钱"},
+      {"text": "我的二维码", "role": "导航", "risk": "none", "note": "展示分享用二维码"},
+      {"text": "设置与隐私", "role": "导航", "risk": "none", "note": "进入本页"}
+    ]
+  },
+  "groups": {
+    "账号": [
+      {"name": "账号", "risk": "send", "note": "账号信息/切换/退出登录"},
+      {"name": "隐私", "risk": "send", "note": "★含「将你的账号推荐给其他人」开关，直接影响被推荐"},
+      {"name": "安全与权限", "risk": "send"},
+      {"name": "分享主页", "risk": "send"}
+    ],
+    "内容和显示": [
+      {"name": "通知", "risk": "send"},
+      {"name": "直播", "risk": "none"},
+      {"name": "活动中心", "risk": "none"},
+      {"name": "内容偏好", "risk": "none"},
+      {"name": "广告", "risk": "none"},
+      {"name": "回放", "risk": "none"},
+      {"name": "展示", "risk": "none"},
+      {"name": "语言", "risk": "send", "note": "★改语言会影响全 App 文案，自动化脚本极易崩"},
+      {"name": "屏幕时间", "risk": "none"},
+      {"name": "家长控制", "risk": "none"},
+      {"name": "辅助功能", "risk": "none", "note": "label 带「有新的设置可用」后缀"}
+    ],
+    "缓存和移动网络": [
+      {"name": "离线视频", "risk": "none"},
+      {"name": "释放空间", "risk": "send", "note": "清缓存，可点但会清掉本地缓存"},
+      {"name": "省流模式", "risk": "none"},
+      {"name": "壁纸", "risk": "none"}
+    ],
+    "支持和关于": [
+      {"name": "反馈与帮助", "risk": "none"},
+      {"name": "支持", "risk": "none"},
+      {"name": "条款和政策", "risk": "none"}
+    ],
+    "登录": [
+      {"name": "切换账号", "risk": "send", "note": "★会改变当前登录态"},
+      {"name": "退出登录", "risk": "forbidden", "note": "★退出后需重新登录/验证码，不可自动化"}
+    ]
+  },
+  "targets_common": [
+    {"name": "返回", "label_re": "^返回上一屏幕$", "role": "导航", "risk": "none", "note": "无 id，21,165"},
+    {"name": "设置列表", "id": "flm", "role": "列表", "risk": "none"},
+    {"name": "每个条目", "id": "bq1", "role": "导航", "risk": "none", "note": "Button，label=条目名；内部 o7_ 文本同名，右侧 fqc 为图标，osu 为右侧容器"},
+    {"name": "分组标题", "id": "text", "role": "标题", "risk": "none", "note": "账号 / 内容和显示 / 缓存和移动网络"}
+  ],
+  "uncovered": [
+    "★所有二级页（账号、隐私、安全与权限、通知、内容偏好、语言、辅助功能等）的具体开关与选项",
+    "「关于」的版本号展示（一级页滚动到底只到「登录」分组，未单独看到 About 条目）",
+    "「余额」相关页面（金钱，不采）"
+  ],
+  "scroll_note": "一级页共 5 个分组，需滚动 4 次才能看全（账号 → 内容和显示 → 缓存和移动网络 → 支持和关于 → 登录）。每次滑动约 550-900px。",
+  "notes": "一级页结构：分组标题（id=text）+ 可点条目。★条目 id 统一为 bq1（Button），靠 label 区分，是稳定定位依据；每条右侧有 fqc 图标和 osu 容器。「登录」分组在整页最底部。"
+}

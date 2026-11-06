@@ -1,0 +1,69 @@
+{
+  "key": "dm_chat",
+  "name": "私信会话页（1v1）",
+  "package": "com.zhiliaoapp.musically",
+  "activity": "com.ss.android.ugc.aweme.splash.SplashActivity 内独立页",
+  "entry": "他人主页「消息」按钮；收件箱会话列表；新建聊天选人",
+  "captured_at": "2026-11-01T20:31:40+08:00",
+  "device": "SERIAL0001",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "会话对象昵称", "id": "eew", "note": "顶部标题"},
+    {"name": "输入框", "id": "g8f", "note": "内部 EditText 无 id，是唯一输入点"},
+    {"name": "底部工具条", "id": "rb", "note": "贴纸/分享发布内容 等"}
+  ],
+  "send_button": {
+    "name": "发送",
+    "location": "id=g8h 容器内，右侧 ImageView（本次观测坐标 942,1667，95x95）",
+    "id": "无（ImageView 无 id）",
+    "visual": "红色圆形纸飞机",
+    "behavior": "★仅在有输入内容时激活；空输入时该位置不显示纸飞机（或为不可点状态）",
+    "risk": "send",
+    "tested": "输入 hello 后按钮出现并可用，但未点击发送（按主人要求停在最后一步）",
+    "warning": "★没有二次确认弹窗，点下去立即发出，无法撤回"
+  },
+  "targets": [
+    {"name": "返回", "id": "ite", "label_re": "^返回$", "role": "导航", "risk": "none"},
+    {"name": "对方头像", "id": "gii", "role": "导航", "risk": "none", "note": "点击可能进入对方主页"},
+    {"name": "对方昵称", "id": "eew", "role": "标题", "risk": "none"},
+    {"name": "举报", "id": "fr7", "label_re": "^举报$", "role": "菜单", "risk": "send", "note": "举报会对外提交工单"},
+    {"name": "查看更多", "id": "fpn", "label_re": "^查看更多$", "role": "菜单", "risk": "none", "note": "应含 拉黑/删除会话/免打扰 等"},
+    {"name": "通知提示条", "id": "ft7", "role": "提示", "risk": "none", "note": "文本=「已开启私信推送通知的消息预览…」，右侧 ft8 为关闭按钮"},
+    {"name": "消息列表", "id": "l53", "role": "列表", "risk": "none", "note": "空会话时无消息气泡"},
+
+    {"name": "空会话-对方头像", "id": "kgk", "role": "展示", "risk": "none"},
+    {"name": "空会话-对方昵称", "id": "kji", "role": "文本", "risk": "none"},
+    {"name": "空会话-@handle", "role": "文本", "risk": "none", "note": "无 id，text 形如 @addisonre"},
+    {"name": "空会话-粉丝数", "role": "文本", "risk": "none", "note": "无 id，形如「29 个关注账号 · 87.6M 个粉丝」"},
+    {"name": "空会话-关注按钮", "id": "l7n", "text": "关注", "role": "关注", "risk": "send"},
+
+    {"name": "我的头像", "id": "g8g", "role": "展示", "risk": "none", "note": "输入框左侧"},
+    {"name": "输入框", "id": "g8f", "role": "输入", "risk": "none", "note": "★EditText 本身无 id；位于 138,1657，709x116"},
+    {"name": "表情/贴纸按钮", "id": "g8h", "role": "控件", "risk": "none", "note": "输入框右侧第一个图标（847,1667）"},
+    {"name": "发送按钮", "id": "g8h", "role": "发送", "risk": "send", "note": "（942,1667）红色纸飞机"},
+    {"name": "底部-贴纸", "id": "rg", "text": "贴纸", "role": "控件", "risk": "none", "note": "工具条 rb 内；左侧还有若干纯图标项"},
+    {"name": "底部-分享发布内容", "id": "rg", "text": "分享发布内容", "role": "分享", "risk": "send", "note": "把视频/作品作为消息发出"},
+    {"name": "表情面板", "id": "jj_", "role": "面板", "risk": "none", "note": "输入聚焦后出现，含推荐表情轮播 n84/nkz"}
+  ],
+  "input_test": {
+    "performed": true,
+    "content": "hello",
+    "result": "输入成功，EditText value=hello，右侧出现红色发送按钮",
+    "cleanup": "已用 5 次 BACKSPACE 清空，未发送",
+    "note": "输入过程中弹出表情推荐面板（jj_），说明输入框聚焦会联动表情面板"
+  },
+  "navigation": [
+    {"action": "点击发送", "to": "dm_chat（消息上屏）", "verified": false, "note": "★未执行，最后一步。点了就外发，无撤回"},
+    {"action": "点击「查看更多」", "to": "dm_menu", "verified": false},
+    {"action": "点击底部「贴纸」", "to": "dm_sticker_panel", "verified": false},
+    {"action": "BACK", "to": "profile_author", "verified": true}
+  ],
+  "uncovered": [
+    "有历史消息时的气泡结构（文本/图片/视频/表情/已读状态/时间戳）",
+    "长按消息菜单（复制/回复/转发/撤回/删除）",
+    "「查看更多」菜单内容",
+    "贴纸面板与「分享发布内容」面板",
+    "语音/拍照/相册发送"
+  ],
+  "notes": "★这是截流链路的终点页。安全边界：输入框可测，发送按钮不可点。发送按钮无二次确认，一旦误触立即外发，做自动化时必须用「输入框是否为空」作为发送前置守卫。"
+}

@@ -1,0 +1,42 @@
+{
+  "key": "movie_channel_tv",
+  "name": "影视频道页 · 电视剧（并验证频道同构）",
+  "package": "tv.danmaku.bili",
+  "activity": "kntr.common.compose.launcher.VertexActivity",
+  "entry": "首页 → 影视 → 电视剧（或影视频道页顶部 tab 切到电视剧）",
+  "captured_at": "2026-10-31T20:30:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "render_tech": "Jetpack Compose",
+  "identity": [
+    {"name": "频道 tab", "text_re": "^(电影|电视剧|纪录片|综艺)$", "note": "电视剧 选中"},
+    {"name": "返回", "label_re": "back"}
+  ],
+  "targets": [
+    {"name": "返回", "label_re": "back", "role": "导航", "risk": "none"},
+    {"name": "电影 tab", "text": "电影", "role": "导航", "risk": "none"},
+    {"name": "电视剧 tab", "text": "电视剧", "role": "导航", "risk": "none", "state_hint": "选中"},
+    {"name": "纪录片 tab", "text": "纪录片", "role": "导航", "risk": "none"},
+    {"name": "综艺 tab", "text": "综艺", "role": "导航", "risk": "none"},
+    {"name": "追热剧场", "text": "追热剧场", "role": "导航", "risk": "none", "note": "入口位按频道变化（电影频道是「排行榜/找电影/即将上线…」）"},
+    {"name": "找电视剧", "text": "找电视剧", "role": "导航", "risk": "none", "note": "字随频道变：找电影 / 找电视剧 / 找纪录片…"},
+    {"name": "新奇剧场", "text": "新奇剧场", "role": "导航", "risk": "none"},
+    {"name": "经典日剧", "text": "经典日剧", "role": "导航", "risk": "none"},
+    {"name": "HBO专区", "text": "HBO专区", "role": "导航", "risk": "none"},
+    {"name": "剧卡封面", "label_re": "ogvImage", "role": "可点击", "risk": "none"},
+    {"name": "剧卡角标", "label_re": "ogvBadge", "role": "状态", "risk": "none"},
+    {"name": "集数", "text_re": "^全\\d+集$", "role": "文本", "risk": "none", "note": "电视剧是「全N集」；电影频道这里是评分或「N追剧」"},
+    {"name": "剧标题", "role": "文本", "risk": "none"},
+    {"name": "剧副标题", "role": "文本", "risk": "none", "note": "如「杂草少女俘获F4」「天才医生肖恩最终季」，偶尔是数据（「1亿播放」）"}
+  ],
+  "navigation": [
+    {"action": "点击 电影/纪录片/综艺 tab", "to": "同页切频道", "verified": false},
+    {"action": "点击剧卡", "to": "movie_detail", "verified": false}
+  ],
+  "uncovered": [
+    "纪录片 / 综艺 两个频道（结构应同构，未逐个点）",
+    "找电视剧 筛选器",
+    "各剧场/专区落地页"
+  ],
+  "notes": "【同构验证】电影频道与电视剧频道是同一个页面模板，只有三处差异：①顶部 tab 选中项；②快捷入口的文案与数量（电影：排行榜/找电影/即将上线/大成功/赢好礼/宝藏片单/黄金厂牌；电视剧：追热剧场/找电视剧/长生契/新奇剧场/经典日剧/HBO专区）；③卡片角上的小字（电影是评分/N追剧，电视剧是「全N集」）。布局、控件体系、无 id 的情况完全一致。"
+}

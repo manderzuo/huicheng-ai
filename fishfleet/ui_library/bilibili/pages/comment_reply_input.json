@@ -1,0 +1,40 @@
+{
+  "key": "comment_reply_input",
+  "name": "评论回复输入态（含发送键定位）",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.ship.theseus.detail.UnitedBizDetailsActivity",
+  "entry": "视频详情页 → 评论 tab → 点某条评论的「回复」",
+  "captured_at": "2026-10-31T21:59:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "sandbox_note": "本次为模拟测试：输入过文字但全部清空后退出，未点击「发布」。评论数 697→679 为自然波动，无 +1，证明未发送。",
+  "identity": [
+    {"name": "输入框", "id": "edit", "type": "EditText", "focused": true},
+    {"name": "发送键", "text": "发布"}
+  ],
+  "targets": [
+    {"name": "输入框", "id": "edit", "type": "EditText", "role": "输入", "risk": "none", "note": "id=tv.danmaku.bili:id/edit，1000x102；focused 时可读 value"},
+    {"name": "发送键", "text": "发布", "role": "发送", "risk": "send", "note": "★这是真正的发送按钮。位置：键盘上方右下角 (946,1685,110x95)；输入框为空时灰色，有内容时变粉"},
+    {"name": "表情键", "role": "输入辅助", "risk": "none", "note": "底部工具条第 2 个，(138,1685,86x95)"},
+    {"name": "艾特键", "role": "输入辅助", "risk": "none", "note": "第 3 个，(224,1685,86x95)"},
+    {"name": "图片键", "role": "输入辅助", "risk": "none", "note": "第 4 个，(310,1685,86x95)"},
+    {"name": "转到动态", "text": "转到动态", "role": "开关", "risk": "send", "note": "左下角圆形勾选框；勾上后发送会同时生成一条动态（额外副作用！）"},
+    {"name": "右侧按钮", "role": "未知", "risk": "none", "note": "输入框右侧 (993,1552,87x94)，用途未确认"}
+  ],
+  "reply_mode_hint": "回复态输入框的占位提示是「回复 {用户名}：」，一输入文字就消失。说明 B站用『回复目标』状态管理，发送时会自动 @ 该用户——**模板里不要再手动加「回复 @xxx」**，否则会重复。",
+  "send_button_states": {
+    "空内容": "灰色（视觉上不可点）",
+    "有内容": "粉色（激活）",
+    "判定方式": "无障碍树里「发布」没有 disabled 属性，**不能用 disabled 判断可点性**，只能靠文本是否存在或截图"
+  },
+  "navigation": [
+    {"action": "点输入框", "to": "进入输入态+弹键盘", "verified": true},
+    {"action": "点发布", "to": "真实发出一条评论", "verified": false, "risk": "send"}
+  ],
+  "uncovered": [
+    "点击「发布」后的实际结果（刻意不做）",
+    "字数上限提示（本次输入 8 字未触发计数器）",
+    "「转到动态」勾选后的复合效果"
+  ],
+  "notes": "★三个坑：①发送键叫「发布」，不叫「发送」，且**没有 id**，只能按 text 定位；②「发布」的 disabled 属性在无障碍树里**不体现**，空内容时也能被匹配到——自动化必须自己判断输入框是否有内容；③左下角「转到动态」是个隐藏副作用开关，勾上会让回复同时发一条动态。"
+}

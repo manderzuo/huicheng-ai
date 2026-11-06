@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>汇城群控AI版</title>
+<link rel="stylesheet" href="/static/style.css?v=20261106fix4">
+<link rel="stylesheet" href="/static/chat_panel.css?v=20261106fix4">
+<style type="text/css">body {-webkit-user-select: none; -khtml-user-select: none; -ms-user-select: none; user-select: none; cursor: default;}</style></head>
+<body>
+<!-- ==================== 顶栏 ==================== -->
+<header class="topbar">
+<span class="tb-title">FishFleet v1.0</span>
+<div class="tb-spacer"></div>
+<span class="tb-stat">在线 <b id="stat-online">20</b>/<b id="stat-total">20</b></span>
+<span class="tb-stat">AI <b id="stat-ai">闲置</b></span>
+<button class="tbtn" id="live-control-mode" aria-pressed="false" title="实时控制与旧版控制切换">控制初始化中</button>
+<button class="tbtn" id="btn-refresh">刷新</button>
+<button class="tbtn" id="btn-settings">⚙</button>
+</header>
+<!-- ==================== 主体 ==================== -->
+<div class="main">
+<!-- 左侧大屏（默认隐藏，只有点手机/右键菜单/快捷键时才打开） -->
+<section class="stage hidden" id="stage">
+<div class="stage-drag-head" id="stage-drag-head"><span id="stage-serial"></span><button id="stage-kbd" title="直接键盘开关" aria-label="直接键盘开关" aria-pressed="true">⌨</button><button id="stage-close" title="关闭大屏" aria-label="关闭大屏">✕ 关闭</button></div>
+<canvas id="stage-canvas" width="408" height="720"></canvas>
+<div class="stage-empty hidden" id="stage-empty">
+<div class="se-icon">📱</div>
+<div class="se-text">点击右侧任意手机开始</div>
+</div>
+<div class="stage-badge" id="stage-badge">
+<span id="stage-fps"></span>
+</div>
+</section>
+<!-- 手机网格与浮动菜单 -->
+<div class="center">
+<div class="phone-grid" id="grid" style="gap: 10px;">
+<div class="float-menu" id="float-menu">
+<div class="fm-head">
+<span class="fm-idx" id="fm-idx">#1</span>
+<span class="fm-name" id="fm-name">SERIAL0001</span>
+<div class="fm-tools">
+<button title="缩小">−</button>
+<button title="放大">+</button>
+<button id="fm-close" title="关闭">✕</button>
+</div>
+</div>
+<div class="fm-sec"><span>手机功能</span></div>
+<ul class="fm-list" id="menu-list">
+<li data-act="open-bigscreen" tabindex="0" role="button"><i>▣</i><span>打开大屏</span></li>
+<li data-op="edit-number"><i>#</i><span>修改编号</span></li>
+<li data-op="edit-name"><i>✎</i><span>修改名称</span></li>
+<li data-op="reboot"><i>⏺</i><span>重启手机</span></li>
+<li data-op="install-apk"><i>⊕</i><span>安装APK</span></li>
+<li data-op="uninstall-apk"><i>−</i><span>卸载应用</span></li>
+<li data-op="apk-info"><i>ⓘ</i><span>应用详情</span></li>
+<li data-op="push-file"><i>↑</i><span>导入文件</span></li>
+<li data-op="pull-file"><i>↓</i><span>导出文件</span></li>
+<li data-op="get-clipboard"><i>📋</i><span>导出粘贴板</span></li>
+<li data-op="adb-cmd"><i>⌨</i><span>ADB命令</span><em>—</em></li>
+<li data-op="auto-swipe"><i>↕</i><span>自动滑屏</span></li>
+<li data-op="record-action"><i>⏺</i><span>录制动作</span></li>
+<li data-op="play-action"><i>▶</i><span>执行动作</span></li>
+<li data-op="run-task"><i>⚙</i><span>执行任务</span></li>
+<li data-op="stop-task" class="danger"><i>✕</i><span>结束任务</span></li>
+<li data-op="task-list"><i>★</i><span>执行列表</span></li>
+<li data-op="switch-ime"><i>⌨</i><span>切换输入法</span><em>—</em></li>
+<li data-op="quick-phrase"><i>💬</i><span>快捷短语</span></li>
+<li data-op="rotate-right"><i>↻</i><span>向右旋转</span></li>
+<li data-op="more-func"><i>⋯</i><span>隐藏功能</span><em>—</em></li>
+</ul>
+<div class="fm-sec"><span>设备信息</span></div>
+<ul class="fm-list" id="menu-devinfo">
+<li data-op="dev-info"><i>▣</i><span>设备详情</span></li>
+<li data-op="dev-density"><i>⊞</i><span>屏幕密度</span></li>
+<li data-op="dev-usbmode"><i>⇄</i><span>USB 模式</span><em>—</em></li>
+<li data-op="dev-ip"><i>🌐</i><span>设备 IP</span></li>
+<li data-op="dev-accessible"><i>♿</i><span>转为无障碍模式</span><em>—</em></li>
+<li data-op="dev-accessible-reconnect"><i>♿</i><span>重连无障碍模式</span><em>—</em></li>
+<li data-op="dev-accessible-close"><i>♿</i><span>关闭无障碍模式</span><em>—</em></li>
+<li data-op="dev-wireless-add"><i>📶</i><span>添加无线设备</span><em>—</em></li>
+<li data-op="dev-hid"><i>⌨</i><span>HID 模式</span><em>—</em></li>
+<li data-op="dev-reconnect"><i>↻</i><span>重新连接</span></li>
+<li data-op="dev-restart-adb"><i>⚙</i><span>重启 ADB</span></li>
+<li data-op="dev-wallpaper"><i>🖼</i><span>设为壁纸</span></li>
+<li data-op="dev-download"><i>↓</i><span>导出截图</span></li>
+</ul>
+<div class="fm-sec"><span>手机应用</span><button id="refresh-phone-apps" type="button" title="刷新第三方应用" aria-label="刷新第三方应用">↻</button></div>
+<ul class="fm-list" id="menu-apps">
+        <li class="fm-loading">右键手机后加载应用…</li>
+      </ul>
+<div class="fm-keys">
+<button data-key="back">◁</button>
+<button data-key="home">○</button>
+<button data-key="recent">□</button>
+</div>
+</div>
+</div>
+<!-- 右侧面板 -->
+
+</div>
+    <aside class="right-panel" id="right-panel">
+<div class="rp-top">
+<button class="rp-circle" title="切换">»</button>
+<div class="rp-brand">
+<div class="rp-logo">🐟</div>
+<div class="rp-name">FishFleet</div>
+</div>
+<button class="rp-circle" title="设置">★</button>
+</div>
+<div class="rp-login">
+<span class="rp-user">👤</span>
+<span>登录后可使用会员版哦！</span>
+<a href="#">API</a>
+</div>
+<div class="rp-tabs">
+<button class="rp-tab active" data-tab="common"><i>⌨</i>常用</button>
+<button class="rp-tab" data-tab="otg"><i>⚙</i>OTG</button>
+<button class="rp-tab" data-tab="ai" id="btn-open-ai"><i>🤖</i>AI 助手</button>
+</div>
+<div class="rp-scroll">
+<div class="rp-funcs">
+<button class="rp-fn" data-op="more-func"><i>⋯</i>更多功能</button>
+<button class="rp-fn" data-op="sys-settings"><i>⚙</i>系统设置</button>
+<button class="rp-fn" data-op="device-list"><i>▣</i>设备列表</button>
+<button class="rp-fn" data-op="rotate-small"><i>↻</i>旋转小屏</button>
+<button class="rp-fn" data-op="lock-big" aria-pressed="false"><i>⊞</i>固定大屏</button>
+<button class="rp-fn on" data-op="ctrl-small" aria-pressed="true" title="已开启：可点击、滚动、滑动；关闭后可拖拽排序"><i>◐</i>操控小屏</button>
+</div>
+<div class="rp-sliders">
+<div class="sl"><label>大屏尺寸</label><input type="range" id="sl-big-size" min="1" max="5" value="3"><b id="sv-big-size">5</b></div>
+<div class="sl"><label>小屏尺寸</label><input type="range" id="sl-small-size" min="1" max="5" value="3"><b id="sv-small-size">5</b></div>
+<div class="sl"><label>小屏画质</label><input type="range" id="sl-quality" min="1" max="5" value="2"><b id="sv-quality">3</b></div>
+<div class="sl"><label>小屏帧率</label><input type="range" id="sl-fps" min="1" max="5" value="5"><b id="sv-fps">24 fps</b></div>
+</div>
+<div class="rp-types">
+<button class="rp-type active" data-type="local"><i>▣</i>本地手机</button>
+<button class="rp-type" data-type="cloud-device"><i>▣</i>云真机</button>
+<button class="rp-type" data-type="cloud-phone"><i>★</i>云手机</button>
+</div>
+<div class="rp-filters">
+<button class="rp-filter active" data-filter="all">全部</button>
+<button class="rp-filter" data-filter="usb">USB</button>
+<button class="rp-filter" data-filter="wifi">WIFI</button>
+<button class="rp-filter" data-filter="otg">OTG</button>
+<button class="rp-filter" data-filter="access">无障碍</button>
+</div>
+<div class="rp-checkrow" id="rp-wifi-scan-row" style="display:none">
+<button class="rp-btn-sm" id="btn-wifi-scan-fast">快速扫描</button>
+<button class="rp-btn-sm" id="btn-wifi-scan-deep">深度扫描</button>
+<span id="wifi-scan-msg" style="font-size:11px;color:#9aa2b1"></span>
+</div>
+<div class="rp-wifi-found" id="wifi-scan-found" style="display:none"></div>
+<div class="rp-tagsec">
+<div class="rp-taghead">
+<span>手机标签</span>
+<button class="rp-mini">+ 添加标签</button>
+</div>
+<div class="rp-checkrow">
+<label><input type="checkbox" id="chk-all" checked=""> 全部手机 (<span id="cnt-all">20/20</span>)</label>
+<button class="rp-btn-sm" id="btn-show-all" title="界面里显示全部手机（忽略标签筛选）">全显</button>
+<button class="rp-btn-sm" id="btn-show-selected" title="只显示下方已勾选的手机">只显已选</button>
+</div>
+<div class="num-grid" id="num-grid-all"></div></div>
+<div class="rp-checkrow mt6">
+<label><input type="checkbox" id="chk-untagged"> 未标签手机 (<span id="cnt-untagged">20/20</span>)</label>
+</div>
+<div class="num-grid" id="num-grid-untag"></div></div>
+</div>
+</div>
+<!-- 底部工具条：CSV / 快捷键/ 版本 -->
+<div id="rp-toolbar" style="display:flex;gap:4px;padding:6px 8px;border-top:1px solid #22272f;flex-shrink:0">
+<button class="rp-tool" id="tb-export" title="导出设备列表 CSV">⤓CSV</button>
+<button class="rp-tool" id="tb-import" title="从 CSV 导入设备名称/编号">⤒CSV</button>
+<button class="rp-tool" id="tb-hotkeys" title="快捷键帮助 (F1)">⌨</button>
+<button class="rp-tool" id="tb-version" title="版本信息">ⓘ</button>
+<button class="rp-tool" id="tb-diag" title="系统诊断">🩺</button>
+</div>
+<!-- OTG 面板 -->
+<div id="rp-otg-panel" class="hidden"></div>
+</aside>
+
+<!-- 兼容旧版 app.js 元素 -->
+<div id="compat" style="display:none">
+<div id="ctrl-hint"></div>
+<div id="ctrl-content">
+<span id="ctrl-index"></span><span id="ctrl-serial"></span><span id="ctrl-state"></span>
+<span id="ctrl-app"></span><span id="ctrl-battery"></span><span id="ctrl-screen"></span><span id="ctrl-tags"></span>
+</div>
+<button id="btn-autoswipe"></button>
+<button id="btn-send-text"></button>
+<button id="btn-use-phrase"></button>
+<button id="btn-shot-old"></button>
+<button id="btn-run-ai"></button>
+<button id="btn-batch-all"></button>
+<button id="btn-add-tag"></button>
+<button id="btn-tag-all"></button>
+<button id="btn-tag-selected"></button>
+<button id="multi-clear"></button>
+<input id="input-text">
+<textarea id="ai-goal"></textarea>
+<select id="phrase-select"><option value="">快捷短语...</option><option value="你好呀～">你好呀～</option><option value="感谢支持！">感谢支持！</option><option value="关注我，看更多内容">关注我，看更多内容</option></select>
+<div id="ai-target"></div><div id="ai-log"></div><div id="tasks"></div>
+<div id="tag-dialog"></div><div id="props-modal"></div>
+<div id="tagbar"></div>
+</div>
+<div id="settings-modal" class="modal hidden"><div id="settings-body"></div><button id="settings-close"></button></div>
+<div id="ctx-menu" class="hidden"></div><div id="toast" class="toast"></div><div id="statusbar" class="statusbar"></div>
+<!-- AI 配置弹窗 -->
+<div id="ai-modal" class="hidden">
+<div class="ai-box">
+<div class="ai-head">
+<span>🤖 AI 配置 <small style="color:#7a8499;font-weight:400">（填好后 AI 可自动操作软件）</small></span>
+<button id="ai-close" style="background:none;border:none;color:#889;cursor:pointer;font-size:16px">✕</button>
+</div>
+<div class="ai-body">
+<div class="ai-sec">
+<div class="ai-sec-title">
+          自动化 LLM
+          <span class="ai-hint">驱动整个软件：看屏幕、点按钮、发内容</span>
+</div>
+<div class="ai-row"><label style="width:70px;color:#98a">接口地址</label>
+<input id="ai-auto-url" style="flex:1;height:30px;background:#0e1218;border:1px solid #2a2f3a;border-radius:6px;color:#dde;padding:0 10px" placeholder="https://api.openai.com/v1"></div>
+<div class="ai-row" style="margin-top:8px"><label style="width:70px;color:#98a">模型</label>
+<input id="ai-auto-model" style="flex:1;height:30px;background:#0e1218;border:1px solid #2a2f3a;border-radius:6px;color:#dde;padding:0 10px" placeholder="gpt-4o"></div>
+<div class="ai-row" style="margin-top:8px"><label style="width:70px;color:#98a">密钥</label>
+<input id="ai-auto-key" type="password" style="flex:1;height:30px;background:#0e1218;border:1px solid #2a2f3a;border-radius:6px;color:#dde;padding:0 10px" placeholder="sk-..."></div>
+<div class="ai-row" style="margin-top:10px">
+<button class="ai-test" id="ai-auto-test">测试连接</button>
+<span class="ai-status" id="ai-auto-status"></span>
+</div>
+</div>
+<div class="ai-sec">
+<div class="ai-sec-title">
+          视频 LLM
+          <span class="ai-hint">按文案生成视频</span>
+</div>
+<div class="ai-row"><label style="width:70px;color:#98a">接口地址</label>
+<input id="ai-video-url" style="flex:1;height:30px;background:#0e1218;border:1px solid #2a2f3a;border-radius:6px;color:#dde;padding:0 10px" placeholder="https://api.example.com/v1"></div>
+<div class="ai-row" style="margin-top:8px"><label style="width:70px;color:#98a">模型</label>
+<input id="ai-video-model" style="flex:1;height:30px;background:#0e1218;border:1px solid #2a2f3a;border-radius:6px;color:#dde;padding:0 10px" placeholder="seedance"></div>
+<div class="ai-row" style="margin-top:8px"><label style="width:70px;color:#98a">密钥</label>
+<input id="ai-video-key" type="password" style="flex:1;height:30px;background:#0e1218;border:1px solid #2a2f3a;border-radius:6px;color:#dde;padding:0 10px" placeholder="..."></div>
+<div class="ai-row" style="margin-top:10px">
+<button class="ai-test" id="ai-video-test">测试连接</button>
+<span class="ai-status" id="ai-video-status"></span>
+</div>
+</div>
+<div class="ai-sec">
+<div class="ai-sec-title">API 代理 <span class="ai-hint">仅影响勾选的 LLM API，不修改系统代理</span></div>
+<div class="ai-row"><label><input id="ai-proxy-enabled" type="checkbox"> 启用独立代理</label></div>
+<div class="ai-row" style="margin-top:8px"><label style="width:70px;color:#98a">代理地址</label>
+<input id="ai-proxy-url" style="flex:1;height:30px;background:#0e1218;border:1px solid #2a2f3a;border-radius:6px;color:#dde;padding:0 10px" placeholder="http://127.0.0.1:7890" autocomplete="off"></div>
+<div class="ai-row" style="margin-top:8px;gap:16px">
+<label><input id="ai-proxy-auto" type="checkbox"> 自动化 LLM</label>
+<label><input id="ai-proxy-video" type="checkbox"> 视频 LLM</label>
+<button class="ai-test" id="ai-proxy-detect" type="button">读取本机代理</button></div>
+<div class="ai-row" style="margin-top:8px"><select id="ai-proxy-candidates" hidden style="width:100%;height:30px;background:#0e1218;color:#dde" aria-label="本机代理候选"></select></div>
+<div class="ai-status" id="ai-proxy-status" style="margin-top:6px;white-space:normal"></div>
+<div class="ai-hint" style="margin-top:6px">支持 HTTP/HTTPS 代理（含 HTTPS CONNECT）；SOCKS 专用端口请改填代理软件的 HTTP 或 mixed 端口。读取不会自动开启或保存。保存后再测试连接；未勾选的 API 沿用原系统/环境网络行为。</div>
+</div>
+<div class="ai-sec" id="ai-internal-sec" hidden>
+<div class="ai-sec-title">
+          内部视频生成
+          <span class="ai-hint">内部功能</span>
+</div>
+<div class="ai-row"><label style="width:70px;color:#98a">仓库</label>
+<input id="ai-internal-repo" style="flex:1;height:30px;background:#0e1218;border:1px solid #2a2f3a;border-radius:6px;color:#7a8499;padding:0 10px" readonly=""></div>
+</div>
+</div>
+<div class="ai-foot">
+<button class="ai-save" id="ai-save">保存配置</button>
+</div>
+</div>
+</div>
+<script>
+/* 全局错误显示 */
+(function () {
+  var box = null;
+  function ensureBox() {
+    if (box) return box;
+    box = document.createElement('div');
+    box.id = '__errbox';
+    box.style.cssText = [
+      'position:fixed', 'top:8px', 'right:8px', 'max-width:520px',
+      'z-index:99999', 'display:flex', 'flex-direction:column', 'gap:4px'
+    ].join(';');
+    document.body.appendChild(box);
+    return box;
+  }
+  function show(msg, isErr) {
+    try {
+      var b = ensureBox();
+      var d = document.createElement('div');
+      d.style.cssText = [
+        'background:' + (isErr ? 'rgba(180,30,30,.95)' : 'rgba(30,90,180,.95)'),
+        'color:#fff', 'font:12px/1.5 Consolas,monospace', 'padding:8px 10px',
+        'border-radius:6px', 'white-space:pre-wrap', 'word-break:break-all',
+        'box-shadow:0 4px 16px rgba(0,0,0,.5)', 'cursor:pointer'
+      ].join(';');
+      d.textContent = msg;
+      d.onclick = function () { d.remove(); };
+      b.appendChild(d);
+      setTimeout(function () { d.remove(); }, isErr ? 30000 : 6000);
+    } catch (e) {}
+  }
+  window.__showErr = show;
+  window.addEventListener('error', function (e) {
+    show('错误：' + (e.message || 'unknown') + '\n@ ' + (e.filename || '').split('/').pop() + ':' + (e.lineno || '?'), true);
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    var r = e.reason;
+    show('Promise 错误：' + (r && (r.stack || r.message || r) || 'unknown'), true);
+  });
+  // 同时显示 console.error
+  var oe = console.error.bind(console);
+  console.error = function () {
+    oe.apply(console, arguments);
+    try { show('错误：' + Array.prototype.join.call(arguments, ' '), true); } catch (e) {}
+  };
+})();
+</script>
+<section id="rp-chat" class="rp-chat hidden" aria-label="AI 对话"></section>
+<script>
+/* 内部功能门：默认隐藏，?internal=1 或本地标记才显示 */
+(function(){try{
+  var show=/(?:\?|&)internal=1/.test(location.search)||localStorage.getItem('ff_internal')==='1';
+  if(show){var el=document.getElementById('ai-internal-sec');if(el)el.hidden=false;}
+}catch(e){}})();
+</script>
+  <script src="/static/h264.js?v=1793199712"></script>
+<script src="/static/app.js?v=20261106fix4"></script>
+<script src="/static/otg_panel.js?v=20261030a"></script>
+<script src="/static/live_control.js?v=20261101live1"></script>
+<script src="/static/ui.js?v=20261106fix4"></script>
+<script src="/static/chat_panel.js?v=20261106fix4"></script>
+<script src="/static/small_control.js?v=20261031swipe1"></script>
+</body></html>

@@ -1,0 +1,36 @@
+{
+  "key": "category",
+  "name": "分区（全部分区入口）",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.lib.ui.GeneralActivity",
+  "entry": "首页顶部分区 tab 条右侧「分区」按钮",
+  "captured_at": "2026-10-31T20:05:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "render_tech": "原生 View（但无资源 id）",
+  "identity": [
+    {"name": "标题", "text": "分区"},
+    {"name": "分组标题", "text_re": "^(快捷访问|全部分区)$"}
+  ],
+  "targets": [
+    {"name": "返回", "role": "导航", "risk": "none", "note": "左上 Button，无 id 无 label，95x91"},
+    {"name": "快捷访问", "role": "分组", "risk": "none", "note": "可编辑（「编辑」按钮）"},
+    {"name": "编辑快捷访问", "text": "编辑", "role": "设置", "risk": "none"},
+    {"name": "全部分区", "role": "分组", "risk": "none"},
+    {"name": "分区入口", "text_re": "^(番剧|国创|纪录片|电影|电视剧|综艺|影视|娱乐|音乐|舞蹈|动画|绘画|鬼畜|游戏|资讯|知识|人工智能|科技数码|汽车|时尚美妆|家装房产|户外潮流|健身|体育运动|手工|美食|小剧场|旅游出行|三农|动物|亲子|健康)$", "role": "导航", "risk": "none", "note": "4 列网格，每格 View(264x138) + TextView；只靠文本定位"}
+  ],
+  "partition_list": [
+    "番剧", "国创", "纪录片", "电影", "电视剧", "综艺", "影视", "娱乐", "音乐", "舞蹈",
+    "动画", "绘画", "鬼畜", "游戏", "资讯", "知识", "人工智能", "科技数码", "汽车", "时尚美妆",
+    "家装房产", "户外潮流", "健身", "体育运动", "手工", "美食", "小剧场", "旅游出行", "三农", "动物", "亲子", "健康"
+  ],
+  "navigation": [
+    {"action": "点击任一分区", "to": "partition_feed", "verified": false}
+  ],
+  "uncovered": [
+    "各分区的落地页",
+    "快捷访问的编辑态",
+    "分区数量是否随版本/地区变化"
+  ],
+  "notes": "分区名字是运营配置，可能随版本增减（本次 32 个）；不要硬编码数量，按文本匹配。"
+}

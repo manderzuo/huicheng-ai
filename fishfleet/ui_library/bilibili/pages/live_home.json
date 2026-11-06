@@ -1,0 +1,40 @@
+{
+  "key": "live_home",
+  "name": "直播（首页「直播」分区）",
+  "package": "tv.danmaku.bili",
+  "activity": "tv.danmaku.bili.MainActivityV2",
+  "entry": "首页顶部 tab → 直播",
+  "captured_at": "2026-10-31T20:05:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "直播容器", "id": "liveTabContainer"},
+    {"name": "分区 tab 选中", "id": "tab_title", "text": "直播"}
+  ],
+  "targets": [
+    {"name": "直播列表", "id": "recyclerView", "role": "列表", "risk": "none"},
+    {"name": "顶部轮播", "id": "banner", "role": "展示", "risk": "none", "note": "含多次直播轮播 + 排行榜热度（top_desc「4.9万热度值」）+ 查看榜单 rank_button"},
+    {"name": "更多直播", "id": "calendar_button", "text": "更多直播", "role": "导航", "risk": "none"},
+    {"name": "活动卡", "id": "activity_card", "role": "推广", "risk": "none", "note": "ViewFlipper 轮播；activity_name/activity_time/is_living/button(去围观)"},
+    {"name": "直播卡封面", "id": "ivCover", "role": "可点击", "risk": "none"},
+    {"name": "直播卡-观看数", "id": "watched_text", "role": "文本", "risk": "none"},
+    {"name": "直播卡-点赞数", "id": "likedView", "role": "文本", "risk": "none"},
+    {"name": "直播卡-分区", "id": "tvArea", "role": "文本", "risk": "none", "note": "如「AI应用·机器人」"},
+    {"name": "直播卡-标题", "id": "tvTitle", "role": "文本", "risk": "none"},
+    {"name": "直播卡-主播名", "id": "tvNickname", "role": "文本", "risk": "none"},
+    {"name": "直播卡-官方标记", "id": "live_official_img", "role": "状态", "risk": "none"},
+    {"name": "直播卡-反馈", "id": "ivFeedback", "role": "菜单", "risk": "none"},
+    {"name": "分类 tab", "id": "name", "text_re": "^(推荐|聊天室|颜值|虚拟主播|娱乐|英雄联盟|王者荣耀|电台|CS2)$", "role": "导航", "risk": "none", "note": "sticky 吸顶横向列表，分类由服务端下发"},
+    {"name": "分类编辑", "id": "text_tab_edit", "role": "设置", "risk": "none"}
+  ],
+  "navigation": [
+    {"action": "点击直播卡", "to": "live_room", "verified": false},
+    {"action": "点击分类 tab", "to": "live_home（换分类）", "verified": false}
+  ],
+  "uncovered": [
+    "直播间内部（弹幕/送礼/关注）",
+    "更多直播、查看榜单",
+    "各分类 tab 下的内容"
+  ],
+  "notes": "直播区有大量轮播与运营位（banner2、活动卡、飘屏），节点坐标会不断变化；这类区域不适合用坐标定位，建议用 id + 文本。直播涉及打赏/付费，属重点风控区。"
+}

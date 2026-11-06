@@ -1,0 +1,59 @@
+{
+  "key": "share_panel",
+  "name": "分享面板（视频页底部工作表）",
+  "package": "com.zhiliaoapp.musically",
+  "activity": "com.ss.android.ugc.aweme.splash.SplashActivity（视频页内叠层）",
+  "entry": "视频页右侧「分享」按钮（d63，label=分享视频）",
+  "captured_at": "2026-11-01T20:34:30+08:00",
+  "device": "SERIAL0001",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "底部工作表容器", "id": "d3e", "label_re": "底部工作表"},
+    {"name": "标题「分享到」", "id": "pqy", "text": "分享到"}
+  ],
+  "targets": [
+    {"name": "面板容器", "id": "d3e", "label_re": "底部工作表", "role": "容器", "risk": "none"},
+    {"name": "标题", "id": "pqy", "text": "分享到", "role": "标题", "risk": "none"},
+    {"name": "收起箭头", "id": "gkn", "role": "控件", "risk": "none", "note": "右上 983,913"},
+    {"name": "分享目标列表", "id": "lpm", "role": "列表", "risk": "none"},
+
+    {"name": "添加到限时动态", "id": "pqy", "text": "添加到限时动态", "role": "分享", "risk": "send", "note": "发到自己的 Story，公开可见"},
+    {"name": "分享给自己的账号", "id": "ist", "label_re": "ngbf ling", "role": "分享", "risk": "send", "note": "第一行第二个=\"我的账号\"，实为发给自己/好友的聊天；label 是昵称不是固定文案"},
+    {"name": "查看更多", "id": "ist", "text": "查看更多", "role": "导航", "risk": "none", "note": "展开更多联系人"},
+    {"name": "邀请好友聊天", "id": "pqy", "text": "邀请好友聊天", "role": "分享", "risk": "send"},
+
+    {"name": "转发", "id": "mcx", "text": "转发", "role": "分享", "risk": "send", "note": "★转发表态，会出现在关注者动态里"},
+    {"name": "复制链接", "id": "mcx", "text": "复制链接", "role": "分享", "risk": "none", "note": "★唯一无副作用的分享项：只写剪贴板"},
+    {"name": "Facebook", "id": "mcx", "text": "Facebook", "role": "分享", "risk": "send", "note": "拉起 FB 分享，外发"},
+    {"name": "Instagram Direct", "id": "mcx", "text": "Instagram Direct", "role": "分享", "risk": "send"},
+    {"name": "SMS", "id": "mcx", "text": "SMS", "role": "分享", "risk": "send"},
+    {"name": "Email", "id": "mcx", "text": "Email", "role": "分享", "risk": "send"},
+    {"name": "Instagram", "id": "mcx", "text": "Instagram", "role": "分享", "risk": "send", "note": "在屏幕外（x=1062，仅露 18px），需横向滑动"},
+
+    {"name": "举报", "id": "mcl", "text": "举报", "role": "菜单", "risk": "send", "note": "★提交举报工单，不可撤销"},
+    {"name": "不感兴趣", "id": "mcl", "text": "不感兴趣", "role": "菜单", "risk": "none", "note": "影响自己的推荐，不影响他人"},
+    {"name": "推广", "id": "mcl", "text": "推广", "role": "菜单", "risk": "forbidden", "note": "★付费投流入口，涉及付款"},
+    {"name": "为何看到此视频", "id": "mcl", "text": "为何看到此视频", "role": "菜单", "risk": "none"},
+    {"name": "字幕和翻译", "id": "mcl", "text": "字幕和翻译", "role": "菜单", "risk": "none", "note": "打开字幕设置"},
+    {"name": "合拍", "id": "mcl", "text": "合拍", "role": "菜单", "risk": "send", "note": "★发起合拍创作，会生成内容"},
+    {"name": "拼接", "id": "mcl", "text": "拼接", "role": "菜单", "risk": "send", "note": "在屏幕外，需横向滑动"}
+  ],
+  "layout": {
+    "row1_share_targets": "添加到限时动态 / 我的账号 / 查看更多 / 邀请好友聊天（联系人横向滚动）",
+    "row2_channels": "转发 / 复制链接 / Facebook / Instagram Direct / SMS / Email / Instagram(屏外)",
+    "row3_more_actions": "举报 / 不感兴趣 / 推广 / 为何看到此视频 / 字幕和翻译 / 合拍 / 拼接(屏外)"
+  },
+  "navigation": [
+    {"action": "点「复制链接」", "to": "share_panel", "verified": false, "note": "唯一可安全验证的分享项（仅复制，不外发）"},
+    {"action": "点任一社交渠道", "to": "外部应用", "verified": false, "note": "★会外发，未执行"},
+    {"action": "BACK", "to": "feed", "verified": true}
+  ],
+  "uncovered": [
+    "「查看更多」展开后的完整联系人列表",
+    "各社交渠道的实际分享流程",
+    "「字幕和翻译」面板",
+    "「举报」二级原因选择页",
+    "「不感兴趣」的二次确认"
+  ],
+  "notes": "分享面板打开本身无副作用，可安全采集。★真正的外发动作在点具体渠道之后。截流若要「分享到私信」，需走「我的账号/查看更多 → 选人 → 发送」，中间会进入 dm_chat 类似输入态，发送点仍是纸飞机。"
+}

@@ -1,0 +1,51 @@
+{
+  "key": "story_comment_sheet",
+  "name": "竖屏播放页 · 底部评论区 / 简介面板",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.video.story.StoryVideoActivity",
+  "entry": "竖屏播放页右侧「评论」按钮 → 底部 BottomSheet",
+  "captured_at": "2026-10-31T20:07:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "底部面板", "id": "design_bottom_sheet"},
+    {"name": "tab 条", "id": "story_bottom_tab_layout", "note": "简介 / 评论（N）"}
+  ],
+  "targets": [
+    {"name": "面板外遮罩", "id": "touch_outside", "role": "关闭", "risk": "none"},
+    {"name": "简介 tab", "label_re": "简介", "role": "导航", "risk": "none"},
+    {"name": "评论 tab", "label_re": "评论（", "role": "导航", "risk": "none", "state_hint": "selected；含评论数"},
+    {"name": "放大", "id": "story_bottom_expand", "role": "布局", "risk": "none", "note": "展开成全屏"},
+    {"name": "评论列表", "id": "cmt3_recycler", "role": "列表", "risk": "none"},
+    {"name": "热门评论标题", "id": "title", "text": "热门评论", "role": "文本", "risk": "none"},
+    {"name": "排序按钮", "id": "sort_button", "role": "排序", "risk": "none", "note": "「按热度」/「按时间」切换"},
+    {"name": "评论条目容器", "id": "long_click_hotspot", "role": "列表项", "risk": "none", "note": "Button，整行点击容器"},
+    {"name": "评论者头像", "id": "avatar_layer", "label_re": "（用户名）", "role": "导航", "risk": "none"},
+    {"name": "评论者用户名", "id": "user_name", "role": "文本", "risk": "none"},
+    {"name": "评论者账号名", "id": "user_handle", "role": "文本", "risk": "none"},
+    {"name": "身份牌", "id": "identity_view", "role": "展示", "risk": "none", "note": "如 UP主/粉丝牌，内容不可读时为空"},
+    {"name": "评论正文", "id": "primary_message", "role": "文本", "risk": "none", "note": "表情会以 [表情名] 文本形式出现"},
+    {"name": "评论图片", "id": "picture_list_widget_stub", "role": "展示", "risk": "none"},
+    {"name": "装扮卡片", "id": "garb_bg", "role": "展示", "risk": "none", "note": "ComposeView，编号在 NO.xxx"},
+    {"name": "评论时间与 IP 属地", "id": "description", "role": "文本", "risk": "none", "note": "形如「昨天 11:41 广东」"},
+    {"name": "回复按钮", "id": "reply_button", "role": "互动", "risk": "send", "state_hint": "点击进入回复输入态"},
+    {"name": "评论点赞", "id": "like_container", "label_re": "点赞，", "role": "互动", "risk": "send", "note": "label 带当前赞数，如「点赞，734」"},
+    {"name": "评论点踩", "id": "dislike_button", "label_re": "点踩", "role": "互动", "risk": "send"},
+    {"name": "评论更多", "id": "more_button", "label_re": "更多", "role": "菜单", "risk": "none", "note": "举报/复制等"},
+    {"name": "评论输入框", "id": "input", "label_re": "文本栏", "role": "输入", "risk": "send", "note": "EditText"},
+    {"name": "添加表情", "id": "emotion", "label_re": "添加表情", "role": "输入", "risk": "none"}
+  ],
+  "navigation": [
+    {"action": "点击 简介 tab", "to": "story_intro", "verified": false},
+    {"action": "点击 排序按钮", "to": "评论按时间排序", "verified": false},
+    {"action": "点击 放大", "to": "全屏评论", "verified": false},
+    {"action": "点击 回复按钮", "to": "回复输入态", "verified": false}
+  ],
+  "uncovered": [
+    "简介 tab 的内容",
+    "回复输入态与发送（对外，需确认）",
+    "评论排序切换后的差异",
+    "二级回复列表（楼中楼）"
+  ],
+  "notes": "评论区是 BottomSheet，占屏幕下半部分；评论正文里的表情是文本占位符 [xxx]，不是图片节点，可直接正则提取。"
+}

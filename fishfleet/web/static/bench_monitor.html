@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>20 路逐台监控</title>
+<style>
+  body { margin:0; background:#0a0a0a; color:#ddd; font:12px/1.35 Consolas,monospace; }
+  #bar { position:sticky; top:0; background:#181818; padding:6px 10px; border-bottom:1px solid #333; z-index:9; }
+  #bar b { color:#4fc3f7; }
+  .warn { color:#f66; font-weight:bold; }
+  .ok { color:#5f5; }
+  #grid { display:grid; grid-template-columns:repeat(10,1fr); gap:2px; padding:2px; }
+  .cell { position:relative; background:#000; border:1px solid #222; }
+  .cell canvas { width:100%; display:block; }
+  .tag { position:absolute; top:0; left:0; right:0; background:rgba(0,0,0,.72); color:#0f0; font-size:9px; padding:1px 2px; line-height:1.2; }
+  .tag.stuck { color:#f44; background:rgba(60,0,0,.85); }
+  .tag.slow { color:#fa0; background:rgba(50,35,0,.85); }
+</style>
+</head>
+<body>
+<div id="bar">
+  <button id="go">开始</button>
+  <button id="stop">停止</button>
+  <span id="stat">就绪</span>
+</div>
+<div id="grid"></div>
+<script src="/static/h264.js?v=20261028a"></script>
+<script>
+(function () {
+  const grid = document.getElementById('grid');
+  const statEl = document.getElementById('stat');
+  let players = [];
+  let timer = null;
+  const STUCK_SEC = 4;      // 超过多少秒没新帧算"卡住"
+  const SLOW_SEC = 1.5;     // 超过多少秒算"慢"
+  const QS = new URLSearchParams(location.search);
+  const LIMIT = parseInt(QS.get('limit') || '20', 10);
+  // 版本自检：确认加载的是最新 h264.js
+  document.title = 'BUILD=' + (window.__H264_BUILD || 'OLD');
+
+  function setStat(t) { statEl.innerHTML = t; }
+
+  async function start() {
+    stop();
+    const r = await fetch('/api/devices');
+    const data = await r.json();
+    const devs = (data.devices || []).filter(d => d.state === 'online').slice(0, LIMIT);
+    if (!devs.length) { setStat('<span class="warn">没有在线设备</span>'); return; }
+
+    grid.innerHTML = '';
+    players = [];
+    const now = performance.now();
+
+    for (const d of devs) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      const cv = document.createElement('canvas');
+      cv.width = 224; cv.height = 480;
+      const tag = document.createElement('div');
+      tag.className = 'tag';
+      cell.appendChild(cv); cell.appendChild(tag);
+      grid.appendChild(cell);
+
+      const p = new H264Player(cv);
+      p.serial = d.serial;
+      p.active = true;
+      p._tag = tag;
+      // 逐台指标
+      p._st = {
+        serial: d.serial,
+        frames: 0,           // 自测开始累计
+        lastT: now,          // 最后一帧时刻
+        gapMax: 0,           // 最长帧间隔(秒)
+        gapSum: 0,
+        gapN: 0,
+        err: 0,
+        dropped: 0,          // 解码器队列丢帧
+        stuckSince: 0,       // 开始卡住的时刻
+        stuckTotal: 0,       // 累计卡住秒数
+        stuckTimes: 0,       // 卡住次数
+        fpsWin: [],          // 最近 N 秒 fps
+      };
+
+      // 包装 output：在 H264Player 的 output 里 frameCount++
+      const origRender = p._render.bind(p);
+      p._render = function (frame) {
+        const st = p._st;
+        const t = performance.now();
+        const gap = (t - st.lastT) / 1000;
+        if (st.frames > 0 && gap > st.gapMax) st.gapMax = gap;
+        if (st.frames > 0) { st.gapSum += gap; st.gapN++; }
+        st.lastT = t;
+        st.frames++;
+        return origRender(frame);
+      };
+
+      // 错误计数
+      const origErr = p._onWcsDecodeError ? p._onWcsDecodeError.bind(p) : null;
+      p._onWcsDecodeError = function (m) {
+        p._st.err++;
+        if (origErr) { try { origErr(m); } catch (e) {} }
+      };
+
+      // 包装 decode 前的丢帧统计：直接读 _dropped
+      try { p.start(d.serial); } catch (e) { tag.textContent = 'ERR'; }
+      players.push(p);
+    }
+
+    // 每秒汇总
+    timer = setInterval(() => {
+      const t = performance.now();
+      let tot = 0, stuck = 0, slow = 0, alive = 0;
+
+      for (const p of players) {
+        const st = p._st;
+        const idle = (t - st.lastT) / 1000;
+        st.dropped = p._dropped || 0;
+
+        // 卡住判定
+        if (idle >= STUCK_SEC) {
+          if (st.stuckSince === 0) { st.stuckSince = st.lastT; st.stuckTimes++; }
+          st.stuckTotal = (t - st.stuckSince) / 1000;
+          stuck++;
+        } else {
+          st.stuckSince = 0;
+        }
+        if (idle >= SLOW_SEC) slow++;
+        if (st.frames > 0) alive++;
+
+        // 显示
+        if (p._tag) {
+          const q = (p.decoder && p.decoder.state === 'configured') ? p.decoder.decodeQueueSize : -1;
+          p._tag.textContent = p.serial.slice(-4) + ' ' +
+            idle.toFixed(1) + 's ' + st.frames + 'f e' + st.err;
+          p._tag.className = 'tag' + (idle >= STUCK_SEC ? ' stuck' : (idle >= SLOW_SEC ? ' slow' : ''));
+        }
+      }
+
+      const ifr = players.reduce((a, p) => a + (p._iframeReqs || 0), 0);
+      setStat(
+        '路数 <b>' + players.length + '</b> | ' +
+        '卡住 <b class="' + (stuck ? 'warn' : 'ok') + '">' + stuck + '</b> | ' +
+        '慢 <b class="' + (slow ? 'warn' : 'ok') + '">' + slow + '</b> | ' +
+        '总数 <b>' + players.reduce((a, p) => a + p._st.frames, 0) + '</b> | ' +
+        '请求IDR <b>' + ifr + '</b>'
+      );
+      document.title = 'MON stuck=' + stuck + ' slow=' + slow + ' idr=' + ifr;
+    }, 1000);
+
+    setStat('已启动 ' + players.length + ' 路');
+  }
+
+  function stop() {
+    if (timer) { clearInterval(timer); timer = null; }
+    for (const p of players) { try { p.stop(); } catch (e) {} }
+    players = [];
+  }
+
+  document.getElementById('go').onclick = start;
+  document.getElementById('stop').onclick = stop;
+
+  // 逐台详细数据（供 Python 读取）
+  window.__mon = {
+    detail: () => players.map(p => {
+      const st = p._st;
+      const idle = (performance.now() - st.lastT) / 1000;
+      return {
+        s: st.serial,
+        build: window.__H264_BUILD,
+        received: p._received || 0,
+        submitted: p._submitted || 0,
+        iframeRequests: p._iframeReqs || 0,
+        iframeAcks: p._iframeAcks || 0,
+        iframeAck: p._iframeAck || null,
+        frames: st.frames,
+        rendered: p.renderCount || 0,
+        renderIdle: p._lastRender ? +((performance.now() - p._lastRender)/1000).toFixed(2) : null,
+        idle: +idle.toFixed(2),
+        gapMax: +st.gapMax.toFixed(2),
+        gapAvg: st.gapN ? +(st.gapSum / st.gapN).toFixed(3) : 0,
+        err: st.err,
+        lastError: p._lastDecodeError || null,
+        dropped: p._dropped || 0,
+        stuckTotal: +st.stuckTotal.toFixed(1),
+        stuckTimes: st.stuckTimes,
+        q: (p.decoder && p.decoder.state === 'configured') ? p.decoder.decodeQueueSize : -1,
+        decState: p.decoder ? p.decoder.state : 'none',
+      };
+    }),
+    resetStats: () => {
+      const now = performance.now();
+      players.forEach(p => {
+        Object.assign(p._st, {
+          frames: 0, lastT: now, gapMax: 0, gapSum: 0, gapN: 0,
+          err: 0, stuckSince: 0, stuckTotal: 0, stuckTimes: 0,
+        });
+      });
+      return players.length;
+    },
+    mark: '',   // 由 Python 设置当前阶段标记
+  };
+
+  if (location.search.indexOf('auto') >= 0) setTimeout(start, 800);
+})();
+</script>
+</body>
+</html>

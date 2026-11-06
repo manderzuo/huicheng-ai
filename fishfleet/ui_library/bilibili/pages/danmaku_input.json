@@ -1,0 +1,32 @@
+{
+  "key": "danmaku_input",
+  "name": "发弹幕输入面板（竖屏播放页）",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.video.story.StoryVideoActivity",
+  "entry": "竖屏播放页底部「弹幕」输入条",
+  "captured_at": "2026-10-31T20:07:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "输入编辑框", "id": "player_input_edit", "note": "EditText，获得焦点"},
+    {"name": "弹幕选项面板", "id": "danmaku_input_options"}
+  ],
+  "targets": [
+    {"name": "输入框", "id": "player_input_edit", "role": "输入", "risk": "none"},
+    {"name": "发送", "id": "player_input_send", "role": "发送", "risk": "send", "state_hint": "空内容时 disabled"},
+    {"name": "输入选项（左侧图标）", "id": "player_input_options_view", "role": "菜单", "risk": "none", "note": "右上红点 player_input_options_red_point"},
+    {"name": "字体大小", "id": "input_options_group_textsize", "role": "单选", "risk": "none", "note": "默认 / 较小（实测只出现两项）"},
+    {"name": "弹幕位置", "id": "input_options_group_type", "role": "单选", "risk": "none", "note": "滚动 / 置顶"},
+    {"name": "弹幕颜色", "id": "input_options_color_group", "role": "单选", "risk": "none", "note": "12 色：白/红/黄/绿/蓝/粉/浅绿/深蓝/橙/紫/浅蓝/棕；白色带 badge"},
+    {"name": "颜色项容器", "id": "input_options_color_white|red|yellow|green|blue|pink|light_green|drak_blue|orange|purple|lite_blue|brown", "role": "可点击", "risk": "none", "note": "注意 id 里有拼写错误：drak_blue、lite_blue，是官方原样"}
+  ],
+  "navigation": [
+    {"action": "输入文字后点发送", "to": "弹幕上屏", "verified": false, "risk": "send"}
+  ],
+  "uncovered": [
+    "真正发送弹幕（对外发布，需主人确认）",
+    "字体大小是否还有「较大」等更多档",
+    "输入选项菜单（左侧图标）展开内容"
+  ],
+  "notes": "弹幕发送属于对外内容发布，risk=send，绝不能自动执行。颜色 id 里的拼写错误（drak_blue / lite_blue）是官方资源名，定位时要照抄。"
+}

@@ -1,0 +1,29 @@
+{
+  "key": "settings_danmaku",
+  "name": "设置 · 弹幕/字幕设置",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.app.preferences.BiliPreferencesActivity",
+  "entry": "我的 → 设置 → 播放设置 → 弹幕/字幕设置",
+  "captured_at": "2026-10-31T20:34:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "标题", "text": "弹幕/字幕设置"},
+    {"name": "分组标题", "id": "title", "text_re": "^(弹幕设置|字幕设置)$", "note": "分组标题用 tv.danmaku.bili:id/title，条目用 android:id/title"}
+  ],
+  "targets": [
+    {"name": "返回", "label_re": "转到上一层级", "role": "导航", "risk": "none"},
+    {"name": "分组-弹幕设置", "id": "title", "text": "弹幕设置", "role": "分组", "risk": "none"},
+    {"name": "记忆弹幕开关状态", "text": "记忆弹幕开关状态", "role": "开关", "risk": "none", "state_hint": "Switch checked=false；summary=「弹幕开关状态变化将同步至此设备的所有视频」"},
+    {"name": "弹幕快捷选择功能", "text": "弹幕快捷选择功能", "role": "开关", "risk": "none", "state_hint": "Switch checked=true；summary=「点击弹幕可进行点赞、复制等操作」"},
+    {"name": "分组-字幕设置", "id": "title", "text": "字幕设置", "role": "分组", "risk": "none"},
+    {"name": "字幕反馈模式", "text": "字幕反馈模式", "role": "开关", "risk": "none", "state_hint": "Switch；summary=「开启可点击字幕进行反馈」"},
+    {"name": "字幕拖拽", "text": "字幕拖拽", "role": "开关", "risk": "none", "state_hint": "Switch；summary=「开启可进行字幕拖拽」"}
+  ],
+  "navigation": [],
+  "uncovered": [
+    "弹幕样式/透明度/字号等更多弹幕设置（本页只有两项）",
+    "字幕语言选择（本页没有）"
+  ],
+  "notes": "本页是原生 preferences 的「分组 + 开关」形态：分组标题 id 是 tv.danmaku.bili:id/title，条目标题是 android:id/title，两者容易混。所有开关都是 id=switchWidget 的 Switch，checked 可直接读。⚠️「记忆弹幕开关状态」若开启，会把这台设备的弹幕开关状态同步到该账号所有视频——自动化改弹幕前要先看这一项。"
+}

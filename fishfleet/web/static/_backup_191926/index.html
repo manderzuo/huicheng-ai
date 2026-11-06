@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FishFleet · 智能群控</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- ============ 顶栏 ============ -->
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">🐟</span>
+    <span class="name">FishFleet</span>
+  </div>
+
+  <div class="stats">
+    <span class="stat"><i>在线</i><b id="stat-online">0/0</b></span>
+    <span class="stat"><i>任务</i><b id="stat-tasks">0</b></span>
+    <span class="stat"><i>AI</i><b id="stat-ai">闲置</b></span>
+  </div>
+
+  <div class="actions">
+    <button class="btn" id="btn-refresh">刷新</button>
+    <button class="btn" id="btn-select-all">全选</button>
+    <button class="btn" id="btn-clear-sel">取消选择</button>
+    <button class="btn" id="btn-settings">⚙ 设置</button>
+  </div>
+</header>
+
+<!-- ============ 主体 ============ -->
+<main class="main">
+
+  <!-- 左侧 -->
+  <section class="left">
+    <!-- 标签栏 -->
+    <div class="tagbar" id="tagbar">
+      <button class="tagchip active" data-tag="all">全部 <b id="tag-all-count">0</b></button>
+      <button class="tagchip" data-tag="untagged">未标签 <b id="tag-untagged-count">0</b></button>
+      <span id="tag-chips"></span>
+      <button class="tagchip add" id="btn-add-tag">+ 标签</button>
+    </div>
+
+    <!-- 网格 -->
+    <div class="grid-wrap">
+      <div class="grid" id="grid"></div>
+    </div>
+  </section>
+
+  <!-- 右侧面板 -->
+  <aside class="panel" id="panel">
+    <nav class="tabs">
+      <button class="tab active" data-tab="control">控制</button>
+      <button class="tab" data-tab="ai">AI</button>
+      <button class="tab" data-tab="tasks">任务</button>
+      <button class="tab" data-tab="actions">动作</button>
+      <button class="tab" data-tab="files">文件</button>
+      <button class="tab" data-tab="logs">日志</button>
+    </nav>
+
+    <!-- 控制 -->
+    <div class="tab-body active" data-body="control">
+      <div class="empty-hint" id="ctrl-hint">点击左侧手机开始控制</div>
+      <div class="hidden" id="ctrl-content">
+        <div class="device-head">
+          <div><span class="dev-num" id="ctrl-index">#1</span>
+            <span class="dev-serial" id="ctrl-serial">—</span></div>
+          <span class="badge" id="ctrl-state">—</span>
+        </div>
+
+        <div class="info-rows">
+          <div class="row"><span>前台</span><span id="ctrl-app">—</span></div>
+          <div class="row"><span>电量</span><span id="ctrl-battery">—</span></div>
+          <div class="row"><span>屏幕</span><span id="ctrl-screen">—</span></div>
+          <div class="row"><span>标签</span><span id="ctrl-tags">—</span></div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">设备操作</div>
+          <div class="grid3">
+            <button class="op-btn" data-op="bigscreen">打开大屏</button>
+            <button class="op-btn" data-op="rename">修改名称</button>
+            <button class="op-btn" data-op="tag">设置标签</button>
+            <button class="op-btn" data-op="props">手机参数</button>
+            <button class="op-btn" data-op="wifi">WiFi模式</button>
+            <button class="op-btn" data-op="sleep">关闭屏幕</button>
+            <button class="op-btn" data-op="reboot">重启手机</button>
+            <button class="op-btn" data-op="restartadbd">重启ADB</button>
+            <button class="op-btn" data-op="clipboard">导出粘贴板</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">批量分发</div>
+          <div class="grid3">
+            <button class="op-btn" data-op="install">安装APK</button>
+            <button class="op-btn" data-op="text">文字分发</button>
+            <button class="op-btn" data-op="file">文件分发</button>
+            <button class="op-btn" data-op="adb">ADB命令</button>
+            <button class="op-btn" data-op="autoswipe">自动滑屏</button>
+            <button class="op-btn" data-op="swipecount">连续滑动</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">任务与动作</div>
+          <div class="grid3">
+            <button class="op-btn" data-op="record">录制动作</button>
+            <button class="op-btn" data-op="play">执行动作</button>
+            <button class="op-btn" data-op="task">执行任务</button>
+            <button class="op-btn" data-op="stoptask">结束任务</button>
+            <button class="op-btn" data-op="tasklist">执行列表</button>
+            <button class="op-btn" data-op="ime">切换输入法</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">应用</div>
+          <div class="grid3">
+            <button class="app-btn" data-pkg="com.ss.android.ugc.aweme">抖音</button>
+            <button class="app-btn" data-pkg="com.xingin.xhs">小红书</button>
+            <button class="app-btn" data-pkg="tv.danmaku.bili">B站</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">按键</div>
+          <div class="grid3">
+            <button class="key-btn" data-key="home">主页</button>
+            <button class="key-btn" data-key="back">返回</button>
+            <button class="key-btn" data-key="recent">多任务</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">滑动</div>
+          <div class="grid3">
+            <button class="key-btn" data-swipe="up">↑ 上滑</button>
+            <button class="key-btn" data-swipe="down">↓ 下滑</button>
+            <button class="key-btn" id="btn-autoswipe">自动滑</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">输入</div>
+          <div class="input-row">
+            <input type="text" id="input-text" placeholder="输入内容后回车">
+            <button class="btn small" id="btn-send-text">发送</button>
+          </div>
+          <div class="input-row" style="margin-top:6px">
+            <select id="phrase-select"><option value="">快捷短语...</option></select>
+            <button class="btn small" id="btn-use-phrase">用</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <button class="btn wide" id="btn-shot">立即截图</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI -->
+    <div class="tab-body" data-body="ai">
+      <div class="row"><span>目标设备</span><span id="ai-target">未选择</span></div>
+      <div class="section">
+        <div class="section-title">任务目标</div>
+        <textarea id="ai-goal" rows="4" placeholder="自然语言描述，例如：打开抖音，搜索大肥鱼，看第一条视频"></textarea>
+      </div>
+      <div class="section">
+        <div class="section-title">快捷任务</div>
+        <div class="quick-list">
+          <button class="quick" data-goal="打开抖音，搜索大肥鱼，看第一条视频并告诉我内容">搜索大肥鱼</button>
+          <button class="quick" data-goal="打开抖音首页，往下刷5条视频，总结每条内容">刷5条抖音</button>
+          <button class="quick" data-goal="检查屏幕上有没有弹窗，有就关掉，然后告诉我当前页面">处理弹窗</button>
+          <button class="quick" data-goal="打开抖音消息页，看看有没有新评论，有的话读给我听">查评论</button>
+        </div>
+      </div>
+      <div class="section">
+        <button class="btn primary wide" id="btn-run-ai">▶ 让 AI 执行</button>
+      </div>
+      <div class="section hidden" id="ai-result-section">
+        <div class="section-title">执行结果</div>
+        <div class="ai-result" id="ai-result"></div>
+      </div>
+    </div>
+
+    <!-- 任务 -->
+    <div class="tab-body" data-body="tasks">
+      <div class="task-stats" id="task-stats"></div>
+      <div class="task-actions">
+        <button class="btn small" id="btn-cancel-all">全部取消</button>
+        <button class="btn small" id="btn-clear-finished">清除已完成</button>
+      </div>
+      <div class="task-list" id="task-list"></div>
+    </div>
+
+    <!-- 动作 -->
+    <div class="tab-body" data-body="actions">
+      <div class="section">
+        <div class="section-title">录制脚本</div>
+        <div class="input-row">
+          <input type="text" id="new-script-name" placeholder="脚本名称">
+          <button class="btn small" id="btn-create-script">新建</button>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-title">脚本列表</div>
+        <div class="script-list" id="script-list"></div>
+      </div>
+      <div class="section" id="script-detail" style="display:none">
+        <div class="section-title" id="script-detail-title">脚本详情</div>
+        <div class="action-list" id="action-list"></div>
+        <div class="btn-row" style="margin-top:8px">
+          <button class="btn small" id="btn-add-act-tap">+点击</button>
+          <button class="btn small" id="btn-add-act-swipe">+滑动</button>
+          <button class="btn small" id="btn-add-act-key">+按键</button>
+          <button class="btn small" id="btn-add-act-wait">+等待</button>
+        </div>
+        <button class="btn primary wide" id="btn-play-script" style="margin-top:10px">▶ 在当前设备执行</button>
+      </div>
+    </div>
+
+    <!-- 文件 -->
+    <div class="tab-body" data-body="files">
+      <div class="section">
+        <div class="section-title">推送到手机</div>
+        <div class="input-row">
+          <input type="text" id="push-local-path" placeholder="本地文件完整路径">
+          <button class="btn small" id="btn-push-file">推送</button>
+        </div>
+        <div class="hint">推视频会自动触发相册扫描，可直接发布</div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">从手机拉取</div>
+        <div class="input-row">
+          <input type="text" id="pull-remote-path" placeholder="/sdcard/Download/xxx.mp4">
+          <button class="btn small" id="btn-pull-file">拉取</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">手机文件列表</div>
+        <button class="btn small" id="btn-list-files">列出 Download</button>
+        <div class="file-list" id="file-list"></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">设备参数</div>
+        <button class="btn small" id="btn-device-props">查看参数</button>
+        <div class="props-box" id="props-box"></div>
+      </div>
+    </div>
+
+    <!-- 日志 -->
+    <div class="tab-body" data-body="logs">
+      <div class="log-list" id="log-list"></div>
+    </div>
+  </aside>
+</main>
+
+<!-- ============ 多选操作栏 ============ -->
+<div class="multi-bar hidden" id="multi-bar">
+  <span>已选 <b id="multi-count">0</b> 台</span>
+  <button class="btn small" data-mb="text">文字分发</button>
+  <button class="btn small" data-mb="back">返回</button>
+  <button class="btn small" data-mb="home">主页</button>
+  <button class="btn small" data-mb="swipe">上滑</button>
+  <button class="btn small" data-mb="launch">抖音</button>
+  <button class="btn small" data-mb="autoswipe">自动滑</button>
+  <button class="btn small" data-mb="adb">ADB</button>
+  <button class="btn small" data-mb="install">装APK</button>
+  <button class="btn small" data-mb="push">推文件</button>
+  <button class="btn small" data-mb="ai">批量AI</button>
+  <button class="btn small" data-mb="tag">打标签</button>
+  <button class="btn small" data-mb="clear">取消</button>
+</div>
+
+<!-- ============ 右键菜单 ============ -->
+<div class="ctx-menu hidden" id="ctx-menu"></div>
+
+<!-- ============ 设置面板 ============ -->
+<div class="modal hidden" id="settings-modal">
+  <div class="settings-panel">
+    <div class="modal-head">
+      <span>系统设置</span>
+      <button class="btn" id="settings-close">×</button>
+    </div>
+    <div class="settings-body" id="settings-body">
+      <!-- 由 JS 填充 -->
+    </div>
+  </div>
+</div>
+
+<!-- ============ 大屏（可操控） ============ -->
+<div class="modal hidden" id="bigscreen">
+  <div class="bigscreen-inner">
+    <div class="modal-head">
+      <span id="bigscreen-title">—</span>
+      <span id="bigscreen-hint" class="bs-hint"></span>
+      <span style="flex:1"></span>
+      <button class="btn small" id="bs-key-back" title="返回">◁</button>
+      <button class="btn small" id="bs-key-home" title="主页">○</button>
+      <button class="btn small" id="bs-key-recent" title="多任务">□</button>
+      <button class="btn small" id="bs-refresh">↻</button>
+      <button class="btn small" id="bs-close">×</button>
+    </div>
+    <img id="bigscreen-img" src="" alt="" title="点击=点屏幕，拖动=滑动，滚轮=上下滑，右键=返回">
+  </div>
+</div>
+
+<!-- ============ 状态栏 ============ -->
+<footer class="statusbar">
+  <span id="sb-msg">就绪</span>
+  <span class="sb-right" id="sb-time"></span>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

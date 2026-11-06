@@ -1,0 +1,54 @@
+{
+  "device_key": "honor_LGE-AN00_w410_1224x2664",
+  "serial": "SERIAL0001",
+  "screen": {
+    "serial": "SERIAL0001",
+    "width": 1224,
+    "height": 2664,
+    "dpi": 476,
+    "status_bar": 63,
+    "nav_bar": 175,
+    "source": "wm",
+    "size_override": false,
+    "density_override": true,
+    "content_h": 2426,
+    "px_per_dp": 2.975,
+    "dp_w": 411.4,
+    "dp_h": 895.5,
+    "content_dp_h": 815.5,
+    "status_dp": 21.2,
+    "nav_dp": 58.8,
+    "scale": 1.1333,
+    "dpi_scale": 1.1333,
+    "dp_family": "w410"
+  },
+  "baseline": {
+    "width": 1080,
+    "height": 1920,
+    "dpi": 420,
+    "status_bar": 63,
+    "nav_bar": 126,
+    "dp_w": 411.4,
+    "dp_h": 731.4
+  },
+  "dp_offsets": {
+    "douyin.home.search": [
+      27.2,
+      54.5
+    ],
+    "xiaohongshu.home.search": [
+      26.6,
+      55.5
+    ],
+    "douyin.home.tab_home": [
+      40.3,
+      38.7
+    ],
+    "bilibili.home.publish": [
+      0.0,
+      38.7
+    ]
+  },
+  "last_foreground": "com.xingin.xhs",
+  "updated_at": 1793794467.3903291
+}

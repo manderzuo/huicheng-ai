@@ -1,0 +1,37 @@
+{
+  "key": "search_live",
+  "name": "搜索结果 · 直播 tab",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.search2.main.BiliMainSearchActivity",
+  "entry": "搜索结果页 → 点「直播」tab",
+  "captured_at": "2026-10-31T20:56:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "直播 tab 选中", "id": "tab_title", "text": "直播", "note": "selected"},
+    {"name": "直播间分组标题", "id": "title", "text_re": "^全部直播间"}
+  ],
+  "targets": [
+    {"name": "分类 tab", "id": "tab_title", "text_re": "^(综合|番剧|直播|用户|影视|图文)$", "role": "导航", "risk": "none", "state_hint": "selected"},
+    {"name": "结果网格", "id": "recycler_view", "role": "列表", "risk": "none"},
+    {"name": "分组标题", "id": "title", "role": "文本", "risk": "none", "note": "形如「全部直播间 (99+）」，注意右括号是中文全角"},
+    {"name": "直播卡容器", "role": "列表项", "risk": "none", "note": "无 id 的 RelativeLayout，2 列，508x431"},
+    {"name": "直播封面", "id": "cover", "role": "可点击", "risk": "none"},
+    {"name": "直播状态", "id": "status", "text": "直播中", "role": "状态", "risk": "none"},
+    {"name": "主播名", "id": "uname", "role": "文本", "risk": "none"},
+    {"name": "在线人数容器", "id": "info_online", "role": "容器", "risk": "none"},
+    {"name": "在线人数图标", "id": "watched_icon", "role": "展示", "risk": "none"},
+    {"name": "在线人数", "id": "watched_text", "role": "文本", "risk": "none", "note": "形如「9.2万」「2745」"},
+    {"name": "直播标题", "id": "title", "role": "文本", "risk": "none"},
+    {"name": "直播分区", "id": "subtitle", "role": "文本", "risk": "none", "note": "如「虚拟日常」「AI应用·机器人」「视频唱见」"}
+  ],
+  "navigation": [
+    {"action": "点击直播卡", "to": "live_room", "verified": false}
+  ],
+  "uncovered": [
+    "番剧 / 影视 / 图文 三个 tab 的结构",
+    "「全部直播间」右侧是否有更多入口",
+    "空结果状态"
+  ],
+  "notes": "搜索直播 tab 的卡片比直播分区的卡片简单：没有点赞数、没有「更多」按钮，只有封面/状态/主播/在线人数/标题/分区。搜索页的 tab 宽度固定 110px，「综合/番剧/直播/用户/影视/图文」共 6 个，点击坐标必须落在对应区间（直播是 220-332）。"
+}

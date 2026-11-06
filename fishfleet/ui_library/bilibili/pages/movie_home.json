@@ -1,0 +1,45 @@
+{
+  "key": "movie_home",
+  "name": "影视分区（电影/电视剧/纪录片/综艺）",
+  "package": "tv.danmaku.bili",
+  "activity": "tv.danmaku.bili.MainActivityV2",
+  "entry": "首页顶部 tab → 影视",
+  "captured_at": "2026-10-31T20:20:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "render_tech": "Jetpack Compose（cvContainer）",
+  "identity": [
+    {"name": "分区 tab 选中", "id": "tab_title", "text": "影视", "note": "selected"},
+    {"name": "影视容器", "id": "cvContainer", "note": "ComposeView"}
+  ],
+  "targets": [
+    {"name": "影视内容容器", "id": "cvContainer", "role": "容器", "risk": "none"},
+    {"name": "顶部 banner", "role": "展示", "risk": "none", "note": "宣传图 + 标语（本次「一座灯塔，三代人，六十年的守望」），内容动态"},
+    {"name": "找片看", "text": "找片看", "role": "导航", "risk": "none"},
+    {"name": "片单", "text": "片单", "role": "导航", "risk": "none"},
+    {"name": "电影", "text": "电影", "role": "导航", "risk": "none"},
+    {"name": "电视剧", "text": "电视剧", "role": "导航", "risk": "none"},
+    {"name": "纪录片", "text": "纪录片", "role": "导航", "risk": "none"},
+    {"name": "综艺", "text": "综艺", "role": "导航", "risk": "none"},
+    {"name": "短剧", "text": "短剧", "role": "导航", "risk": "none"},
+    {"name": "我的追剧", "text": "我的追剧", "role": "导航", "risk": "none"},
+    {"name": "猜你想追", "text": "猜你想追", "role": "分组", "risk": "none"},
+    {"name": "影视卡封面", "label_re": "ogvImage", "role": "可点击", "risk": "none"},
+    {"name": "集数/更新日期", "role": "文本", "risk": "none", "note": "形如「全8集」「全18集」「10-30」（上映日期）"},
+    {"name": "影视标题", "role": "文本", "risk": "none"},
+    {"name": "影视副标题/卖点", "role": "文本", "risk": "none", "note": "形如「12315打假实录」"},
+    {"name": "正在热播", "text": "正在热播", "role": "分组", "risk": "none"}
+  ],
+  "navigation": [
+    {"action": "点击 电影/电视剧/纪录片/综艺/短剧", "to": "ogv 频道页", "verified": false},
+    {"action": "点击影视卡", "to": "bangumi_detail（ogv 详情）", "verified": false},
+    {"action": "点击 找片看", "to": "影视筛选页", "verified": false}
+  ],
+  "uncovered": [
+    "电影/电视剧/纪录片/综艺/短剧 各频道页",
+    "找片看（影视筛选）",
+    "片单",
+    "影视详情页（应与 bangumi_detail 同构，未验证）"
+  ],
+  "notes": "影视分区是纯 Compose：只有 cvContainer 一个容器，内部全部无 id，靠文本和 ogvImage label。与番剧分区（VertexActivity）不是一个 Activity，别混淆。"
+}

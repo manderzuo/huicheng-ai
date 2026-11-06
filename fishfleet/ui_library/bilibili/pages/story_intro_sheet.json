@@ -1,0 +1,31 @@
+{
+  "key": "story_intro_sheet",
+  "name": "竖屏播放页 · 底部「简介」面板",
+  "package": "tv.danmaku.bili",
+  "activity": "com.bilibili.video.story.StoryVideoActivity",
+  "entry": "竖屏播放页底部面板 → 简介 tab",
+  "captured_at": "2026-10-31T20:08:00+08:00",
+  "device": "192.168.31.248:5555",
+  "evidence_level": "navigation-verified",
+  "identity": [
+    {"name": "简介 tab 选中", "label_re": "简介", "note": "selected"},
+    {"name": "底部面板", "id": "design_bottom_sheet"}
+  ],
+  "targets": [
+    {"name": "视频标题", "role": "文本", "risk": "none"},
+    {"name": "元信息行", "role": "文本", "risk": "none", "note": "一行混合：playCount + danmaku + 发布日期 + BV号 + 版权声明，例「playCount11.6万 danmaku154 2026年10月30日 11:11 BV14gxc61Eux copyright未经作者授权禁止转载」；需正则拆字段"},
+    {"name": "简介正文", "role": "文本", "risk": "none", "note": "超长时末尾带「...展开」"},
+    {"name": "相关视频标题", "text": "相关视频", "role": "分组", "risk": "none"},
+    {"name": "相关视频项", "role": "列表项", "risk": "none", "note": "2 列网格：播放量/弹幕数/时长/标题/UP主，均为无 id 的 TextView"},
+    {"name": "收起面板", "id": "story_bottom_expand", "role": "布局", "risk": "none"}
+  ],
+  "navigation": [
+    {"action": "点击相关视频", "to": "video_detail", "verified": false}
+  ],
+  "uncovered": [
+    "简介「展开」后的全文",
+    "相关视频的「更多」",
+    "BV 号以外的分P/合集信息"
+  ],
+  "notes": "元信息行把所有字段挤在一个 TextView 里，是解析成本最高的地方；建议用正则分别抓 playCount/danmaku/日期/BV号/版权。"
+}
