@@ -1,4 +1,4 @@
-﻿# FishFleet 主配置
+# FishFleet 主配置
 
 # ============================================================
 # LLM 配置（可多套，按任务路由）
@@ -69,12 +69,14 @@ devices:
 # 视频生成（MCP 接入，预留）
 # ============================================================
 video_generation:
-  enabled: true               # 已接入本地 stdio MCP（trae-maker / seedance）；真正生成仍需在界面确认
+  enabled: true               # 已内置本地 stdio MCP（trae-maker / seedance）；真正生成仍需在界面确认
   mcp:
     transport: stdio         # http | stdio
-    command: 'C:\Users\Administrator\.dsh\dsh-runtimes\dsh-primary-runtime\dependencies\node\bin\node.exe'
+    # {APP_BASE} = 程序根（打包态 exe 目录，开发态项目根），由 config.py 自动展开；
+    # 旧包里的开发机绝对路径在客户机上不存在，mcp_client 会自动回退到内置路径。
+    command: '{APP_BASE}/runtime/node/node.exe'
     args:
-      - 'C:\Users\Administrator\Documents\deepseek-harness\default-workspace\huicheng-auto\vendor\trae-maker-MCP\skills\aiwork-seedance\mcp\server.mjs'
+      - '{APP_BASE}/_internal/vendor/trae-maker-MCP/skills/aiwork-seedance/mcp/server.mjs'
     server: ""               # stdio 不用
     tool: "seedance_generate"
     timeout: 900

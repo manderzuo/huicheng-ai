@@ -49,6 +49,8 @@ class ServerThread(threading.Thread):
         super().__init__(daemon=True)
         self.port = port
         self.error: str | None = None
+        # 2026-11-07：保留 server 实例，关闭窗口时能优雅收尾（不再只能 kill 进程）。
+        self.server = None
 
     def run(self) -> None:
         try:
@@ -69,7 +71,7 @@ class ServerThread(threading.Thread):
             #   1. 把 None 的 stdout/stderr 换成安全 writer（带 isatty/fileno）；
             #   2. 给 uvicorn 传 log_config=None，让它不去装自定义 formatter。
             _ensure_stdio()
-            uvicorn.run(
+            config = uvicorn.Config(
                 app,
                 host=HOST,
                 port=self.port,
@@ -77,8 +79,18 @@ class ServerThread(threading.Thread):
                 access_log=False,
                 log_config=None,          # 见上：避免 configure_formatter 崩
             )
+            self.server = uvicorn.Server(config)
+            self.server.run()
         except Exception:  # noqa: BLE001
             self.error = traceback.format_exc()
+
+    def request_stop(self) -> None:
+        """让 uvicorn 走正常 shutdown（触发 lifespan 收尾），失败就交给兜底。"""
+        try:
+            if self.server is not None:
+                self.server.should_exit = True
+        except Exception:
+            pass
 
 
 class _SafeWriter:
@@ -273,30 +285,276 @@ def _find_browser() -> str | None:
     return None
 
 
-def _open_app_window(url: str, profile_dir: str) -> bool:
-    """用浏览器以「应用窗口」方式打开 URL。返回是否成功拉起。"""
+def _window_geom_file():
+    """窗口大小/位置的缓存文件。"""
+    try:
+        from fishfleet.paths import data_dir
+        return data_dir() / 'window.json'
+    except Exception:
+        return None
+
+
+def _load_window_geometry():
+    """读上次的窗口大小与位置；没有就用默认值。
+
+    2026-11-07 加：用户把窗口拉大 / 挪到副屏后，下次启动应该保持，
+    否则每次都是 1600x950 居中，用起来很别扭。
+    """
+    import json as _json
+    default = (1600, 950, 80, 60)
+    f = _window_geom_file()
+    if not f:
+        return default
+    try:
+        d = _json.loads(f.read_text(encoding='utf-8'))
+        w = int(d.get('w') or 1600)
+        h = int(d.get('h') or 950)
+        x = int(d.get('x') if d.get('x') is not None else 80)
+        y = int(d.get('y') if d.get('y') is not None else 60)
+        # 基本合理性检查：别让窗口跑到屏幕外
+        if w < 900 or h < 600 or w > 8000 or h > 5000:
+            w, h = 1600, 950
+        if x < -4000 or y < -4000 or x > 8000 or y > 8000:
+            x, y = 80, 60
+        return (w, h, x, y)
+    except Exception:
+        return default
+
+
+def save_window_geometry(w: int, h: int, x: int = 80, y: int = 60) -> None:
+    """保存窗口几何（退出时调用，或者由前端上报）。"""
+    import json as _json
+    f = _window_geom_file()
+    if not f:
+        return
+    try:
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(_json.dumps({'w': w, 'h': h, 'x': x, 'y': y}),
+                     encoding='utf-8')
+    except Exception:
+        pass
+
+
+def _open_app_window(url: str, profile_dir: str):
+    """用浏览器以「应用窗口」方式打开 URL。
+
+    返回 (是否成功, Popen 或 None)。2026-11-07 起返回进程句柄：
+    关闭窗口时要能确认「这个 Edge 实例是我们起的」，只杀它，不误伤用户自己的浏览器。
+    """
     import subprocess as _sp
 
     exe = _find_browser()
     if not exe:
-        return False
+        return False, None
+
+    # 2026-11-07 观感优化（选项 C：不装 Tauri，把 Edge --app 做到接近原生）
+    #   · 关扩展/同步/后台网络/翻译 -> 少开无关进程，白屏时间更短
+    #   · 窗口大小位置记忆 -> 下次按上次的样子打开
+    #   · 先开 splash.html，服务就绪后由页面自己跳转 -> 不再白屏
+    w, h, x, y = _load_window_geometry()
     args = [
         exe,
         "--app=" + url,
-        "--window-size=1600,950",
-        "--window-position=80,60",
+        f"--window-size={w},{h}",
+        f"--window-position={x},{y}",
         "--no-first-run",
         "--no-default-browser-check",
-        "--disable-features=Translate,BackForwardCache",
+        "--disable-extensions",
+        "--disable-component-update",
+        "--disable-background-networking",
+        "--disable-sync",
+        "--disable-default-apps",
+        "--disable-breakpad",
+        "--disable-features=Translate,BackForwardCache,msEdgeIdentityIntegration",
         "--user-data-dir=" + profile_dir,
     ]
     try:
-        _sp.Popen(args, close_fds=True)
+        proc = _sp.Popen(args, close_fds=True)
         print(f"[FishFleet] 已用 {os.path.basename(exe)} 打开窗口")
-        return True
+        return True, proc
     except Exception as exc:            # noqa: BLE001
         print(f"[FishFleet] 打开浏览器失败：{exc}", file=sys.stderr)
-        return False
+        return False, None
+
+
+def _kill_tree_async(delay: float = 0.0) -> None:
+    """兜底：把本进程整棵子进程树杀掉（含没有句柄的 mobilecli daemon / ffmpeg）。"""
+    if os.name != 'nt':
+        return
+    try:
+        import subprocess as _sp
+        flags = getattr(_sp, 'CREATE_NO_WINDOW', 0x08000000)
+        _sp.Popen(['taskkill', '/PID', str(os.getpid()), '/T', '/F'],
+                  creationflags=flags,
+                  stdout=_sp.DEVNULL, stderr=_sp.DEVNULL, close_fds=True)
+    except Exception:
+        pass
+
+
+def _close_mcp_pool() -> int:
+    """关掉 mobile-mcp 的 Node 通道（预建的那些进程）。返回关掉的数量。"""
+    try:
+        from fishfleet.web import mobile_gateway as _mg
+        return int(_mg.close_all() or 0)
+    except Exception:
+        return 0
+
+
+def _stop_mobilecli_daemon() -> bool:
+    """停掉 mobilecli 守护进程。
+
+    2026-11-07 主人实测：删整个程序目录时，`mobilecli-windows-amd64.exe`
+    被占用删不掉。它就是 mobile-mcp 起的**常驻 daemon**
+    （`mobilecli daemon`：在命令之间保持设备发现、iOS 隧道、手机端 agent 存活），
+    关窗口时没有任何人去关它，于是一直霸着 exe 文件。
+
+    顺序：先 `daemon stop` 让它体面退出，再按镜像名强杀兜底（这个 exe 是本程序
+    专用的，同名进程不可能是别家的）。
+    """
+    exe = ''
+    try:
+        from fishfleet.paths import mobilecli_path
+        exe = mobilecli_path()
+    except Exception:
+        exe = ''
+    stopped = False
+    if exe and os.path.exists(exe):
+        try:
+            import subprocess as _sp
+            flags = getattr(_sp, 'CREATE_NO_WINDOW', 0x08000000) if os.name == 'nt' else 0
+            _sp.run([exe, 'daemon', 'stop'], capture_output=True, timeout=10,
+                    creationflags=flags)
+            stopped = True
+        except Exception:
+            pass
+    if os.name == 'nt':
+        try:
+            import subprocess as _sp
+            flags = getattr(_sp, 'CREATE_NO_WINDOW', 0x08000000)
+            _sp.run(['taskkill', '/IM', 'mobilecli-windows-amd64.exe', '/F'],
+                    capture_output=True, timeout=10, creationflags=flags)
+            stopped = True
+        except Exception:
+            pass
+    return stopped
+
+
+def _shutdown(srv: "ServerThread", browser_proc=None, reason: str = '') -> None:
+    """关闭窗口后的收尾：后端 → MCP 通道 → 浏览器 → 兜底进程树。
+
+    2026-11-07 主人反馈「点关闭后台关不干净」。这里的顺序是有意的：
+      1. 先让 uvicorn 停，任务状态才有机会落盘；
+      2. 再关 Node 通道（每个通道 = 一个 node 进程，预建 8 个就是 8 个）；
+      3. 关我们自己起的那个 Edge 实例（只杀它的 pid，不动用户自己的浏览器）；
+      4. 最后兜底 taskkill /T /F，把 ffmpeg / mobilecli daemon 这类
+         没有句柄的子孙一并收掉（adb server 若被带走，下次调用会自动重启）。
+    """
+    try:
+        from fishfleet.logsetup import get_logger, log_event
+        _lg = get_logger('desktop')
+    except Exception:
+        _lg = None
+    if _lg:
+        try:
+            _lg.info('开始退出（原因：%s）', reason or 'window_close')
+            log_event('desktop.shutdown', {'reason': reason or 'window_close'})
+        except Exception:
+            pass
+
+    # 1) 后端优雅停
+    try:
+        srv.request_stop()
+        srv.join(timeout=5)
+    except Exception:
+        pass
+
+    # 2) MCP Node 通道
+    closed = _close_mcp_pool()
+    if _lg:
+        try:
+            _lg.info('已关闭 MCP 通道 %d 个', closed)
+        except Exception:
+            pass
+
+    # 2.5) mobilecli 常驻 daemon —— 不关它，程序目录会删不掉（exe 被占）
+    if _stop_mobilecli_daemon():
+        if _lg:
+            try:
+                _lg.info('已停止 mobilecli daemon')
+            except Exception:
+                pass
+
+    # 3) 我们自己起的浏览器窗口
+    try:
+        if browser_proc is not None and browser_proc.poll() is None:
+            browser_proc.terminate()
+            try:
+                browser_proc.wait(timeout=5)
+            except Exception:
+                browser_proc.kill()
+    except Exception:
+        pass
+
+    # 4) 兜底：整棵进程树（含 daemon / ffmpeg / 卡住的 adb 客户端）
+    _kill_tree_async()
+
+
+def _watch_close(srv: "ServerThread", browser_proc) -> None:
+    """等窗口/前端发来关闭信号；收到后收尾退出。
+
+    2026-11-07 血泪（客户机「打开软件后不显示手机」的真凶）：
+        第一版这里直接判断 `browser_proc.poll() is not None` 就退出。
+        但 Chromium 有个坑：如果 `--user-data-dir` 指向的 profile
+        已经有一个 Edge 实例在用，新起的 `msedge.exe` 会把请求**转发**给它，
+        然后**自己立即退出**（这是正常行为，不是用户关窗）。
+        于是主程序在 3 秒后就把自己杀了：窗口还在、后端没了、页面空白。
+
+        现在的判定分三段：
+          1. 启动后 15 秒内进程就没了 → 认定为「转发给已有实例」，**放弃进程监测**，
+             只靠前端 beacon 和看门狗（这样绝不会误杀）；
+          2. 过了 15 秒还在，之后进程消失 → 才算用户真关窗，且要连续 3 秒确认；
+          3. 前端 beacon / 心跳超时始终生效，是主通道。
+    """
+    ARM_AFTER = 15.0          # 启动宽限：这段时间内进程退出不当作关窗
+    CONFIRM = 3               # 连续确认次数，防抖动
+    started = time.time()
+    monitor = browser_proc is not None
+    miss = 0
+    while True:
+        time.sleep(1)
+        try:
+            from fishfleet.web import desktop_ctl
+            if desktop_ctl.should_quit():
+                _shutdown(srv, browser_proc, desktop_ctl.reason())
+                os._exit(0)
+            # 心跳看门狗：窗口关掉后前端不再 ping，超时即退（beacon 丢失时的兜底）
+            if desktop_ctl.stale():
+                _shutdown(srv, browser_proc, 'heartbeat_lost')
+                os._exit(0)
+        except Exception:
+            pass
+        if not monitor:
+            continue
+        try:
+            if browser_proc.poll() is None:
+                miss = 0
+                continue
+            # 进程已退出：区分「转发退出」和「用户关窗」
+            if time.time() - started < ARM_AFTER:
+                monitor = False        # 转发模式：不再监测，交给人手/心跳
+                try:
+                    from fishfleet.logsetup import get_logger
+                    get_logger('desktop').info(
+                        '浏览器进程启动即退出（复用已有实例），改为心跳监测')
+                except Exception:
+                    pass
+                continue
+            miss += 1
+            if miss >= CONFIRM:
+                _shutdown(srv, browser_proc, 'window_closed')
+                os._exit(0)
+        except Exception:
+            pass
 
 
 def main() -> int:
@@ -449,6 +707,14 @@ def main() -> int:
                 if srv.error:
                     print(srv.error, file=sys.stderr)
                     break
+                # 自动化/运维：允许用 /api/desktop/quit 远程关掉（原来这里没有出口）
+                try:
+                    from fishfleet.web import desktop_ctl
+                    if desktop_ctl.should_quit():
+                        _shutdown(srv, None, desktop_ctl.reason())
+                        os._exit(0)
+                except Exception:
+                    pass
         except KeyboardInterrupt:
             pass
         return 0
@@ -461,15 +727,20 @@ def main() -> int:
     )
     os.makedirs(profile, exist_ok=True)
 
-    if _open_app_window(url, profile):
-        print("[FishFleet] 窗口已打开（关闭窗口后请在本程序按 Ctrl+C 或点关闭退出）")
-        # 保持后端存活：浏览器窗口是独立进程，主进程在这里守到被杀。
+    opened, browser_proc = _open_app_window(url, profile)
+    if opened:
+        print("[FishFleet] 窗口已打开（关闭窗口即整套退出）")
+        # 2026-11-07：开着心跳看门狗再守。前端每 15 秒 ping 一次，45 秒没动静
+        # 就认定窗口没了（beacon 丢失、Edge 复用实例、被强杀都能兜住）。
         try:
-            while True:
-                time.sleep(1)
-                if srv.error:
-                    print(srv.error, file=sys.stderr)
-                    break
+            from fishfleet.web import desktop_ctl as _dc
+            _dc.arm_watchdog(45.0)
+        except Exception:
+            pass
+        # 2026-11-07：不再死守 while True。窗口关掉 / 前端发来关闭信号，
+        # 都要把后端 + Node 通道 + 子孙进程一起收干净（主人反馈的后台残留）。
+        try:
+            _watch_close(srv, browser_proc)
         except KeyboardInterrupt:
             pass
         return 0
@@ -479,10 +750,17 @@ def main() -> int:
     try:
         import webbrowser
         webbrowser.open(url)
-        print("[FishFleet] 已在默认浏览器打开；按 Ctrl+C 退出")
+        print("[FishFleet] 已在默认浏览器打开；关掉页面后进程会保留，点「退出」或 Ctrl+C 结束")
         try:
             while True:
                 time.sleep(1)
+                try:
+                    from fishfleet.web import desktop_ctl
+                    if desktop_ctl.should_quit():
+                        _shutdown(srv, None, desktop_ctl.reason())
+                        os._exit(0)
+                except Exception:
+                    pass
         except KeyboardInterrupt:
             pass
         return 0
@@ -551,6 +829,8 @@ def _diagnose_to_file() -> Path:
         ('runtime/mobile-mcp/start-mobile-mcp.cjs',
          base / 'runtime' / 'mobile-mcp' / 'start-mobile-mcp.cjs'),
         ('bin/adb.exe', base / 'bin' / 'adb.exe'),
+        ('fishfleet/ui_library/phone20/actions.json',
+         base / '_internal' / 'fishfleet' / 'ui_library' / 'phone20' / 'actions.json'),
         ('data 目录', base / 'data'),
     ]
     for label, p in checks:

@@ -25,9 +25,24 @@ except ImportError:  # pragma: no cover
 _ENV_PATTERN = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
 
 
+def _app_base_str() -> str:
+    """程序根目录字符串，供配置里的 {APP_BASE} 占位用。
+
+    打包态 = exe 所在目录；开发态 = 项目根。失败时回退当前目录，
+    绝不抛异常（配置加载不能因为路径探测崩掉）。
+    """
+    try:
+        from fishfleet.paths import app_base
+        return str(app_base())
+    except Exception:
+        return os.getcwd()
+
+
 def _expand_env(value):
-    """递归替换 ${VAR} 形式的环境变量。"""
+    """递归替换 ${VAR} 环境变量与 {APP_BASE} 程序根占位。"""
     if isinstance(value, str):
+        if "{APP_BASE}" in value:
+            value = value.replace("{APP_BASE}", _app_base_str())
         def repl(m):
             return os.environ.get(m.group(1), "")
         return _ENV_PATTERN.sub(repl, value)

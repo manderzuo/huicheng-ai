@@ -1,0 +1,133 @@
+中文搜索自查（r7 版）
+================================================
+
+【先搞清一件事：为什么英文行、中文不行】
+------------------------------------------------
+英文：程序调 `adb shell input text`，这是系统级命令，**跟输入法无关**，所以永远通。
+中文：`input text` 不支持非 ASCII，必须借输入法把字"提交"进输入框。
+      旧方案依赖手机里的 devicekit（剪贴板注入），新机没装 → 退化成"粘贴"，
+      于是把**上一次的剪贴板内容**贴进了搜索框。
+
+r7 改成：装一个 17 KB 的 ADBKeyboard，用它的广播输入中文（原生支持，不碰剪贴板）。
+        程序首次输入中文时会**自动装**，也可以双击「手机助手安装.bat」批量提前铺。
+
+
+【第 0 步】确认版本
+------------------------------------------------
+程序目录下 `版本.txt` 应该是：2026-11-07-r7
+exe 大小约 11,343 KB。
+
+不是 r7 就重新覆盖：
+  Expand-Archive -Path "D:\汇城AI更新包_r7_覆盖版.zip" `
+      -DestinationPath "D:\汇城群控AI版" -Force
+覆盖前先双击「彻底关闭.bat」，不然文件被占用会失败。
+
+
+【第 1 步】批量装输入组件（一次搞定 40 台）
+------------------------------------------------
+双击：手机助手安装.bat
+
+它会逐台装 `bin\apk\ADBKeyboard.apk`，已装的自动跳过，最后给汇总。
+首次装时手机上可能弹"允许安装"，点允许即可。
+
+装完可以用这条确认任意一台：
+  .\bin\adb.exe -s <串号> shell "pm list packages com.android.adbkeyboard"
+  应该输出：package:com.android.adbkeyboard
+
+
+【第 2 步】绕过程序，直接验手机能收中文
+------------------------------------------------
+这一步最关键：这里能进字 → 手机没问题，问题在程序；进不去 → 手机的问题。
+
+  1) 进抖音搜索页：
+     .\bin\adb.exe -s <串号> shell "am force-stop com.ss.android.ugc.aweme"
+     .\bin\adb.exe -s <串号> shell "am start -a android.intent.action.VIEW -d `"snssdk1128://search`""
+     （等 6 秒）
+
+  2) 点一下搜索框（Note9 一般是 451,187；换机型就用程序里看到的坐标）：
+     .\bin\adb.exe -s <串号> shell "input tap 451 187"
+
+  3) 切到 ADBKeyboard：
+     .\bin\adb.exe -s <串号> shell "ime set com.android.adbkeyboard/.AdbIME"
+
+  4) **再点一次搜索框**（关键！切换输入法会让输入框失焦）：
+     .\bin\adb.exe -s <串号> shell "input tap 451 187"
+
+  5) 发中文（"手动测试中文abc" 的 base64）：
+     .\bin\adb.exe -s <串号> shell "am broadcast -a ADB_INPUT_B64 --es msg '5omL5Yqo5rWL6K+V5Lit5paHYWJj'"
+
+  6) 看手机屏幕：搜索框里应该出现「手动测试中文abc」。
+
+     · 出现了 → 手机没问题，回到第 4 步看程序日志
+     · 没出现 → 看第 3 步
+
+注意：这条命令的返回可能是 `result=0`，**这是正常的**，
+      ADBKeyboard 用 0 表示收到（uiautomator 那个实现才是 -1）。
+      要不要看字进没进，只看屏幕/输入框。
+
+
+【第 3 步】没进字时按顺序查
+------------------------------------------------
+a) 键盘真的切过去了吗？
+     .\bin\adb.exe -s <串号> shell "settings get secure default_input_method"
+   应该是 com.android.adbkeyboard/.AdbIME
+
+b) 输入框有焦点吗？
+     .\bin\adb.exe -s <串号> shell "uiautomator dump /sdcard/u.xml"
+     .\bin\adb.exe -s <串号> exec-out cat /sdcard/u.xml | findstr EditText
+   看 focused="true" 在不在那个输入框上。不在就先点一下。
+
+c) 键盘挡住导致 dump 失败，先收起键盘：
+     .\bin\adb.exe -s <串号> shell "input keyevent 4"
+
+d) 换成 uiautomator 版的 AdbKeyboard 再试（如果这台装的是那个）：
+     .\bin\adb.exe -s <串号> shell "ime set com.github.uiautomator/.AdbKeyboard"
+     .\bin\adb.exe -s <串号> shell "am broadcast -a ADB_KEYBOARD_INPUT_TEXT --es text '5omL5Yqo5rWL6K+V5Lit5paHYWJj'"
+
+
+【第 4 步】看程序有没有走新路
+------------------------------------------------
+程序目录 data\logs\app.log，搜：
+
+  AdbKeyboard    走新路径
+  devicekit      走老路径（说明 exe 不是 r7）
+  Non-ASCII      老路径的报错
+
+如果日志里出现 "Non-ASCII text is not supported on Android"，
+就是 exe 没更新到 r7。
+
+
+【第 5 步】实在不行，把输入法固定成 ADBKeyboard
+------------------------------------------------
+  .\bin\adb.exe -s <串号> shell "ime set com.android.adbkeyboard/.AdbIME"
+
+然后再搜中文。能搜 → 说明"切换丢焦点"是主因，
+我给你出"固定 ADBKeyboard + 手动打字时切回"的开关。
+
+要恢复三星键盘：
+  .\bin\adb.exe -s <串号> shell "ime set com.samsung.android.honeyboard/.service.HoneyBoardService"
+
+
+【要发给我的东西】
+------------------------------------------------
+1. 版本.txt 内容
+2. 手机助手安装.bat 最后的汇总（成功/跳过/失败各几台）
+3. 第 2 步第 5 条命令的完整输出
+4. 第 2 步之后手机搜索框截图
+5. data\logs\error.log 最后 50 行
+
+
+================================================
+附：视频生成不用再手动输了
+================================================
+软件「AI 设置」里填的视频模型地址和 Key 会自动同步给生成服务：
+
+  · 点生成时，程序读 data\llm.json 的 video 段
+  · 用 PowerShell 的 DPAPI 加密写进 %APPDATA%\AIWork\seedance-skill.json
+  · 明文不落盘，也不用再跑 install.cmd
+
+前提：地址要填 AI Work 网关（含 gemstory 域名），否则程序会回落到默认
+      https://api.gemstory.cn/v1
+
+如果仍然报「未配置 AIWORK_GATEWAY_BASE_URL」，说明 Key 没填或者填的是
+其它厂商的地址——去 AI 设置里补一下视频那一栏即可。

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>汇城群控AI版 · 启动中</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#0f1115;
+            font-family:"Microsoft YaHei",-apple-system,sans-serif}
+  .wrap{height:100%;display:flex;flex-direction:column;
+        align-items:center;justify-content:center;gap:22px}
+  .logo{width:132px;height:132px;border-radius:28px;
+        box-shadow:0 12px 40px rgba(0,0,0,.55);
+        animation:pop .55s cubic-bezier(.2,.9,.3,1.3)}
+  @keyframes pop{from{transform:scale(.72);opacity:0}to{transform:scale(1);opacity:1}}
+  .name{color:#e9edf3;font-size:23px;letter-spacing:2px;font-weight:600}
+  .bar{width:260px;height:4px;background:#222833;border-radius:2px;overflow:hidden}
+  .bar>i{display:block;height:100%;width:38%;border-radius:2px;
+         background:linear-gradient(90deg,#3b82f6,#22d3ee);
+         animation:run 1.15s ease-in-out infinite}
+  @keyframes run{0%{transform:translateX(-100%)}100%{transform:translateX(360%)}}
+  .tip{color:#5f6b7d;font-size:12.5px;letter-spacing:.5px}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <img class="logo" src="/static/favicon.png" alt="">
+    <div class="name">汇城群控AI版</div>
+    <div class="bar"><i></i></div>
+    <div class="tip" id="tip">正在启动服务…</div>
+  </div>
+<script>
+  // 轮询后端是否就绪，就绪后跳主界面
+  var n = 0, tips = ['正在启动服务…', '正在加载界面…', '马上就好…'];
+  function poll () {
+    n++;
+    var t = document.getElementById('tip');
+    if (t) t.textContent = tips[Math.min(Math.floor(n / 6), tips.length - 1)];
+    fetch('/api/control/config', { cache: 'no-store' })
+      .then(function (r) { if (r.ok) location.replace('/'); })
+      .catch(function () {})
+      .then(function () { setTimeout(poll, 700); });
+  }
+  setTimeout(poll, 300);
+</script>
+</body>
+</html>

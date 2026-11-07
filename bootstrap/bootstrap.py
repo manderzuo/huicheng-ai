@@ -142,8 +142,12 @@ def app_base() -> Path:
 
 
 BASE = app_base()
-RUNTIME = BASE / 'runtime'
-BIN = BASE / 'bin'
+# 2026-11-07 单 runtime 布局：运行环境只放在安装根（AI/runtime/），
+# 引导器在 AI/汇城AI安装引导/。本目录优先（兼容旧包），否则用父目录的。
+_DEF_RUNTIME = BASE / 'runtime'
+RUNTIME = _DEF_RUNTIME if _DEF_RUNTIME.exists() else (BASE.parent / 'runtime')
+_DEF_BIN = BASE / 'bin'
+BIN = _DEF_BIN if _DEF_BIN.exists() else (BASE.parent / 'bin')
 STATE_FILE = RUNTIME / '.state.json'
 #: 随包内置资源目录（打包时把 adb / get-pip.py 放这里）
 RESOURCES = BASE / 'resources'
@@ -555,6 +559,33 @@ def has_adb() -> bool:
         return False
 
 
+def has_seedance() -> bool:
+    """视频生成 MCP 是否随主程序内置（零依赖，只看文件在不在）。
+
+    vendor 打在主程序包里（AI/_internal/vendor/...），引导器在
+    AI/汇城AI安装引导/，所以 BASE 的父目录也要找。
+    """
+    rel = Path('vendor/trae-maker-MCP/skills/aiwork-seedance/mcp/server.mjs')
+    cands = [
+        BASE / '_internal' / rel,
+        BASE / rel,
+        BASE.parent / '_internal' / rel,
+        BASE.parent / rel,
+    ]
+    return any(p.exists() for p in cands)
+
+
+def check_all() -> dict:
+    return {
+        'python': has_python(),
+        'pip': has_pip_and_packages(),
+        'node': has_node(),
+        'mobile_mcp': has_mobile_mcp(),
+        'adb': has_adb(),
+        'seedance': has_seedance(),
+    }
+
+
 def check_all() -> dict:
     return {
         'python': has_python(),
@@ -934,7 +965,10 @@ def run(repair: bool = False, progress=None) -> int:
             say('✓ %s 完成' % name)
 
     final = check_all()
-    missing = [k for k, v in final.items() if not v]
+    # seedance 随主程序包发布，不由引导器安装，只提示不拦截。
+    missing = [k for k, v in final.items() if not v and k != 'seedance']
+    if not final.get('seedance'):
+        say('提示：视频生成 MCP 未随包（旧主程序包），更新主程序后可用；不影响三链')
     if missing:
         say('仍有未完成项：%s' % '、'.join(missing))
         return 1
@@ -949,6 +983,7 @@ def main() -> int:
         log('环境检查：')
         for key, name, size in COMPONENTS:
             log('  %-12s %s' % (name, '✓ 已安装' if st.get(key) else '✗ 缺失'))
+        log('  %-12s %s' % ('视频生成MCP', '✓ 随包' if st.get('seedance') else '- 未随包（旧主程序包，不影响三链）'))
         log('  程序根目录：%s' % BASE)
         return 0
     if '--repair' in args:

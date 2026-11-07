@@ -284,15 +284,67 @@ def video_status():
     return {'enabled':bool(cfg.get('enabled')),'configured':ready,'transport':transport,
             'tool':mcp.get('tool','generate_video'),
             'cost':'费用由外部服务决定，当前无法估价；提交前需确认'}
+def _sync_video_gateway() -> str:
+    """把界面里填的视频模型配置同步给 seedance MCP。返回说明文字（空=不用同步）。
+
+    2026-11-07 主人要求：「软件里有配置视频模型的配置，让 MCP 直接读这个配置，
+    不需要外面再跑 install.cmd 输 Key（手抄 Key 容易出错）」。
+
+    做法：读 data/llm.json 的 video 段（url + key），用官方 install.ps1 的
+    非交互参数把网关地址和 Key 写进 %APPDATA%\\AIWork\\seedance-skill.json
+    （Key 由 PowerShell 用 Windows DPAPI 加密，明文不落盘）。
+    `-InstallTo` 指回包内目录，避免它把 skill 再复制一份到用户目录。
+    """
+    try:
+        import os as _os
+        import subprocess as _sp
+        from .server import _load_llm
+        cfg = _load_llm() or {}
+        video = cfg.get('video') or {}
+        key = str(video.get('key') or '').strip()
+        if not key:
+            return ''
+        url = str(video.get('url') or '').strip()
+        # 只认 AI Work 网关；其它地址（OpenAI 兼容的 chat 接口）没法直接喂给 seedance
+        if 'gemstory' not in url.lower():
+            url = 'https://api.gemstory.cn/v1'
+        try:
+            from fishfleet.paths import seedance_scripts_dir, seedance_server
+            scripts = str(seedance_scripts_dir())
+            root = _os.path.dirname(scripts)
+            ps = _os.path.join(scripts, 'install.ps1')
+        except Exception:
+            return ''
+        if not _os.path.exists(ps):
+            return '未找到 install.ps1，无法同步网关配置'
+        try:
+            r = _sp.run(['powershell', '-NoProfile', '-ExecutionPolicy', 'Bypass',
+                         '-File', ps, '-GatewayBaseUrl', url, '-ApiKey', key,
+                         '-InstallTo', root],
+                        capture_output=True, text=True, timeout=90,
+                        encoding='utf-8', errors='replace')
+            if r.returncode == 0:
+                return '已用界面里的视频模型配置同步网关（Key 已 DPAPI 加密）'
+            return '同步网关配置失败：' + ((r.stderr or r.stdout or '')[:160])
+        except Exception as exc:                                   # noqa: BLE001
+            return '同步网关配置异常：%s' % str(exc)[:120]
+    except Exception:
+        return ''
+
+
 @router.post('/video/jobs')
 def generate(req:VideoRequest):
     if not req.confirmed:raise HTTPException(400,'需要确认可能产生费用的生成请求')
     status=video_status()
-    if not status['enabled'] or not status['configured'] or status['transport']!='http':raise HTTPException(400,'视频生成HTTP服务尚未启用或配置')
+    if not status['enabled'] or not status['configured']:
+        raise HTTPException(400,'视频生成尚未启用或未配置（请先在 AI 设置里填好视频模型的地址和 Key）')
+    # 2026-11-07：原先这里强制 transport=='http'，把内置的 stdio 桥整个挡在门外，
+    # 客户机上明明配了 stdio 却永远只能看到"HTTP服务未启用"。改为两种都放行。
+    note = _sync_video_gateway() if status['transport'] != 'http' else ''
     with LOCK:
         if any(j['status']=='running' for j in JOBS.values()):raise HTTPException(409,'已有视频生成请求运行中，请勿重复提交')
         if len(JOBS)>=100:raise HTTPException(409,'本次会话生成记录已满')
-        job={'id':uuid.uuid4().hex,'status':'running','created_at':time.time(),'prompt':req.prompt,'result':None,'notice':'上游生成中，不支持撤销；超时后请核查服务端，勿盲目重试'};JOBS[job['id']]=job
+        job={'id':uuid.uuid4().hex,'status':'running','created_at':time.time(),'prompt':req.prompt,'result':None,'notice':note or '上游生成中，不支持撤销；超时后请核查服务端，勿盲目重试'};JOBS[job['id']]=job
     def work():
         try:
             from ..content.mcp_client import MCPVideoClient

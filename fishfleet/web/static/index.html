@@ -3,6 +3,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>汇城群控AI版</title>
+<link rel="icon" href="/static/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/static/favicon.png">
+<link rel="apple-touch-icon" href="/static/favicon.png">
 <link rel="stylesheet" href="/static/style.css?v=20261106fix4">
 <link rel="stylesheet" href="/static/chat_panel.css?v=20261106fix4">
 <style type="text/css">body {-webkit-user-select: none; -khtml-user-select: none; -ms-user-select: none; user-select: none; cursor: default;}</style></head>
@@ -16,6 +19,7 @@
 <button class="tbtn" id="live-control-mode" aria-pressed="false" title="实时控制与旧版控制切换">控制初始化中</button>
 <button class="tbtn" id="btn-refresh">刷新</button>
 <button class="tbtn" id="btn-settings">⚙</button>
+<button class="tbtn" id="btn-quit" title="退出程序（会同时关闭后台服务与手机通道）">⏻ 退出</button>
 </header>
 <!-- ==================== 主体 ==================== -->
 <div class="main">
@@ -334,4 +338,29 @@
 <script src="/static/ui.js?v=20261106fix4"></script>
 <script src="/static/chat_panel.js?v=20261106fix4"></script>
 <script src="/static/small_control.js?v=20261031swipe1"></script>
+<script src="/static/desktop_quit.js?v=20261107r3"></script>
+
+<script>
+// 2026-11-07：把窗口大小报给后端，下次启动按同样尺寸打开。
+// --app 模式我们改不了窗口属性，但能记住用户拉出来的尺寸。
+(function () {
+  var last = '';
+  function report () {
+    try {
+      var w = window.outerWidth | 0, h = window.outerHeight | 0;
+      var x = (window.screenX || 0) | 0, y = (window.screenY || 0) | 0;
+      var key = w + 'x' + h + '@' + x + ',' + y;
+      if (key === last || w < 900 || h < 600) return;
+      last = key;
+      fetch('/api/window/geometry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ w: w, h: h, x: x, y: y })
+      }).catch(function () {});
+    } catch (e) {}
+  }
+  setTimeout(report, 2500);
+  window.addEventListener('beforeunload', report);
+})();
+</script>
 </body></html>

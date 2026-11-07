@@ -21,10 +21,18 @@ ROOT = Path(SPECPATH).parent    # noqa: F821 - PyInstaller 注入；spec 在 bui
 
 # ---------------------------------------------------------------- 收集数据文件
 datas = [
+    (str(ROOT / 'apk' / 'ADBKeyboard.apk'), 'apk'),   # 中文输入必需（17 KB）
     # 前端（必须打进去，否则窗口白屏）
     (str(ROOT / 'fishfleet' / 'web' / 'static'), 'fishfleet/web/static'),
     # 配置模板（不含用户 API Key；config.yaml 用环境变量占位）
     (str(ROOT / 'fishfleet' / 'config'), 'fishfleet/config'),
+    # 2026-11-07 主人反馈「一键里的快捷功能全没了」的根因：
+    #   `server.py:_onekey_actions()` 读 `fishfleet/ui_library/phone20/actions.json`，
+    #   而 datas 里**从来没打过 ui_library**，打包后路径不存在 → 返回空字典
+    #   → 手机一键那一栏一个动作都不显示。
+    #   同目录还有 bilibili/tiktok 的页面定义、phone20 的控件模板与证据截图，
+    #   合计 19.3 MB / 173 个文件，直接整包带上（开发态零影响）。
+    (str(ROOT / 'fishfleet' / 'ui_library'), 'fishfleet/ui_library'),
     # 2026-11-06 修：creative_studio 是项目根下的**命名空间包**（没有 __init__.py），
     # 而 `fishfleet/web/server.py:250` 有
     #     from creative_studio.backend import app as studio_app, resume_known_tasks
@@ -36,6 +44,14 @@ datas = [
     # `_internal` 本身就在 sys.path 上，运行时能正常 import 这些 .py。
     (str(ROOT / 'creative_studio' / 'backend.py'), 'creative_studio'),
     (str(ROOT / 'creative_studio' / 'static'), 'creative_studio/static'),
+    # 2026-11-07 视频生成 MCP 内置（trae-maker / seedance，zero-dependency）：
+    # server.mjs 只用 node 内建模块，实际干活的是 ../scripts/*.ps1（单实现），
+    # 两边相对位置不能变，所以 mcp/ 与 scripts/ 成对打进去；install.cmd 留给
+    # 用户首次配网关/API Key 用（密钥存用户目录，绝不进包）。
+    (str(ROOT / 'vendor' / 'trae-maker-MCP' / 'skills' / 'aiwork-seedance' / 'mcp'), 'vendor/trae-maker-MCP/skills/aiwork-seedance/mcp'),
+    (str(ROOT / 'vendor' / 'trae-maker-MCP' / 'skills' / 'aiwork-seedance' / 'scripts'), 'vendor/trae-maker-MCP/skills/aiwork-seedance/scripts'),
+    (str(ROOT / 'vendor' / 'trae-maker-MCP' / 'skills' / 'aiwork-seedance' / 'install.cmd'), 'vendor/trae-maker-MCP/skills/aiwork-seedance'),
+    (str(ROOT / 'vendor' / 'trae-maker-MCP' / 'skills' / 'aiwork-seedance' / 'SKILL.md'), 'vendor/trae-maker-MCP/skills/aiwork-seedance'),
 ]
 
 # ---------------------------------------------------------------- 隐藏导入

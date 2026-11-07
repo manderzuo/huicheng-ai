@@ -228,6 +228,40 @@ def mobilecli_path() -> str:
     return str(runtime_dir() / 'mobile-mcp' / rel)
 
 
+# ---------------------------------------------------------------- 视频生成 MCP（trae-maker / seedance）
+def seedance_server() -> str:
+    """定位 seedance MCP 的 server.mjs。
+
+    优先级：环境变量 → 打包态 `_internal/vendor/...`（含 _MEIPASS）→
+    程序根 `vendor/...` → 开发态项目内路径。
+    找不到也返回打包态标准位置，让上层报「缺文件」而不是 KeyError。
+    """
+    import sys as _sys
+    env = os.environ.get('FISHFLEET_SEEDANCE')
+    if env and Path(env).exists():
+        return env
+    rel = Path('vendor') / 'trae-maker-MCP' / 'skills' / 'aiwork-seedance' / 'mcp' / 'server.mjs'
+    cands: list[Path] = []
+    try:
+        meipass = getattr(_sys, '_MEIPASS', None)
+        if meipass:
+            cands.append(Path(meipass) / rel)
+    except Exception:
+        pass
+    cands.append(app_base() / '_internal' / rel)
+    cands.append(app_base() / rel)
+    cands.append(Path(__file__).resolve().parents[1] / rel)
+    found = _first_existing(*cands)
+    if found:
+        return str(found)
+    return str(app_base() / '_internal' / rel)
+
+
+def seedance_scripts_dir() -> Path:
+    """seedance runner 脚本目录（server.mjs 的 ../scripts，与其保持同级）。"""
+    return Path(seedance_server()).parent.parent / 'scripts'
+
+
 # ---------------------------------------------------------------- scrcpy / apk
 def scrcpy_jar() -> Path | None:
     """scrcpy-server.jar 位置。"""
@@ -239,10 +273,20 @@ def scrcpy_jar() -> Path | None:
 
 
 def apk_path(name: str) -> Path | None:
-    """定位随包的 APK（assistant / XWKeyboard / hidmanager）。"""
+    """定位随包的 APK（ADBKeyboard / assistant / XWKeyboard 等）。
+
+    2026-11-07：加开发态 `apk/` 候选。ADBKeyboard.apk（17 KB）是中文输入
+    的必需组件，`bin/apk/` 里没有它时，至少开发机能从项目根的 `apk/` 找到。
+    """
     found = _first_existing(
         bin_dir() / 'apk' / name,
         bin_dir() / name,
+        app_base() / 'apk' / name,
+        # 2026-11-07：PyInstaller onedir 把 datas 放进 _internal\，
+        # 所以打包后 apk 实际在 <程序>\_internal\apk\。
+        # 不加上这一条，客户机上中文输入直接失效（ADBKeyboard 找不到）。
+        app_base() / '_internal' / 'apk' / name,
+        Path(__file__).resolve().parents[1] / 'apk' / name,
         Path(r'C:\Program Files (x86)\huicheng_android\tools') / name,
     )
     return found
@@ -298,4 +342,6 @@ def describe() -> dict:
         'mcp_exists': Path(mobile_mcp_entry()).exists(),
         'ffmpeg': ffmpeg_path() or '(无)',
         'scrcpy_jar': str(scrcpy_jar()) if scrcpy_jar() else '(无)',
+        'seedance': seedance_server(),
+        'seedance_exists': Path(seedance_server()).exists(),
     }

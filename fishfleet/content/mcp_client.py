@@ -101,6 +101,21 @@ class MCPVideoClient:
         self.command = mcp.get("command", "") or ""
         self.args = list(mcp.get("args", []) or [])
 
+        # 2026-11-07 内置回退：旧配置里的开发机绝对路径在客户机上不存在时，
+        # 自动改用程序自带的 runtime/node + 内置 server.mjs（零依赖，无需 npm 装）。
+        if self.transport != "http":
+            import os as _os
+            need_fallback = (not self.command or not _os.path.exists(self.command)
+                             or not self.args or not _os.path.exists(self.args[0]))
+            if need_fallback:
+                try:
+                    from fishfleet.paths import node_path as _node, seedance_server as _seed
+                    _n, _s = _node(), _seed()
+                    if _os.path.exists(_n) and _os.path.exists(_s):
+                        self.command, self.args = _n, [_s, *self.args[1:]]
+                except Exception:
+                    pass
+
         self.prompt_template = cfg.get("prompt_template", "{topic}")
         self.defaults = cfg.get("defaults", {}) or {}
 

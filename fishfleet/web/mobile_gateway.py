@@ -161,6 +161,56 @@ def _new_adapter():
     return MobileMCPAdapter()
 
 
+def close_all() -> int:
+    """关闭池里所有 MCP 通道（每个通道 = 一个 node 子进程）。
+
+    2026-11-07：桌面窗口关闭时调用。原来这些 Node 进程没有任何人管，
+    关掉窗口后它们继续挂后台（预建 8 个就是 8 个进程），越积越多。
+    返回实际关闭的数量；任何异常都吞掉，绝不阻塞退出流程。
+    """
+    global _created
+    closed = 0
+    # 1) 池里待命的
+    while True:
+        try:
+            ad = _slots.get_nowait()
+        except queue.Empty:
+            break
+        try:
+            ad.close()
+            closed += 1
+        except Exception:
+            pass
+    # 2) 线程本地（正在被某个线程试绑的设备通道）
+    try:
+        binding = getattr(_LOCAL, 'binding', None)
+        if binding:
+            ad = binding[0]
+            try:
+                ad.close()
+                closed += 1
+            except Exception:
+                pass
+            _LOCAL.binding = None
+    except Exception:
+        pass
+    # 3) 旧通道兜底
+    global _fallback
+    try:
+        if _fallback is not None:
+            try:
+                _fallback.close()
+                closed += 1
+            except Exception:
+                pass
+            _fallback = None
+    except Exception:
+        pass
+    with _created_lock:
+        _created = 0
+    return closed
+
+
 def _acquire(stop_event=None):
     """等待空闲槽位；等待者不拥有槽，超时绝不扣减其他租户计数。"""
     global _created
@@ -498,4 +548,221 @@ def call_raw(tool, args, serial):
 def call(tool,args,serial):
  """统一出口。录制已下沉到 MobileMCPAdapter.call_tool（覆盖 FB 等直连 adapter 的路径），
  这里保持原样转调，行为与历史实现完全一致。"""
+ # 2026-11-07 中文输入短接：Mobile MCP 的 type_keys 在 Android 上靠
+ # com.mobilenext.devicekit 走"剪贴板 + 粘贴"，新机没装那个 agent 时
+ # 会把**旧剪贴板内容**贴进搜索框（英文正常、中文错乱，极难排查）。
+ # 这里改走 uiautomator2 的 AdbKeyboard 广播（base64，原生支持中文），
+ # 不依赖任何额外安装；失败再原路退回 MCP，行为不倒退。
+ if tool == 'mobile_type_keys' and not _is_ascii_text((args or {}).get('text')):
+     if _adb_input_text(serial, str((args or {}).get('text') or '')):
+         return {'ok': True, 'via': 'adbkeyboard'}
  return call_raw(tool,args,serial)
+
+
+# ---------------------------------------------------------------- 中文输入（AdbKeyboard）
+#: 两种 AdbKeyboard 实现，协议不同，按顺序探测：
+#:   1) com.android.adbkeyboard/.AdbIME  —— 标准 ADBKeyboard（本项目 apk/ADBKeyboard.apk 装出来的）
+#:      广播 ADB_INPUT_B64 + --es msg <base64>；返回 result=0 也算成功（实测字能进去）
+#:   2) com.github.uiautomator/.AdbKeyboard —— uiautomator2 自带的那个
+#:      广播 ADB_KEYBOARD_INPUT_TEXT + --es text <base64>；成功标志 result=-1
+_ADB_IMES = [
+    ('com.android.adbkeyboard/.AdbIME', 'ADB_INPUT_B64', 'msg'),
+    ('com.github.uiautomator/.AdbKeyboard', 'ADB_KEYBOARD_INPUT_TEXT', 'text'),
+]
+_ADB_APK = 'ADBKeyboard.apk'
+_IME_STATE = {}          # serial -> 当前默认输入法，避免每次都查
+_IME_LOCK = threading.Lock()
+_KB_READY = {}           # serial -> 可用的 (ime_id, action, extra_key)
+
+
+def _is_ascii_text(text) -> bool:
+    """纯 ASCII 沿用 MCP 的原生 input text（快且稳），其余走 AdbKeyboard。"""
+    if not isinstance(text, str) or not text:
+        return True
+    try:
+        text.encode('ascii')
+        return True
+    except (UnicodeEncodeError, AttributeError):
+        return False
+
+
+def _sh(serial, cmd, timeout=20):
+    import subprocess as sp
+    adb = _resolve_adb_path()
+    return sp.run([adb, '-s', serial, 'shell', cmd], capture_output=True,
+                  text=True, encoding='utf-8', errors='replace', timeout=timeout)
+
+
+def _resolve_adb_path() -> str:
+    try:
+        from fishfleet.paths import adb_path as _ap
+        return _ap()
+    except Exception:
+        return 'adb'
+
+
+def _installed_imes(serial) -> set:
+    try:
+        out = _sh(serial, 'ime list -s', timeout=10).stdout or ''
+    except Exception:
+        return set()
+    return {ln.strip() for ln in out.splitlines() if '/' in ln}
+
+
+def _install_adb_keyboard(serial) -> bool:
+    """把随包的 ADBKeyboard.apk 装到手机（17 KB，秒装）。
+
+    这是"中文能输入"的关键组件：MCP 原生只支持 ASCII，
+    非 ASCII 要靠输入法把文本 commit 进输入框。
+    """
+    try:
+        import subprocess as sp
+        from fishfleet.paths import apk_path
+        apk = apk_path(_ADB_APK)
+        if not apk or not os.path.exists(str(apk)):
+            return False
+        adb = _resolve_adb_path()
+        r = sp.run([adb, '-s', serial, 'install', '-r', str(apk)],
+                   capture_output=True, text=True, encoding='utf-8',
+                   errors='replace', timeout=120)
+        return 'Success' in ((r.stdout or '') + (r.stderr or ''))
+    except Exception:
+        return False
+
+
+def _pick_keyboard(serial):
+    """返回 (ime_id, action, extra_key)；没有可用的就装一个，再不行返回 None。"""
+    with _IME_LOCK:
+        cached = _KB_READY.get(serial)
+    if cached:
+        return cached
+    imes = _installed_imes(serial)
+    for ime_id, action, extra in _ADB_IMES:
+        if ime_id in imes:
+            with _IME_LOCK:
+                _KB_READY[serial] = (ime_id, action, extra)
+            return (ime_id, action, extra)
+    # 都没装：装随包 apk 再探测一次
+    if _install_adb_keyboard(serial):
+        imes = _installed_imes(serial)
+        for ime_id, action, extra in _ADB_IMES:
+            if ime_id in imes:
+                with _IME_LOCK:
+                    _KB_READY[serial] = (ime_id, action, extra)
+                return (ime_id, action, extra)
+    return None
+
+
+def _current_ime(serial) -> str:
+    with _IME_LOCK:
+        cached = _IME_STATE.get(serial)
+    if cached:
+        return cached
+    try:
+        out = (_sh(serial, 'settings get secure default_input_method', timeout=8).stdout or '').strip()
+    except Exception:
+        out = ''
+    with _IME_LOCK:
+        _IME_STATE[serial] = out
+    return out
+
+
+def _set_ime(serial, ime_id) -> bool:
+    try:
+        _sh(serial, 'ime enable %s' % ime_id, timeout=10)
+        _sh(serial, 'ime set %s' % ime_id, timeout=10)
+        with _IME_LOCK:
+            _IME_STATE[serial] = ime_id
+        time.sleep(0.5)
+        return True
+    except Exception:
+        return False
+
+
+def _adb_input_text(serial, text) -> bool:
+    """用 AdbKeyboard 广播输入任意文本（含中文）。成功返回 True。
+
+    2026-11-07 真机实测（Note9 / 抖音搜索页 et_search_kw）：
+      · 输入法**已经是 AdbKeyboard** 时，点一下输入框再广播 → 文字正常写入；
+      · 从别的输入法**切到** AdbKeyboard 会让输入框**丢焦点**，
+        必须**重新点一次输入框**再广播，否则广播发出去了但字进不去
+        （"看着成功实际没输入"，比直接报错更难查）。
+    所以：需要切换时，先记下焦点框位置 → 切 → 点回去 → 广播。
+    """
+    if not text:
+        return False
+    try:
+        import base64
+    except Exception:
+        return False
+    picked = _pick_keyboard(serial)
+    if not picked:
+        return False          # 手机既没有 AdbKeyboard 也装不上：交回 MCP 报准确错误
+    ime_id, action, extra_key = picked
+    try:
+        cur = _current_ime(serial)
+        if ime_id not in (cur or ''):
+            center = _focused_edit_center(serial)
+            if not _set_ime(serial, ime_id):
+                return False
+            if center:
+                _tap_point(serial, center)
+                time.sleep(0.7)
+        b64 = base64.b64encode(text.encode('utf-8')).decode('ascii')
+        r = _sh(serial, "am broadcast -a %s --%s %s '%s'" % (action, 'es', extra_key, b64), timeout=20)
+        out = (r.stdout or '') + (r.stderr or '')
+        # 两个实现的成功标志不同：uiautomator 版是 result=-1，标准版是 result=0
+        # （两者都实测能把字写进去）。真正的失败是广播根本没发出去。
+        if 'Broadcast completed' not in out and 'result=' not in out:
+            return False
+        _sh(serial, 'am broadcast -a ADB_KEYBOARD_HIDE', timeout=8)
+        return True
+    except Exception:
+        return False
+
+
+def _tap_point(serial, center) -> None:
+    try:
+        x, y = int(center[0]), int(center[1])
+        _sh(serial, 'input tap %d %d' % (x, y), timeout=15)
+    except Exception:
+        pass
+
+
+def _focused_edit_center(serial):
+    """dump 一次，找当前聚焦的 EditText 中心点；找不到返回 None。
+
+    只在"需要切换输入法"时调用一次（每个设备第一次），
+    后续 AdbKeyboard 已在位就不 dump，避免每输一次都花 2~4 秒。
+    """
+    try:
+        import re as _re
+        import subprocess as _sp
+        r = _sh(serial, 'uiautomator dump /sdcard/_ff_input.xml', timeout=25)
+        txt = ((r.stdout or '') + (r.stderr or '')).upper()
+        if 'ERROR' in txt:
+            # 视频页 dump 不出来的情况：退回不点击，直接广播（多数机型仍可写入）
+            return None
+        p = _sp.run([_resolve_adb_path(), '-s', serial, 'exec-out',
+                     'cat', '/sdcard/_ff_input.xml'],
+                    capture_output=True, text=True, encoding='utf-8',
+                    errors='replace', timeout=25)
+        xml = p.stdout or ''
+        if len(xml) < 500:
+            return None
+        focused, first = None, None
+        for m in _re.finditer(r'<node[^>]*EditText[^>]*>', xml):
+            tag = m.group(0)
+            b = _re.search(r'bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"', tag)
+            if not b:
+                continue
+            x1, y1, x2, y2 = map(int, b.groups())
+            c = ((x1 + x2) // 2, (y1 + y2) // 2)
+            if 'focused="true"' in tag:
+                focused = c
+                break
+            if first is None:
+                first = c
+        return focused or first
+    except Exception:
+        return None

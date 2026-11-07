@@ -1498,7 +1498,15 @@ def run_action_script(serial: str, script: str) -> dict:
                 shell(serial, f"input keyevent {parts[1]}")
             elif op == "text":
                 t = ln[ln.index("text") + 4:].strip()
-                shell(serial, f"input text '{t}'")
+                # 2026-11-07：input text 不支持非 ASCII（中文会变成问号）。
+                # 走 mobile_gateway 的统一入口：ASCII 用它原生，中文自动切 AdbKeyboard。
+                try:
+                    from fishfleet.web.mobile_gateway import _adb_input_text as _input_text
+                    ok = _input_text(serial, t)
+                    if not ok:
+                        shell(serial, f"input text '{t}'")   # 兜底：纯 ASCII 仍可
+                except Exception:
+                    shell(serial, f"input text '{t}'")
             elif op == "sleep" and len(parts) >= 2:
                 time.sleep(int(parts[1]) / 1000.0)
             else:

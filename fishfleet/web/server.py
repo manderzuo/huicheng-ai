@@ -109,6 +109,78 @@ async def log_client_event(payload: dict):
         return {'ok': False}
 
 
+# ---------------------------------------------------------------- 桌面关闭
+# 2026-11-07：窗口关闭要连带把后端/Node 通道一起收掉，否则下次启动端口被占。
+# 前端在 pagehide/beforeunload 里打 beacon，这里只登记 + 宽限，主进程每秒查一次。
+
+
+@app.post('/api/desktop/quit')
+def desktop_quit(payload: dict | None = None):
+    """窗口要关了：登记关闭请求（宽限期后主进程退出）。"""
+    try:
+        from . import desktop_ctl
+        reason = ''
+        if isinstance(payload, dict):
+            reason = str(payload.get('reason') or '')[:80]
+        try:
+            grace = float((payload or {}).get('grace')) if isinstance(payload, dict) else None
+        except (TypeError, ValueError):
+            grace = None
+        out = desktop_ctl.beacon(reason or 'window_close', grace)
+        try:
+            from fishfleet.logsetup import log_event
+            log_event('desktop.quit_requested', {'reason': reason or 'window_close'})
+        except Exception:
+            pass
+        return out
+    except Exception as exc:                                   # noqa: BLE001
+        return {'ok': False, 'error': str(exc)[:200]}
+
+
+@app.post('/api/desktop/ping')
+def desktop_ping():
+    """前端还活着：取消尚未触发的关闭（刷新页面不会误杀）。"""
+    try:
+        from . import desktop_ctl
+        return desktop_ctl.ping()
+    except Exception as exc:                                   # noqa: BLE001
+        return {'ok': False, 'error': str(exc)[:200]}
+
+
+@app.post('/api/window/geometry')
+async def api_window_geometry(req: dict) -> JSONResponse:
+    """前端上报窗口大小（供下次启动复用）。
+
+    2026-11-07 加：浏览器 --app 模式的窗口尺寸我们改不了，
+    但可以让前端把 window.outerWidth/outerHeight 报上来，
+    下次启动时按同样的大小打开，用户不必每次重新拉窗口。
+    """
+    try:
+        w = int((req or {}).get("w") or 0)
+        h = int((req or {}).get("h") or 0)
+        x = int((req or {}).get("x") or 0)
+        y = int((req or {}).get("y") or 0)
+    except Exception:
+        return JSONResponse({"ok": False, "error": "参数无效"})
+    if not (900 <= w <= 8000 and 600 <= h <= 5000):
+        return JSONResponse({"ok": False, "error": "尺寸超出范围"})
+    try:
+        from fishfleet.desktop import save_window_geometry
+        save_window_geometry(w, h, x, y)
+        return JSONResponse({"ok": True})
+    except Exception as exc:                       # noqa: BLE001
+        return JSONResponse({"ok": False, "error": str(exc)[:120]})
+
+
+@app.get('/api/desktop/state')
+def desktop_state():
+    try:
+        from . import desktop_ctl
+        return {'ok': True, **desktop_ctl.pending()}
+    except Exception as exc:                                   # noqa: BLE001
+        return {'ok': False, 'error': str(exc)[:200]}
+
+
 @app.get('/api/log/diagnose')
 def log_diagnose():
     """返回最近的错误日志 + 环境快照，方便技术支持远程判断。"""
