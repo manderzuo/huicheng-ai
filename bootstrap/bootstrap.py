@@ -223,6 +223,186 @@ def _fix_stdio_encoding() -> None:
 _fix_stdio_encoding()
 
 
+def _emit(line: str, full: list, label: str, progress, show_fn, tmod) -> None:
+    """把一行输出收进完整日志，并把提炼后的状态推给界面。"""
+    line = line.strip()
+    if not line:
+        return
+    full.append(line)
+    if not progress:
+        return
+    try:
+        shown = show_fn(line)
+        if shown:
+            progress(shown)
+    except Exception:
+        pass
+
+
+def run_stream(cmd, label='', progress=None, idle_timeout=600, cwd=None,
+               env=None) -> tuple[int, str]:
+    r"""跑外部命令并**实时**把输出喂给界面，而不是等它结束。
+
+    2026-11-07 主人反馈「有一台电脑装到 PIP 就一直卡住」：
+        原来是 `subprocess.run(capture_output=True, timeout=3600)`，
+        pip 下载 250 MB 期间**一个字节都不输出**，界面看起来就是死了。
+        实际在下载，但用户不知道，会以为卡住然后强杀。
+
+    现在改成 Popen 逐行读取：
+        · 每读到一行就回调 progress()，界面实时滚动
+        · 用正则把 pip 的「Downloading / Collecting / 百分比」提炼成一行状态
+        · 用 **idle_timeout（多久没有任何输出）** 判卡死，而不是总时长
+          —— 慢速下载可能超过 1 小时，但只要还在动就不该被杀
+        · 返回 (退出码, 完整输出文本)
+
+    idle_timeout 默认 600 秒（10 分钟无任何输出才认定真卡死）。
+    """
+    import re as _re
+    import time as _t
+
+    full: list[str] = []
+    last_output = _t.time()
+    try:
+        p = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            text=True, encoding='utf-8', errors='replace',
+            bufsize=1, cwd=cwd, env=env,
+            creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
+        )
+    except Exception as exc:                        # noqa: BLE001
+        return -1, '启动失败: %s' % exc
+
+    # 2026-11-07 改进：只显示**有信息量**的行。
+    #   原来每个「Collecting xxx」都刷一行，12 个包能刷几十行噪音，
+    #   反而把真正的「下载 xxx」淹没了（主人截图里全是「依赖 准备」）。
+    #   现在：下载/进度/完成/错误 才显示，「准备」只在换包时提示一次。
+    _dl = _re.compile(r'Downloading\s+(?:https?://\S+/)?([\w.\-+]+?\.(?:whl|tar\.gz|zip))'
+                      r'(?:\s+\(([^)]+)\))?')
+    _pct = _re.compile(r'(\d{1,3})%')
+    _size = _re.compile(r'([\d.]+\s*[kMG]?B)\s*/\s*([\d.]+\s*[kMG]?B)')
+    import time as _tm
+    _state = {'last': '', 'start': _tm.time(), 'done_mb': 0.0}
+
+    def _size_mb(text):
+        # '15.9 MB' / '58 kB' / '1.2 GB' -> MB（浮点）
+        if not text:
+            return 0.0
+        t = str(text).strip().upper().replace(' ', '')
+        try:
+            if t.endswith('GB'):
+                return float(t[:-2]) * 1024.0
+            if t.endswith('MB'):
+                return float(t[:-2])
+            if t.endswith('KB'):
+                return float(t[:-2]) / 1024.0
+            if t.endswith('B'):
+                return float(t[:-1]) / 1048576.0
+        except Exception:
+            return 0.0
+        return 0.0
+
+    def _used() -> str:
+        sec = int(_tm.time() - _state['start'])
+        return '%d:%02d' % (sec // 60, sec % 60)
+
+    def _show(line: str) -> str | None:
+        m = _dl.search(line)
+        if m:
+            name = m.group(1)
+            human = m.group(2) or ''
+            _state['done_mb'] += _size_mb(human)
+            out = ('%s下载 %s %s | 累计 %.1f MB / 约 250 MB | 已用 %s'
+                   % (label, name, human, _state['done_mb'], _used()))
+            if out != _state['last']:
+                _state['last'] = out
+                return out
+            return None
+        # 进度百分比（只在整 10% 时刷，减少噪音）
+        pm = _pct.search(line)
+        sm = _size.search(line)
+        if pm and sm:
+            pct = int(pm.group(1))
+            if pct % 10 == 0:
+                out = '%s%d%%  (%s / %s)' % (label, pct, sm.group(1), sm.group(2))
+                if out != _state['last']:
+                    _state['last'] = out
+                    return out
+            return None
+        # 完成 / 开始安装
+        if 'Successfully installed' in line:
+            pkgs = line.split('Successfully installed', 1)[-1].strip()
+            return '%s完成：%s' % (label, pkgs[:180])
+        if 'Installing collected packages' in line:
+            return '%s所有包已下载，开始安装…' % label
+        # 错误
+        if 'ERROR' in line.upper() or 'error:' in line.lower():
+            return '%s%s' % (label, line[:160])
+        # 重试 / 超时提示
+        if 'Retrying' in line or 'Read timed out' in line or 'Connection' in line:
+            return '%s%s' % (label, line[:140])
+        return None
+
+    # 2026-11-07 关键修复：pip 的进度条是用 \r 刷新的，不是 \n。
+    #   原来用 readline()（按 \n 切），结果**整段进度条被当成一行**，
+    #   在 GBK 控制台下变成 依赖 下载 。 这种乱码，界面上看不出在下什么。
+    #   改为按 \r 和 \n 双分隔读取，只保留每段的最后一个片段用于显示。
+    import io as _io
+
+    try:
+        buf = ''
+        while True:
+            ch = p.stdout.read(1)                   # type: ignore[union-attr]
+            if not ch:
+                if buf:
+                    _emit(buf, full, label, progress, _show, _t)
+                break
+            if ch in '\r\n':
+                if buf:
+                    last_output = _t.time()
+                    _emit(buf, full, label, progress, _show, _t)
+                    buf = ''
+                continue
+            buf += ch
+            if len(buf) > 4000:                     # 防御：超长行截断
+                _emit(buf[:4000], full, label, progress, _show, _t)
+                buf = ''
+                last_output = _t.time()
+            # 心跳：20 秒没有新输出就刷一行，明确告诉用户还在下
+            if _t.time() - last_output > 20:
+                last_output = _t.time()
+                if progress:
+                    try:
+                        sec = int(_t.time() - _state['start'])
+                        progress('%s仍在下载… 累计 %.1f MB / 约 250 MB | 已用 %d:%02d'
+                                 % (label, _state['done_mb'], sec // 60, sec % 60))
+                    except Exception:
+                        pass
+            if _t.time() - last_output > idle_timeout:
+                try:
+                    p.kill()
+                except Exception:
+                    pass
+                msg = '[超时] %d 秒没有任何输出，已终止' % idle_timeout
+                full.append(msg)
+                if progress:
+                    progress(label + msg)
+                return -2, '\n'.join(full)
+    finally:
+        try:
+            p.stdout.close()                       # type: ignore[union-attr]
+        except Exception:
+            pass
+
+    try:
+        p.wait(timeout=60)
+    except Exception:
+        try:
+            p.kill()
+        except Exception:
+            pass
+    return p.returncode, '\n'.join(full)
+
+
 def load_state() -> dict:
     try:
         return json.loads(STATE_FILE.read_text(encoding='utf-8'))
@@ -408,6 +588,88 @@ def install_python(progress=None) -> bool:
     return python_exe().exists()
 
 
+#: 候选 pip 镜像（按国内访问速度排序）
+PIP_MIRRORS = [
+    ('清华 TUNA', 'https://pypi.tuna.tsinghua.edu.cn/simple'),
+    ('阿里云', 'https://mirrors.aliyun.com/pypi/simple'),
+    ('腾讯云', 'https://mirrors.cloud.tencent.com/pypi/simple'),
+    ('中科大', 'https://pypi.mirrors.ustc.edu.cn/simple'),
+    ('华为云', 'https://repo.huaweicloud.com/repository/pypi/simple'),
+]
+
+#: 测速缓存（秒）；同一台机器不用每次都测
+_MIRROR_CACHE = RUNTIME / '.mirror.txt'
+
+
+def _probe_url(url: str, timeout: float = 6.0) -> float | None:
+    """返回访问该 URL 的耗时（秒），失败返回 None。"""
+    import time as _t
+    import urllib.request as _ur
+    try:
+        req = _ur.Request(url.rstrip('/') + '/pip/',
+                          headers={'User-Agent': 'FishFleet-Bootstrap/1.0'})
+        t0 = _t.time()
+        with _ur.urlopen(req, timeout=timeout) as r:
+            r.read(256)
+        return _t.time() - t0
+    except Exception:
+        return None
+
+
+def pick_mirror(progress=None) -> str:
+    """测速挑最快的 pip 镜像。
+
+    2026-11-07 加：客户机网络千差万别，固定用清华源不一定最快
+    （有的 ISP 到清华绕的国际线路，反而阿里云快）。
+    这里依次测 5 个国内源，取延迟最低的；结果缓存到 runtime/.mirror.txt，
+    下次启动直接用，不重复测速（省 3~5 秒）。
+    """
+    # 1) 缓存
+    try:
+        if _MIRROR_CACHE.exists():
+            cached = _MIRROR_CACHE.read_text(encoding='utf-8').strip()
+            if cached.startswith('http') and any(cached == u for _, u in PIP_MIRRORS):
+                return cached
+    except Exception:
+        pass
+
+    # 2) 测速
+    best_url, best_cost = None, 1e9
+    for name, url in PIP_MIRRORS:
+        cost = _probe_url(url)
+        if cost is None:
+            continue
+        if progress:
+            try:
+                progress('测速 %s: %.2f 秒' % (name, cost))
+            except Exception:
+                pass
+        if cost < best_cost:
+            best_cost, best_url = cost, url
+
+    if best_url is None:
+        # 全都不通：退回清华（至少配置是对的，让它自己报错）
+        best_url = PIP_MIRRORS[0][1]
+        if progress:
+            try:
+                progress('所有镜像都连不上，退回清华源')
+            except Exception:
+                pass
+    else:
+        if progress:
+            try:
+                n = next(nm for nm, u in PIP_MIRRORS if u == best_url)
+                progress('选用镜像：%s（%.2f 秒）' % (n, best_cost))
+            except Exception:
+                pass
+    try:
+        _MIRROR_CACHE.parent.mkdir(parents=True, exist_ok=True)
+        _MIRROR_CACHE.write_text(best_url, encoding='utf-8')
+    except Exception:
+        pass
+    return best_url
+
+
 def install_pip(progress=None) -> bool:
     """装 pip，再批量装依赖。"""
     if not has_python():
@@ -424,38 +686,50 @@ def install_pip(progress=None) -> bool:
     elif not download(MIRRORS['get_pip'], get_pip, 'pip 引导脚本', progress=progress):
         return False
     if progress:
-        progress('pip：安装中…')
-    r = subprocess.run([py, str(get_pip), '--no-warn-script-location',
-                        '-i', PIP_MIRROR],
-                       capture_output=True, text=True, timeout=600)
+        progress('pip：安装中（约 10 秒）…')
+    # 2026-11-07：改流式，避免用户以为卡死
+    rc, out = run_stream([py, str(get_pip), '--no-warn-script-location',
+                          '-i', PIP_MIRROR],
+                         label='pip ', progress=progress, idle_timeout=300)
     get_pip.unlink(missing_ok=True)
-    if r.returncode != 0:
-        log('  pip 安装失败：%s' % (r.stderr or r.stdout)[-300:])
+    if rc != 0:
+        log('  pip 安装失败（退出码 %d）：' % rc)
+        for line in out.splitlines()[-8:]:
+            log('    ' + line[:200])
         return False
 
     # 依赖
     if progress:
-        progress('依赖包：开始安装 %d 个（首次约 250 MB，请耐心等）'
+        progress('依赖包：开始安装 %d 个（首次约 250 MB，逐个下载会持续显示）'
                  % len(PIP_PACKAGES))
+    # 2026-11-07 复盘「卡在 PIP 一直不动」：
+    #   总下载约 250 MB（opencv 38 / av 30 / numpy 16 MB）。
+    #   原 --timeout 60 --retries 3 —— 单包最多耗 4 分钟且全程无输出，
+    #   12 个包能拖 40+ 分钟，界面看起来就是死机。
+    #   现在单包超时 120 秒、重试 5 次，并由 run_stream 每 20 秒发心跳。
+    # 2026-11-07 关键修复：**去掉 --extra-index-url https://pypi.org/simple**
+    #   pip 会向所有 index 并行探测，国内访问 pypi.org 常十几秒才超时。
+    #   开发机有 HTTP_PROXY 所以感觉不到，客户机没代理就整个卡住
+    #   （主人实测：界面停在「依赖 下载 。」不动）。
+    #   清华源本身就是 PyPI 的完整镜像，根本不需要备用源。
+    mirror = pick_mirror(progress=progress)
     cmd = [py, '-m', 'pip', 'install', '--no-warn-script-location',
-           '--disable-pip-version-check', '-i', PIP_MIRROR,
-           '--extra-index-url', 'https://pypi.org/simple',
-           '--retries', '3', '--timeout', '60'] + PIP_PACKAGES
-    try:
-        r = subprocess.run(cmd, capture_output=True, text=True,
-                           encoding='utf-8', errors='replace', timeout=3600)
-    except subprocess.TimeoutExpired:
-        log('  依赖安装超时（1 小时），请检查网络')
-        return False
-    if r.returncode != 0:
-        # 2026-11-06：把 pip 的**最后几十行**打出来，并高亮 ERROR 行，
-        # 原来只截 500 字符且不区分行，界面上一句「失败」看不出原因。
-        out = ((r.stdout or '') + '\n' + (r.stderr or '')).strip()
+           '--disable-pip-version-check', '-i', mirror,
+           '--retries', '5', '--timeout', '120',
+           '--progress-bar', 'off'] + PIP_PACKAGES
+    # 2026-11-07 关键改动：
+    #   · 原来 subprocess.run(capture_output=True, timeout=3600) —— 250 MB
+    #     下载期间零输出，客户机表现为「卡在 PIP 一直不动」。
+    #   · 现在流式读取，每下载一个包就刷一行；判卡死用**空闲超时**
+    #     （15 分钟没有任何输出才放弃），慢速网络不会误杀。
+    rc, out = run_stream(cmd, label='依赖 ', progress=progress,
+                         idle_timeout=900)
+    if rc != 0:
         lines = [l for l in out.splitlines() if l.strip()]
         errs = [l for l in lines if 'ERROR' in l.upper()]
-        log('  依赖安装失败（pip 返回码 %d）' % r.returncode)
-        for l in (errs or lines)[-12:]:
-            log('    ' + l[:220])
+        log('  依赖安装失败（退出码 %d）' % rc)
+        for line in (errs or lines)[-12:]:
+            log('    ' + line[:220])
         return False
 
     # 再逐个 import 验证一次，把缺的包名精确报出来
@@ -502,13 +776,18 @@ def install_mobile_mcp(progress=None) -> bool:
         return False
 
     if progress:
-        progress('mobile-mcp：npm 安装中（约 70 MB）…')
+        progress('mobile-mcp：npm 安装中（约 70 MB，会显示下载进度）…')
     cmd = [str(npm), 'install', '--no-audit', '--no-fund',
+           '--loglevel', 'http',
            '--registry', NPM_MIRROR] + NPM_PACKAGES
-    r = subprocess.run(cmd, cwd=str(target), capture_output=True,
-                       text=True, timeout=1800, shell=False)
-    if r.returncode != 0:
-        log('  npm 安装失败：%s' % (r.stderr or r.stdout)[-400:])
+    # 2026-11-07：npm 也可能长时间无输出（同样让用户以为卡死），改流式。
+    # --loglevel http 能让 npm 把每个 tarball 的下载动作打出来。
+    rc, out = run_stream(cmd, label='npm ', progress=progress,
+                         idle_timeout=900, cwd=str(target))
+    if rc != 0:
+        log('  npm 安装失败（退出码 %d）：' % rc)
+        for line in out.splitlines()[-10:]:
+            log('    ' + line[:200])
         return False
 
     # 入口脚本（与开发机一致：设置 MOBILECLI_PATH + 动态找 adb）
@@ -586,10 +865,46 @@ INSTALLERS = {
 
 # ---------------------------------------------------------------- 主流程
 
+def check_path_length(base: Path | None = None, progress=None) -> int:
+    r"""检查安装路径长度，太长的直接拦下来。
+
+    2026-11-07 客户机实测（主人截图）：
+        程序被放在 D:\xwechat_files\wxid_xxx\汇城AI安装引导\（微信接收文件夹），
+        路径本身就有 70+ 字符。再往下 
+untime\python\Lib\site-packages\numpy\core\...
+        轻松超过 Windows 的 260 字符上限，pip 解压 numpy/opencv 时会失败，
+        而且报错信息在旧版里被吞掉，用户只看到「pip 与依赖包 失败」。
+
+    返回超出的字符数（0 表示没问题）。超过 200 就建议换目录。
+    """
+    b = base or BASE
+    # 最深的典型路径：runtime\python\Lib\site-packages\<包>\<子模块>\<文件名>
+    deepest = len(str(b)) + len(r'\runtime\python\Lib\site-packages' + r'\opencv_python.libs' + r'\abcdefghijklmnop.pyd')
+    msg = ('安装目录：%s\n预计最深路径约 %d 字符（Windows 上限 260）'
+           % (b, deepest))
+    if deepest > 240:
+        if progress:
+            progress('【路径太长】' + msg)
+            progress('请把整个文件夹移到更短的路径，例如 D:\\AI\\，然后重新运行。')
+        else:
+            log('【路径太长】' + msg)
+            log('请把整个文件夹移到更短的路径，例如 D:\\AI\\，然后重新运行。')
+    return max(0, deepest - 240)
+
+
 def run(repair: bool = False, progress=None) -> int:
     say = progress or log
     RUNTIME.mkdir(parents=True, exist_ok=True)
     BIN.mkdir(parents=True, exist_ok=True)
+
+    # 2026-11-07：装之前先检查路径长度（微信/QQ 接收文件夹特别容易超）
+    _over = check_path_length(BASE, progress=say)
+    if _over > 0:
+        say('')
+        say('=== 已中止：安装路径过长 ===')
+        say('Windows 单文件路径上限 260 字符，超了 pip 解压会失败。')
+        say('请把「汇城AI安装引导」整个文件夹移到 D:\\AI\\ 之类的短路径后再运行。')
+        return 2
 
     status = check_all()
     todo = [k for k, _, _ in COMPONENTS if not status.get(k)]
