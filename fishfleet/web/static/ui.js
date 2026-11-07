@@ -2192,6 +2192,19 @@ window.renderOtgPanel = renderOtgPanel;
     }
   };
 
+
+  // 2026-11-07 修 BUG（大屏操作其他手机不同步）：
+  //   原来大屏触控把 targets 硬编码成 [serial]，只控当前这一台。
+  //   统一走 live_control.getTargets：大屏那台在 S.multi 里时，
+  //   操作会广播到所有选中的在线设备；不在多选里则退回单台。
+  function __lcTargets(serial) {
+    try {
+      const lc = window.__liveControl;
+      if (lc && typeof lc.getTargets === 'function') return lc.getTargets(serial);
+    } catch (e) {}
+    return [serial];
+  }
+
   window.openBigscreen = async function (serial, index, options = {}) {
     if (!serial) return;
     // 2026-11-07 修 BUG（点开大屏后群控失效）：
@@ -2368,7 +2381,7 @@ window.renderOtgPanel = renderOtgPanel;
       if(e.button!==0||!curSerial||!window.__liveControl?.enabled)return;
       const serial=curSerial,w=stageW,h=stageH,fw=stage.width,fh=stage.height,rotation=displayRotation;
       const valid=()=>stage.isConnected&&serial===curSerial&&stageW===w&&stageH===h&&stage.width===fw&&stage.height===fh&&displayRotation===rotation&&!document.getElementById('stage')?.classList.contains('hidden');
-      window.__liveControl.startPointer(e,{element:stage,point:toDevice,valid,targets:[serial],source_width:w,source_height:h});
+      window.__liveControl.startPointer(e,{element:stage,point:toDevice,valid,targets:__lcTargets(serial),source_width:w,source_height:h});
     });
     // 明确选择旧模式时才启用松手重播；实时失败绝不补发旧操作。
     stage.addEventListener('mousedown', e => {
@@ -2433,7 +2446,7 @@ window.renderOtgPanel = renderOtgPanel;
       // 归一化：一次滚轮约等于 1.0（一屏）
       const v = delta===0?0:(delta>0?-1:1);
       if(!v)return;
-      if(window.__liveControl?.enabled){window.__liveControl.scroll({targets:[curSerial],source_width:stageW,source_height:stageH,...point,h:0,v});return;}
+      if(window.__liveControl?.enabled){window.__liveControl.scroll({targets:__lcTargets(curSerial),source_width:stageW,source_height:stageH,...point,h:0,v});return;}
       const result=await post('/api/scroll', { serial: curSerial, ...point, h: 0, v });
       if(!result?.ok)toast('滚轮操作失败：'+(result?.error||'设备控制通道不可用'));
     }, { passive: false });
@@ -2444,7 +2457,7 @@ window.renderOtgPanel = renderOtgPanel;
   document.querySelectorAll('.stool[data-key]').forEach((btn) => {
     btn.addEventListener('click', async () => {
       if (!curSerial) return toast('请先选择手机');
-      if(window.__liveControl?.enabled){window.__liveControl.key([curSerial],btn.dataset.key);return;}
+      if(window.__liveControl?.enabled){window.__liveControl.key(__lcTargets(curSerial),btn.dataset.key);return;}
       await post('/api/key', { serial: curSerial, key: btn.dataset.key });
     });
   });
