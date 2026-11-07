@@ -1094,3 +1094,15 @@ dialog pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 60vh; o
 /* 系统设置：卡片编号 / 名称显示开关 */
 body.hide-number .phone .overlay .big-num { display: none; }
 body.hide-model .phone .overlay .model { display: none; }
+
+
+/* ==================================================================
+   2026-11-07 修 BUG：点开大屏后群控无法执行
+   ------------------------------------------------------------------
+   #stage 原本是 position:fixed + z-index:80 的浮层，
+   工作台 #rp-chat 没有 z-index，于是大屏会盖在群控面板上面，
+   按钮点不到。工作台可见时给 body 加这个类，把大屏压到下面一层。
+   ================================================================== */
+body.stage-under-chat #stage:not(.hidden):not(.ai-live-stage) {
+  z-index: 40 !important;   /* 低于工作台里的弹层，也不挡主网格 */
+}

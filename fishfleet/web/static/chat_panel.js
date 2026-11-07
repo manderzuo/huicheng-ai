@@ -3413,6 +3413,17 @@ function openOnekey(){
   renderOnekeyDevices();
   loadOnekeyActions();
   paintFeedback();
+  // 2026-11-07 修 BUG（点开大屏后群控失效）：
+  //   如果主界面已经拉起了大屏，把它搬进工作台里，
+  //   否则那个 z-index:80 的浮层会压在面板上，按钮点不到。
+  try {
+    const cur = (window.S && (window.S.expanded || window.S.selected)) || window.__ctxSerial;
+    const stageEl = document.getElementById('stage');
+    const visible = stageEl && !stageEl.classList.contains('hidden');
+    if (cur && visible && typeof window.openAiBigscreen === 'function') {
+      window.openAiBigscreen(cur).catch(() => {});
+    }
+  } catch (e) {}
 }
 function renderOnekeyDevices(){
   const box=$('onekey-devices');if(!box)return;

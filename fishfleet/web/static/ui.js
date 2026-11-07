@@ -2194,8 +2194,15 @@ window.renderOtgPanel = renderOtgPanel;
 
   window.openBigscreen = async function (serial, index, options = {}) {
     if (!serial) return;
-    // 主界面入口主动结束 AI 挂载，避免把群控大屏留在隐藏工作台内。
-    if (aiStageMount && !options.ai) window.closeAiBigscreen();
+    // 2026-11-07 修 BUG（点开大屏后群控失效）：
+    //   原来无条件 closeAiBigscreen()，把群控正在用的大屏画面拆掉了。
+    //   现在只在**工作台不可见**时才拆 —— 工作台可见时保持挂载，
+    //   大屏继续待在群控面板里，群控面板照常能点。
+    const _chatEl = document.getElementById('rp-chat');
+    const _chatVisible = !!_chatEl && !_chatEl.hidden
+        && !_chatEl.classList.contains('hidden')
+        && _chatEl.offsetParent !== null;
+    if (aiStageMount && !options.ai && !_chatVisible) window.closeAiBigscreen();
     // WAKEUP 是幂等唤醒键，不使用会把亮屏反向关闭的 POWER 键。
     post('/api/key', { serial, key: 'wakeup' }).then(r => {
       if (!r?.ok) toast('手机唤醒未确认，请检查设备状态');
@@ -2217,6 +2224,11 @@ window.renderOtgPanel = renderOtgPanel;
     paintEmpty(false);
     document.getElementById('stage')?.classList.remove('hidden');
     stage.classList.add('live');
+    // 工作台可见时不能让浮层大屏盖住它（#stage z-index:80，工作台无 z-index）
+    try {
+      if (_chatVisible) document.body.classList.add('stage-under-chat');
+      else document.body.classList.remove('stage-under-chat');
+    } catch (e) {}
     const si = document.querySelector('.stage-input');
     if (si) si.classList.add('show');
     try { window.focusDirectIme && window.focusDirectIme(); } catch (e) {}
