@@ -149,3 +149,11 @@ tmp*/
 screenshots/
 **/screenshots/
 *.md.bak
+
+# ---------- 引导器运行时 / 打包临时 / 检测产物 ----------
+bootstrap/runtime/
+build/_*/
+build/*/_*/
+网络检测.txt
+selfcheck.txt
+诊断结果.txt
